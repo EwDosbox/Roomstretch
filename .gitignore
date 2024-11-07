@@ -74,3 +74,4 @@ src/Assets/StreamingAssets/aa/*
 
 # Temporary Artifacts
 src/Assets/Library/aa/*
+src/ProjectSettings/Packages/com.unity.testtools.codecoverage/Settings.json
