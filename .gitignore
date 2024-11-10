@@ -78,3 +78,7 @@ src/ProjectSettings/Packages/com.unity.testtools.codecoverage/Settings.json
 
 # Microsoft Office Temporary Files
 ~*.*
+
+#Blender
+*.blend1
+*.blend2
