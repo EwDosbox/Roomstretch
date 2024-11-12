@@ -14,9 +14,9 @@
 - [ ] Chest (3 variants)
 - [ ] Coat Hanger
 - [ ] BookShelf (3 variants)
-- [ ] Book (12 variants)
+- [x] Book (2 variants)
 - [ ] Scrolls (5 variants)
-- [ ] Gemstones (3 variants)
+- [x] Gemstones (3 variants)
 - [ ] Gnome
 - [x] Urn
 
