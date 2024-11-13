@@ -5,9 +5,9 @@
 - total number of assests (with variants) is 48
 - that is 16 assests per control point
 
-## List - 15
+## List - 18
 
-### [ ]  Randomly Placed Assets - 33
+### [ ]  Randomly Placed Assets - 24
 
 - [x] Vase (3 variants)
 - [ ] Picture Frame (2 variants)
@@ -27,10 +27,10 @@
 - [ ] Chandelier
 - [ ] Candle
 
-#### [ ] Potions - 5
+#### [X] Potions - 5
 
-- [ ] Flask (3 variants)
-- [x] Vial (2 variants)
+- [X] Flask (3 variants)
+- [X] Vial (2 variants)
 
 #### [ ] Weapons - 4
 
