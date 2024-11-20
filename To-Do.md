@@ -2,6 +2,8 @@
 
 ## Tasks
 
+- Check if fileName in DNDFileScriptCreator ends with .dnd
+
 ## Completed
 
 ## Notes
