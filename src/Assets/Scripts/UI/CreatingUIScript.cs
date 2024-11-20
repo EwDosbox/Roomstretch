@@ -21,13 +21,10 @@ public class CreatingUIScript : MonoBehaviour
     public void SubmitButton_Click()
     {
 
-        #region Getting Inputs
-
         string seed = GetInput("Seed") ;
-
-        #endregion
+        string name = GetInput("Name") ;
         //Creates the DND File
-        dNDFileScriptCreator.CreateFile(seed);
+        dNDFileScriptCreator.CreateFile(seed, name);
     }
 
     private string GetInput(string ToFind)
