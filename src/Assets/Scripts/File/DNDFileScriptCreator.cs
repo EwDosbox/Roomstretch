@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using static UnityEditor.Timeline.TimelinePlaybackControls;
 
 public class DNDFileScriptCreator : MonoBehaviour
 {
@@ -12,8 +11,8 @@ public class DNDFileScriptCreator : MonoBehaviour
 
     private void Awake()
     {
-        //path = Application.persistentDataPath + "/Files/";
-        path = UtilityScript.filePathPC;
+        path = Application.persistentDataPath + "/Files/";
+        //path = UtilityScript.filePathPC;
         Directory.CreateDirectory(path);
     }
     public void CreateFile(string seed, string fileName)
@@ -22,6 +21,7 @@ public class DNDFileScriptCreator : MonoBehaviour
         File.Create(filePath).Dispose();
 
         WriteHead(seed);
+        Debug.Log(".dnd File called: " + fileName + " Created at: " + filePath);
     }
 
     private void WriteStartingEndingTag(string tag, string contents)

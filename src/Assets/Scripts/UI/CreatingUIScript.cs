@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using SFB;
 using UnityEngine;
+using System.IO;
 
 public class CreatingUIScript : MonoBehaviour
 {
@@ -25,6 +27,18 @@ public class CreatingUIScript : MonoBehaviour
         string name = GetInput("Name") ;
         //Creates the DND File
         dNDFileScriptCreator.CreateFile(seed, name);
+    }
+
+    public void FileButton_Click()
+    {
+        // Open save file dialog
+        string path = StandaloneFileBrowser.SaveFilePanel("Save Your File", "", "defaultName", "txt");
+
+        if (!string.IsNullOrEmpty(path))
+        {
+            File.WriteAllText(path, "This is your file content!");
+            Debug.Log("File saved at: " + path);
+        }
     }
 
     private string GetInput(string ToFind)
