@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor.Playables;
 using UnityEngine;
 
 public class DNDFileScriptCreator : MonoBehaviour
@@ -43,7 +44,6 @@ public class DNDFileScriptCreator : MonoBehaviour
     {
         WriteStartingTag("Head");
         WriteNewline();
-        WriteStartingEndingTag("Version", UtilityScript.version);
         WriteNewline();
         WriteStartingEndingTag("Seed", seed);
         WriteNewline();
