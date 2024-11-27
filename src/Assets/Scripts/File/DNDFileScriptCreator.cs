@@ -17,6 +17,11 @@ public class DNDFileScriptCreator : MonoBehaviour
         Directory.CreateDirectory(path);
         degreeOfDepth = 0;
     }
+    /// <summary>
+    /// Creates .dnd file with specified paramters
+    /// </summary>
+    /// <param name="seed">Seed of the file</param>
+    /// <param name="fileName">Name of the File</param>
     public void CreateFile(string seed, string fileName)
     {
         filePath = path + fileName;
@@ -25,7 +30,10 @@ public class DNDFileScriptCreator : MonoBehaviour
         WriteHead(seed);
         Debug.Log(".dnd File called: " + fileName + " Created at: " + filePath);
     }
-
+    /// <summary>
+    /// Writes the <Head> part of the .dnd file
+    /// </summary>
+    /// <param name="seed">Seed of the file</param>
     private void WriteHead(string seed)
     {
         WriteStartingTag("Head");
@@ -36,41 +44,62 @@ public class DNDFileScriptCreator : MonoBehaviour
         WriteNewline();
         WriteEndingTag("Head");
     }
-
+    /// <summary>
+    /// Writes a tag that starts and ends e.g. <Seed> 123 </Seed>
+    /// </summary>
+    /// <param name="tag">Name of the Tag to write e.g. </param>
+    /// <param name="contents">Contents of the tag e.g. 123</param>
     private void WriteStartingEndingTag(string tag, string contents)
     {
-
         string toWrite = Indentation() + "<" + tag + "> " + contents + " </" + tag + ">";
         File.AppendAllText(filePath, toWrite);
-
     }
+    /// <summary>
+    /// Writes a tag that starts e.g. <Head>
+    /// </summary>
+    /// <param name="tag">Name of the Tag to write</param>
     private void WriteStartingTag(string tag)
     {
         string toWrite = Indentation() + "<" + tag + ">";
         IncreaseIndentation();
         File.AppendAllText(filePath, toWrite);
-
     }
+    /// <summary>
+    /// Writes a tag that ends </Head>
+    /// </summary>
+    /// <param name="tag">Name of the Tag to write</param>
     private void WriteEndingTag(string tag)
     {
         DecreaseIndentation();
         string toWrite = Indentation() + "</" + tag + ">";
         File.AppendAllText(filePath, toWrite);
     }
+    /// <summary>
+    /// Writes a New Line to the file
+    /// </summary>
     private void WriteNewline()
     {
         string toWrite = "\n";
         File.AppendAllText(filePath, toWrite);
     }
+    /// <summary>
+    /// Increases Indetation for the next tag
+    /// </summary>
     private void IncreaseIndentation()
     {
         degreeOfDepth++;
     }
+    /// <summary>
+    /// Decreases Indentation for the next tag
+    /// </summary>
     private void DecreaseIndentation()
     {
         degreeOfDepth--;
     }
-
+    /// <summary>
+    /// Makes the next indentation
+    /// </summary>
+    /// <returns>Indentation String</returns>
     private string Indentation()
     {
         string indentation = "";
