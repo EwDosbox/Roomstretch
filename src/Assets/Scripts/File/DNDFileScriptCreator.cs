@@ -8,12 +8,14 @@ public class DNDFileScriptCreator : MonoBehaviour
 {
     private string path;
     private string filePath;
+    private int degreeOfDepth;
 
     private void Awake()
     {
         path = Application.persistentDataPath + "/Files/";
         //path = UtilityScript.filePathPC;
         Directory.CreateDirectory(path);
+        degreeOfDepth = 0;
     }
     public void CreateFile(string seed, string fileName)
     {
@@ -22,31 +24,6 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         WriteHead(seed);
         Debug.Log(".dnd File called: " + fileName + " Created at: " + filePath);
-    }
-
-    private void WriteStartingEndingTag(string tag, string contents)
-    {
-
-        string toWrite = "<" + tag + "> " + contents + " </" + tag + ">";
-        File.AppendAllText(filePath, toWrite);
-
-    }
-    private void WriteStartingTag(string tag)
-    {
-
-        string toWrite = "<" + tag + ">";
-        File.AppendAllText(filePath, toWrite);
-
-    }
-    private void WriteEndingTag(string tag)
-    {
-        string toWrite = "</" + tag + ">";
-        File.AppendAllText(filePath, toWrite);
-    }
-    private void WriteNewline()
-    {
-        string toWrite = "\n";
-        File.AppendAllText(filePath, toWrite);
     }
 
     private void WriteHead(string seed)
@@ -58,5 +35,51 @@ public class DNDFileScriptCreator : MonoBehaviour
         WriteStartingEndingTag("Seed", seed);
         WriteNewline();
         WriteEndingTag("Head");
+    }
+
+    private void WriteStartingEndingTag(string tag, string contents)
+    {
+
+        string toWrite = Indentation() + "<" + tag + "> " + contents + " </" + tag + ">";
+        File.AppendAllText(filePath, toWrite);
+
+    }
+    private void WriteStartingTag(string tag)
+    {
+        string toWrite = Indentation() + "<" + tag + ">";
+        IncreaseIndentation();
+        File.AppendAllText(filePath, toWrite);
+
+    }
+    private void WriteEndingTag(string tag)
+    {
+        DecreaseIndentation();
+        string toWrite = Indentation() + "</" + tag + ">";
+        File.AppendAllText(filePath, toWrite);
+    }
+    private void WriteNewline()
+    {
+        string toWrite = "\n";
+        File.AppendAllText(filePath, toWrite);
+    }
+    private void IncreaseIndentation()
+    {
+        degreeOfDepth++;
+    }
+    private void DecreaseIndentation()
+    {
+        degreeOfDepth--;
+    }
+
+    private string Indentation()
+    {
+        string indentation = "";
+
+        for (int i = 0; i < degreeOfDepth; i++)
+        {
+            indentation += "    ";
+        }
+
+        return indentation;
     }
 }
