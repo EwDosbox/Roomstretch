@@ -24,20 +24,17 @@ public class CreatingUIScript : MonoBehaviour
     {
 
         string seed = GetInput("Seed") ;
-        string name = GetInput("Name") ;
         //Creates the DND File
-        dNDFileScriptCreator.CreateFile(seed, name);
-    }
+        dNDFileScriptCreator.CreateFile(seed);
 
-    public void FileButton_Click()
-    {
         // Open save file dialog
-        string path = StandaloneFileBrowser.SaveFilePanel("Save Your File", "", "defaultName", "txt");
+        string dNDFilePath = StandaloneFileBrowser.SaveFilePanel("Save Your .DND File", "", "", "dnd");
 
-        if (!string.IsNullOrEmpty(path))
+        if (!string.IsNullOrEmpty(dNDFilePath))
         {
-            File.WriteAllText(path, "This is your file content!");
-            Debug.Log("File saved at: " + path);
+            File.Copy(dNDFileScriptCreator.FilePath, dNDFilePath, true);
+            File.Delete(dNDFileScriptCreator.FilePath);
+            Debug.Log("File: .dnd was created at " + dNDFilePath);
         }
     }
 
