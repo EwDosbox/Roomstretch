@@ -82,6 +82,3 @@ src/ProjectSettings/Packages/com.unity.testtools.codecoverage/Settings.json
 #Blender
 *.blend1
 *.blend2
-
-#Builds
-build/
