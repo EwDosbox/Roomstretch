@@ -9,6 +9,7 @@ public class DNDFileScriptCreator : MonoBehaviour
 {
     private string filePath;
     private int degreeOfDepth;
+    public UtilityScript utilityScript;
 
     public string FilePath
     {
@@ -44,6 +45,7 @@ public class DNDFileScriptCreator : MonoBehaviour
     {
         WriteStartingTag("Head");
         WriteNewline();
+        WriteStartingEndingTag("Version", utilityScript.version);
         WriteNewline();
         WriteStartingEndingTag("Seed", seed);
         WriteNewline();
