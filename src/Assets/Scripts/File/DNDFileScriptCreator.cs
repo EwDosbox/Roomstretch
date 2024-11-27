@@ -6,15 +6,21 @@ using UnityEngine;
 
 public class DNDFileScriptCreator : MonoBehaviour
 {
-    private string path;
     private string filePath;
     private int degreeOfDepth;
 
+    public string FilePath
+    {
+        get
+        {
+            return filePath;
+        }
+    }
+
     private void Awake()
     {
-        path = Application.persistentDataPath + "/Files/";
-        //path = UtilityScript.filePathPC;
-        Directory.CreateDirectory(path);
+        filePath = Application.persistentDataPath + "/Files/temp";
+        Directory.CreateDirectory(Application.persistentDataPath + "/Files");
         degreeOfDepth = 0;
     }
     /// <summary>
@@ -22,13 +28,12 @@ public class DNDFileScriptCreator : MonoBehaviour
     /// </summary>
     /// <param name="seed">Seed of the file</param>
     /// <param name="fileName">Name of the File</param>
-    public void CreateFile(string seed, string fileName)
+    public void CreateFile(string seed)
     {
-        filePath = path + fileName;
         File.Create(filePath).Dispose();
 
         WriteHead(seed);
-        Debug.Log(".dnd File called: " + fileName + " Created at: " + filePath);
+        Debug.Log("File: Temp.dnd created at: " + filePath);
     }
     /// <summary>
     /// Writes the <Head> part of the .dnd file
