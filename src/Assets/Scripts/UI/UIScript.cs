@@ -38,6 +38,9 @@ public class UIScript : MonoBehaviour
         // Open save file dialog
         string dNDFilePath = StandaloneFileBrowser.SaveFilePanel("Save Your .DND File", "", "", "dnd");
 
+        // Ensures the path is valid
+        dNDFilePath = EndsWithDND(dNDFilePath);
+
         if (!string.IsNullOrEmpty(dNDFilePath))
         {
             File.Copy(dNDFileScriptCreator.FilePath, dNDFilePath, true);
@@ -76,5 +79,11 @@ public class UIScript : MonoBehaviour
         GameObject ToFindInputGO = ToFindGO.transform.Find(ToFind + "InputField").gameObject;
         TMP_InputField ToFindTMPInputField = ToFindInputGO.GetComponent<TMP_InputField>();
         return ToFindTMPInputField.text;
+    }
+
+    private string EndsWithDND(string file)
+    {
+        if(file.EndsWith(".dnd") || file.EndsWith(".DND")) return file;
+        return file + ".dnd";
     }
 }

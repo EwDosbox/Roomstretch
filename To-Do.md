@@ -2,10 +2,11 @@
 
 ## Tasks
 
-- Check if fileName in DNDFileScriptCreator ends with .dnd
 - Close Button on Settings
 
 ## Completed
+
+- Check if fileName in DNDFileScriptCreator ends with .dnd
 
 ## Notes
 
