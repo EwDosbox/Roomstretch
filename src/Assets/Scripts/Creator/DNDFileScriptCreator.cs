@@ -9,6 +9,8 @@ public class DNDFileScriptCreator : MonoBehaviour
 {
     private string filePath;
     private int degreeOfDepth;
+    
+    [SerializeField]
     public UtilityScript utilityScript;
 
     public string FilePath

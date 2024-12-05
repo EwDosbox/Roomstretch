@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class DNDSceneScriptCreator : MonoBehaviour
 {
+    [SerializeField]
     public UtilityScript utilityScript;
     private string dNDFilePath = "";
 
