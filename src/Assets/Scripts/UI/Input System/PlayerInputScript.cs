@@ -5,48 +5,35 @@ using UnityEngine.InputSystem;
 
 public class PlayerInputScript : MonoBehaviour
 {
-    private Rigidbody rb;
-
-    private Dictionary<string, float> Speeds = new Dictionary<string, float>();
-
     private bool goLeft = false, goRight = false, goForward = false, goBack = false;
-    private void Awake()
+
+    public Vector3 WalkingVector
     {
-        Speeds.Add("Forward", 10);
-        Speeds.Add("Back", -5);
-        Speeds.Add("Left",-8);
-        Speeds.Add("Right", 8);
+        get
+        {
+            Vector3 walkingVector = Vector3.zero;
+            if (goRight)
+            {
+                walkingVector.x = 1;
+            }
+            else if (goLeft)
+            {
+                walkingVector.x = -1;
+            }
 
-        rb = GetComponent<Rigidbody>();
+            if (goForward)
+            {
+                walkingVector.y = 1;
+            }
+            else if (goBack)
+            {
+                walkingVector.y = -1;
+            }
+
+            return walkingVector;
+        }
     }
-    private void FixedUpdate()
-    {
-        Vector3 walkingVector = Vector3.zero;
 
-        if (goLeft)
-        {
-            walkingVector.x = Speeds["Left"];
-            Debug.Log("Left");
-        }
-        else if (goRight)
-        {
-            walkingVector.x = Speeds["Right"];
-            Debug.Log("Right");
-        }
-
-        if (goForward)
-        {
-            walkingVector.y = Speeds["Forward"];
-            Debug.Log("Forward");
-        }
-        else if (goBack)
-        {
-            walkingVector.y = Speeds["Back"];
-            Debug.Log("Back");
-        }
-
-        rb.AddForce(walkingVector, ForceMode.Impulse);
-    }
 
     //InputAction Methods
 
