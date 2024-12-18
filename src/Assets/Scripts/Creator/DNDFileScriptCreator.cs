@@ -29,7 +29,6 @@ public class DNDFileScriptCreator : MonoBehaviour
     /// Creates .dnd file with specified paramters
     /// </summary>
     /// <param name="seed">Seed of the file</param>
-    /// <param name="fileName">Name of the File</param>
     public void CreateFile(string seed)
     {
         File.Create(filePath).Dispose();

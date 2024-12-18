@@ -1,33 +1,62 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class DNDSceneScriptCreator : MonoBehaviour
 {
     [SerializeField]
-    public UtilityScript utilityScript;
-    private string dNDFilePath = "";
+    private UtilityScript utilityScript;
+
+    private Dictionary<string, GameObject> Models;
+
+    private string file;
 
     private void Awake()
     {
-
-        dNDFilePath = utilityScript.filePath;
-
-        if(string.IsNullOrEmpty(dNDFilePath))
+        if (SceneManager.GetActiveScene().name == "LevelScene")
         {
-            Debug.Log("Creator: Badly made DND File Path");
-        }
-        else
-        {
-            
+            if (!string.IsNullOrEmpty(utilityScript.filePath))
+            {
+                LoadModels();
+                PrepareFile();
+                MakeMap();
+            }
+            else
+            {
+                Debug.LogError("Creator: Badly made DND File Path");
+            }
         }
     }
-    #region Reading Lines
-    private string ReadLine()
+
+    private void LoadModels()
     {
-        return " ";
+        List<GameObject> resources = Resources.LoadAll<GameObject>("Models").ToList();
+        Models = new Dictionary<string, GameObject>();
+
+        foreach (GameObject resource in resources)
+        {
+            Models.Add(resource.name, resource);
+        }
+
+        Debug.Log("Creator: Imported: " + Models.ToSeparatedString("; "));
     }
-    #endregion
-    
+    private void MakeMap()
+    {
+        throw new NotImplementedException();
+    }
+
+    private bool isBody()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void PrepareFile()
+    {
+        file = File.ReadAllText(utilityScript.filePath);
+    }
 }
