@@ -62,6 +62,15 @@ public class PlayerInputScript : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        PlayerInput playerInput = GetComponent<PlayerInput>();
+
+        // Enable both "Movement" and "UI" action maps
+        playerInput.actions.FindActionMap("Movement").Enable();
+        playerInput.actions.FindActionMap("UI").Enable();
+    }
+
     #region InputAction Methods
 
     public void Forward(InputAction.CallbackContext context)
