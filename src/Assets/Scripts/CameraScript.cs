@@ -5,37 +5,52 @@ using UnityEngine;
 
 public class CameraScript : MonoBehaviour
 {
-    private GameObject cam;
+    private Camera camComponent;
     [SerializeField]
     private GameObject player;
+    [SerializeField]
+    private SaveScript save;
 
     [SerializeField]
-    private float sensitivity = 5f; // Adjust sensitivity for mouse input
+    private float baseHorizontalSensitivity;
+    [SerializeField]
+    private float baseVerticalSensitivity;
 
-    private float pitch = 0f; // Up/down rotation
-    private float yaw = 0f;   // Left/right rotation
+    [SerializeField]
+    private float inputThreshold;
+
+    private float verticalRotation = 0f;
+    private float horizontalRotation = 0f;
     private PlayerInputScript playerInputScript;
 
     private void Awake()
     {
-        cam = this.gameObject;
+        camComponent = GetComponent<Camera>();
         playerInputScript = player.GetComponent<PlayerInputScript>();
+        camComponent.fieldOfView = save.FOV;
     }
 
     private void LateUpdate()
     {
-        // Follow player position
-        cam.transform.position = player.transform.position;
+        transform.position = player.transform.position;
 
-        // Rotate camera based on input
+        float fovScale = save.FOV / 60f;
+        float horizontalSensitivity = baseHorizontalSensitivity * fovScale;
+        float verticalSensitivity = baseVerticalSensitivity * fovScale;
+
         Vector2 lookInput = playerInputScript.LookInput;
-        float mouseX = lookInput.x * sensitivity * Time.deltaTime;
-        float mouseY = lookInput.y * sensitivity * Time.deltaTime;
 
-        pitch = Mathf.Clamp(pitch - mouseY, -90f, 90f); // Clamp vertical rotation
-        yaw += mouseX; // Accumulate horizontal rotation
+        if (Mathf.Abs(lookInput.x) > inputThreshold || Mathf.Abs(lookInput.y) > inputThreshold)
+        {
+            float mouseX = lookInput.x * horizontalSensitivity * Time.deltaTime;
+            float mouseY = lookInput.y * verticalSensitivity * Time.deltaTime;
 
-        // Apply rotations to the camera
-        cam.transform.localRotation = Quaternion.Euler(pitch, yaw, 0f);
+            verticalRotation = Mathf.Clamp(verticalRotation - mouseY, -50f, 50f);
+            horizontalRotation += mouseX;
+
+            transform.localRotation = Quaternion.Euler(verticalRotation, horizontalRotation, 0f);
+        }
+
+        camComponent.fieldOfView = save.FOV;
     }
 }
