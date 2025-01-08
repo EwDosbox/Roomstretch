@@ -10,7 +10,7 @@ public class DNDFileScriptCreator : MonoBehaviour
     private string filePath;
     
     [SerializeField]
-    public UtilityScript utilityScript;
+    private SaveScript save;
 
     public string FilePath
     {
@@ -42,12 +42,12 @@ public class DNDFileScriptCreator : MonoBehaviour
     /// <param name="seed">Seed of the file</param>
     private void WriteHead(string seed)
     {
-        utilityScript.WriteStartingTag("Head", 0);
-        utilityScript.WriteNewline();
-        utilityScript.WriteStartingEndingTag("Version", utilityScript.version, 1);
-        utilityScript.WriteNewline();
-        utilityScript.WriteStartingEndingTag("Seed", seed, 1);
-        utilityScript.WriteNewline();
-        utilityScript.WriteEndingTag("Head", 0);
+        UtilityScript.WriteStartingTag("Head", 0, save);
+        UtilityScript.WriteNewline(save);
+        UtilityScript.WriteStartingEndingTag("Version", save.version, 1, save);
+        UtilityScript.WriteNewline(save);
+        UtilityScript.WriteStartingEndingTag("Seed", seed, 1, save);
+        UtilityScript.WriteNewline(save);
+        UtilityScript.WriteEndingTag("Head", 0,save);
     }
 }

@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 public class DNDSceneScriptCreator : MonoBehaviour
 {
     [SerializeField]
-    private UtilityScript utilityScript;
+    private SaveScript save;
 
     private Dictionary<string, GameObject> Models;
 
@@ -18,7 +18,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "LevelScene")
         {
-            if (!string.IsNullOrEmpty(utilityScript.filePath))
+            if (!string.IsNullOrEmpty(save.filePath))
             {
                 LoadModels();
                 MakeMap();
@@ -44,14 +44,14 @@ public class DNDSceneScriptCreator : MonoBehaviour
     }
     private void MakeMap()
     {
-        string[] linesRead = utilityScript.ReadIndentation(0);
+        string[] linesRead = UtilityScript.ReadIndentation(0, save);
 
         foreach (string line in linesRead)
         {
             Debug.Log("Creator: Read0:" + line);
         }
 
-        linesRead = utilityScript.ReadIndentation(1); foreach (string line in linesRead)
+        linesRead = UtilityScript.ReadIndentation(1, save); foreach (string line in linesRead)
         {
             Debug.Log("Creator: Read1:" + line);
         }
