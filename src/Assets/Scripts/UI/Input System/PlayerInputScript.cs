@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor.Overlays;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerInputScript : MonoBehaviour
 {
     private bool goLeft = false, goRight = false, goForward = false, goBack = false;
-    private Vector2 lookInput;
+    private Vector2 lookInput = Vector2.zero;
+    private bool shouldBeInMenu = false;
 
     public Vector2 LookInput
     {
@@ -51,8 +54,15 @@ public class PlayerInputScript : MonoBehaviour
         }
     }
 
+    public bool ShouldBeInMenu
+    {
+        get
+        {
+            return shouldBeInMenu;
+        }
+    }
 
-#region InputAction Methods
+    #region InputAction Methods
 
     public void Forward(InputAction.CallbackContext context)
     {
@@ -102,8 +112,19 @@ public class PlayerInputScript : MonoBehaviour
     #region Camera
     public void Look(InputAction.CallbackContext context)
     {
-        lookInput = context.ReadValue<Vector2>();
+        if (context.started)
+        {
+            lookInput = context.ReadValue<Vector2>();
+        }
     }
     #endregion
-
+    #region UI
+    public void Menu(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            shouldBeInMenu = !shouldBeInMenu;
+        }
+    }
+    #endregion
 }

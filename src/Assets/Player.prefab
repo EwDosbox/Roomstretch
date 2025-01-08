@@ -128,7 +128,19 @@ MonoBehaviour:
     m_ActionId: aa1235a3-3ce6-4e54-9618-241d20c69b09
     m_ActionName: Movement/Right[/Keyboard/r]
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6215993420212032229}
+        m_TargetAssemblyTypeName: PlayerInputScript, Assembly-CSharp
+        m_MethodName: Menu
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 1
     m_ActionId: 97ce4258-327f-42bc-b276-dbb8b596aad5
     m_ActionName: UI/Menu[/Keyboard/escape]
   - m_PersistentCalls:

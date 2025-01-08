@@ -7,22 +7,48 @@ using SFB;
 public class UIScript : MonoBehaviour
 {
     private DNDFileScriptCreator dNDFileScriptCreator;
+    private PlayerInputScript playerInputScript;
+    private Canvas canvas;
+    private GameObject player;
+    private GameObject canvasGO;
     private GameObject inputs;
     private GameObject creator;
     private void Awake()
     {
-        try
+        Scene activeScene = SceneManager.GetActiveScene();
+        switch (activeScene.buildIndex)
         {
-            creator = GameObject.Find("Creator");
-            inputs = GameObject.Find("Inputs");
+            case 0:
+                {//Main Menu
+                    break;
+                }
+            case 1:
+                {//Generating Scene
+                    creator = GameObject.Find("Creator");
+                    inputs = GameObject.Find("Inputs");
 
-            //Gets the instnace of the file script
-            dNDFileScriptCreator = creator.GetComponent<DNDFileScriptCreator>();
+
+                    dNDFileScriptCreator = creator.GetComponent<DNDFileScriptCreator>();
+                    break;
+                }
+            case 2:
+                {//Level scene
+                    creator = GameObject.Find("Creator");
+                    player = GameObject.Find("Player");
+                    canvasGO = GameObject.Find("Canvas");
+
+                    canvas = canvasGO.GetComponent<Canvas>();
+                    dNDFileScriptCreator = creator.GetComponent<DNDFileScriptCreator>();
+                    playerInputScript = player.GetComponent<PlayerInputScript>();
+                    break;
+                }
         }
-        catch
-        {
-            Debug.Log("UI: Didnt find all the objects");
-        }
+
+    }
+
+    private void Update()
+    {
+        canvas.enabled = playerInputScript.ShouldBeInMenu;
     }
 
     #region Buttons
@@ -83,7 +109,7 @@ public class UIScript : MonoBehaviour
 
     private string EndsWithDND(string file)
     {
-        if(file.EndsWith(".dnd") || file.EndsWith(".DND")) return file;
+        if (file.EndsWith(".dnd") || file.EndsWith(".DND")) return file;
         return file + ".dnd";
     }
 }
