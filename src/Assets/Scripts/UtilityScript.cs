@@ -20,6 +20,15 @@ public class UtilityScript : ScriptableObject
         }
         return true;
     }
+
+    /// <summary>
+    /// Makes the next indentation
+    /// </summary>
+    /// <returns>Indentation String</returns>
+    private string Indentation(int degreeOfDepth)
+    {
+        return new string(' ', degreeOfDepth * 4);
+    }
     #region Write Into Files
     /// <summary>
     /// Writes a tag that starts and ends e.g. <Seed> 123 </Seed>
@@ -57,20 +66,24 @@ public class UtilityScript : ScriptableObject
         string toWrite = "\n";
         File.AppendAllText(filePath, toWrite);
     }
-    /// <summary>
-    /// Makes the next indentation
-    /// </summary>
-    /// <returns>Indentation String</returns>
-    private string Indentation(int degreeOfDepth)
+    #endregion
+    #region Read From Files
+    public string[] ReadIndentation(int targetIndentation)
     {
-        string indentation = "";
+        string[] lines = File.ReadAllLines(filePath);
+        string indentation = new string(' ', targetIndentation * 4);
+        List<string> matchingLines = new List<string>();
 
-        for (int i = 0; i < degreeOfDepth; i++)
+        foreach (string line in lines)
         {
-            indentation += "    ";
+            if (line.StartsWith(indentation))
+            {
+                matchingLines.Add(line.Trim()); // Add the trimmed line content to the list
+            }
         }
 
-        return indentation;
+        return matchingLines.ToArray();
     }
+
     #endregion
 }

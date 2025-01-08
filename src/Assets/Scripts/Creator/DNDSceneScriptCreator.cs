@@ -14,8 +14,6 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
     private Dictionary<string, GameObject> Models;
 
-    private string file;
-
     private void Awake()
     {
         if (SceneManager.GetActiveScene().name == "LevelScene")
@@ -23,7 +21,6 @@ public class DNDSceneScriptCreator : MonoBehaviour
             if (!string.IsNullOrEmpty(utilityScript.filePath))
             {
                 LoadModels();
-                PrepareFile();
                 MakeMap();
             }
             else
@@ -47,16 +44,23 @@ public class DNDSceneScriptCreator : MonoBehaviour
     }
     private void MakeMap()
     {
-        throw new NotImplementedException();
+        string[] linesRead = utilityScript.ReadIndentation(0);
+
+        foreach (string line in linesRead)
+        {
+            Debug.Log("Creator: Read0:" + line);
+        }
+
+        linesRead = utilityScript.ReadIndentation(1); foreach (string line in linesRead)
+        {
+            Debug.Log("Creator: Read1:" + line);
+        }
+
+        Instantiate(Models["Book_1"]);
     }
 
     private bool isBody()
     {
         throw new NotImplementedException();
-    }
-
-    private void PrepareFile()
-    {
-        file = File.ReadAllText(utilityScript.filePath);
     }
 }
