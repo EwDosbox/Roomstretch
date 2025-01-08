@@ -6,6 +6,23 @@ using UnityEngine.InputSystem;
 public class PlayerInputScript : MonoBehaviour
 {
     private bool goLeft = false, goRight = false, goForward = false, goBack = false;
+    private Vector2 lookInput;
+
+    public Vector2 LookInput
+    {
+        get
+        {
+            return lookInput;
+        }
+    }
+
+    public bool ShouldWalk
+    {
+        get
+        {
+            return goLeft || goRight || goForward || goBack;
+        }
+    }
 
     public Vector3 WalkingVector
     {
@@ -23,19 +40,19 @@ public class PlayerInputScript : MonoBehaviour
 
             if (goForward)
             {
-                walkingVector.y = 1;
+                walkingVector.z = 1;
             }
             else if (goBack)
             {
-                walkingVector.y = -1;
+                walkingVector.z = -1;
             }
 
-            return walkingVector;
+            return walkingVector.normalized; // Normalize to ensure consistent speed in diagonal movement
         }
     }
 
 
-    //InputAction Methods
+#region InputAction Methods
 
     public void Forward(InputAction.CallbackContext context)
     {
@@ -81,4 +98,12 @@ public class PlayerInputScript : MonoBehaviour
             goRight = false;
         }
     }
+    #endregion
+    #region Camera
+    public void Look(InputAction.CallbackContext context)
+    {
+        lookInput = context.ReadValue<Vector2>();
+    }
+    #endregion
+
 }
