@@ -6,6 +6,7 @@ using UnityEngine;
 public class SaveScript : ScriptableObject
 {
     public readonly string version = "1.0";
+    public string seed;
     public string filePath;
 
     public float FOV = 60f;
