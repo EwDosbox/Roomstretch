@@ -45,39 +45,56 @@ public class DNDSceneScriptCreator : MonoBehaviour
     }
     private void MakeMap()
     {
-        DNDFileData file = ParseDNDFile(save.filePath);
+        DNDFileData dNDFile = ParseDNDFile(save.filePath);
 
-        Debug.Log("Creator: " + file.Rooms[0].Height);
+        Debug.Log("Creator: " + dNDFile.ToString());
 
     }
 
     private DNDFileData ParseDNDFile(string filePath)
     {
-        var fileContent = File.ReadAllText(filePath);
-        var document = XDocument.Parse(fileContent);
+        string fileContent = File.ReadAllText(filePath);
+        XDocument document = XDocument.Parse(fileContent);
 
-        var head = document.Element("RoomStretch")?.Element("Head");
-        if (head == null) throw new InvalidDataException("Missing Head element in DND file.");
+        DNDFileData file = new DNDFileData(save.version, save.seed);
 
-        var roomElement = document.Element("RoomStretch")?.Element("Room");
-        if (roomElement == null) throw new InvalidDataException("Missing Room element in DND file.");
+        XElement roomstretch = document.Element("RoomStretch");
 
-        Vector3 size = new Vector3(
-            int.Parse(roomElement.Element("Depth")?.Value.Trim() ?? "0"),
-            int.Parse(roomElement.Element("Width")?.Value.Trim() ?? "0"),
-            int.Parse(roomElement.Element("Height")?.Value.Trim() ?? "0"));
+        XElement scene = roomstretch.Element("Scene");
 
-        // Parse the room data
-        var roomData = new RoomData
-        (
-            size, new List<DoorData>(), new List<ObjectData>(), this
-        );
+        List<XElement> rooms = scene.Elements("Room").ToList();
 
-        // Return the parsed data
-        return new DNDFileData(
-            head.Element("Version")?.Value.Trim() ?? "1.0",
-            head.Element("Seed")?.Value.Trim() ?? "default",
-            new List<RoomData> { roomData });
+        foreach (XElement room in rooms)
+        {
+            float height = float.Parse( room.Element("Height").Value.Trim());
+            float width = float.Parse( room.Element("Width").Value.Trim());
+            float depth = float.Parse( room.Element("Depth").Value.Trim());
+
+            Vector3 size = new Vector3(depth, width, height);
+
+            Vector3 position = Vector3.zero;
+
+            List<XElement> doors = scene.Elements("Door").ToList();
+            List<DoorData> doorsData = new List<DoorData>();
+
+            foreach (XElement door in doors)
+            {
+
+            }
+
+            List<XElement> objects = scene.Elements("Object").ToList();
+            List<ObjectData> objectDatas = new List<ObjectData>();
+
+            foreach (XElement prefab in objects)
+            {
+
+            }
+
+            file.AddRoom(size, position, doorsData, objectDatas);
+        }
+
+        return file;
     }
+
 
 }

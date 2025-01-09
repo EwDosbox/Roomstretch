@@ -4,65 +4,159 @@ using UnityEngine;
 
 public class DNDFileData
 {
-    public int LastUsedID { get; set; }
-    public string Version { get; set; }
-    public string Seed { get; set; }
-    public List<RoomData> Rooms { get; set; }
+    private int lastUsedID;
+    private string version;
+    private string seed;
+    private List<RoomData> rooms;
+
+    public string Version
+    {
+        get { return version; }
+    }
+    public string Seed
+    {
+        get { return seed; }
+    }
+    public List<RoomData> Rooms
+    {
+        get { return rooms; }
+    }
 
     public DNDFileData(string version, string seed)
     {
-        LastUsedID = 0;
-        Version = version;
-        Seed = seed;
-        Rooms =  new List<RoomData>();
+        lastUsedID = 0;
+        this.version = version;
+        this.seed = seed;
+        rooms = new List<RoomData>();
     }
 
-    public void AddRoom(RoomData room)
+    public void AddRoom(Vector3 size, Vector3 position, List<DoorData> listDoors, List<ObjectData> listObjects)
     {
-        Rooms.Add(room);
+        lastUsedID++;
+        rooms.Add(new RoomData(size, position, listDoors, listObjects, lastUsedID));
+    }
+
+    public override string ToString()
+    {
+        string s = $"Version: {version}, Seed: {seed},\n Rooms : ";
+        foreach (RoomData room in rooms)
+        {
+            s += room.ToString();
+        }
+        return s;
     }
 }
 
 public class RoomData
 {
-    public int id { get; set; }
-    public Vector3 Size { get; set; }
-    public List<DoorData> Doors { get; set; }
-    public List<ObjectData> Objects { get; set; }
+    private int id;
+    private Vector3 size;
+    private Vector3 position;
+    private List<DoorData> listDoors
+    ;
+    private List<ObjectData> listObjects
+    ;
 
-    public RoomData(Vector3 size, List<DoorData> doors, List<ObjectData> objects, DNDFileData file)
+
+    public int Id
     {
-        id = file.LastUsedID++;
-        Size = size;
-        Doors = doors;
-        Objects = objects;
+        get { return id; }
+    }
+    public Vector3 Size
+    {
+        get { return size; }
+    }
+    public Vector3 Position
+    {
+        get { return position; }
+    }
+    public List<DoorData> Doors
+    {
+        get { return listDoors; }
+    }
+    public List<ObjectData> Objects
+    {
+        get { return listObjects; }
+    }
+
+    public RoomData(Vector3 size, Vector3 position, List<DoorData> listDoors, List<ObjectData> listObjects, int id)
+    {
+        this.size = size;
+        this.position = position;
+        this.listDoors = listDoors;
+        this.listObjects = listObjects;
+        this.id = id;
+    }
+
+    public override string ToString()
+    {
+        string s = $"\nRoom ID: {id};\nSize: {size};\nPosition: {position};\nDoors: ";
+        foreach (DoorData door in listDoors)
+        {
+            s += door.ToString();
+        }
+        s += "\n Objects: ";
+        foreach (ObjectData obj in listObjects)
+        {
+            s += obj.ToString();
+        }
+        return s;
     }
 }
 
 public class DoorData
 {
-    public int DoorID { get; set; }
-    public Vector3 Position { get; set; }
-    public int LinkedRoomID { get; set; }
+    private int doorID;
+    private RoomData linkedRoom;
+    private Vector3 position;
 
-    public DoorData(string doorName, Vector3 position = default, int linkedRoomID)
+    public int DoorID
     {
-        DoorName = doorName;
-        Position = position;
-        LinkedRoomID = linkedRoomID;
+        get { return doorID; }
+    }
+    public RoomData LinkedRoom
+    {
+        get { return linkedRoom; }
+    }
+    public Vector3 Position
+    {
+        get { return position; }
+    }
+
+    public DoorData(Vector3 position , RoomData linkedRoom, int id)
+    {
+        this.position = position;
+        this.linkedRoom = linkedRoom;
+        this.doorID = id;
+    }
+
+    public override string ToString()
+    {
+        return $"Door ID: {doorID}; Position: {position}; Linked Room ID: {linkedRoom.Id}";
     }
 }
 
 public class ObjectData
 {
-    public string ObjectName { get; set; }
-    public Vector3 Position { get; set; }
-    public string PrefabName { get; set; }
+    private Vector3 position;
+    private GameObject prefab;
 
-    public ObjectData(string objectName = "Default Object", Vector3 position = default, string prefabName = "DefaultPrefab")
+    public Vector3 Position
     {
-        ObjectName = objectName;
-        Position = position;
-        PrefabName = prefabName;
+        get { return position; }
+    }
+    public GameObject Object
+    {
+        get { return prefab; }
+    }
+
+    public ObjectData(Vector3 position, GameObject prefab)
+    {
+        this.position = position;
+        this.prefab = prefab;
+    }
+    public override string ToString()
+    {
+        return $"Position: {position}; Object: {prefab.name}";
     }
 }

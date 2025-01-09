@@ -3,9 +3,11 @@
         <Version> 1.0 </Version>
         <Seed> 123 </Seed>
     </Head>
-    <Room>
-        <Depth> 10 </Depth>
-        <Width> 5 </Width>
-        <Height> 2 </Height>
-    </Room>
+    <Scene>
+        <Room>
+            <Depth> 10 </Depth>
+            <Width> 5 </Width>
+            <Height> 2 </Height>
+        </Room>
+    </Scene>
 </RoomStretch>
