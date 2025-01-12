@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 using UnityEditor.Playables;
 using UnityEngine;
 
@@ -25,29 +26,82 @@ public class DNDFileScriptCreator : MonoBehaviour
         filePath = Application.persistentDataPath + "/Files/temp";
         Directory.CreateDirectory(Application.persistentDataPath + "/Files");
     }
-    /// <summary>
-    /// Creates .dnd file with specified paramters
-    /// </summary>
-    /// <param name="seed">Seed of the file</param>
-    public void CreateFile(string seed)
-    {
-        File.Create(filePath).Dispose();
 
-        WriteHead(seed);
-        Debug.Log("File: Temp.dnd created at: " + filePath);
-    }
-    /// <summary>
-    /// Writes the <Head> part of the .dnd file
-    /// </summary>
-    /// <param name="seed">Seed of the file</param>
-    private void WriteHead(string seed)
+    public void CreateFile(SaveScript save)
     {
-        UtilityScript.WriteStartingTag("Head", 0, save);
-        UtilityScript.WriteNewline(save);
-        UtilityScript.WriteStartingEndingTag("Version", save.version, 1, save);
-        UtilityScript.WriteNewline(save);
-        UtilityScript.WriteStartingEndingTag("Seed", seed, 1, save);
-        UtilityScript.WriteNewline(save);
-        UtilityScript.WriteEndingTag("Head", 0,save);
+        XmlWriterSettings settings = new()
+        {
+            Indent = true, 
+            NewLineOnAttributes = false
+
+        };
+
+        DNDFileData data = save.DNDFileData;
+
+        using (XmlWriter writer = XmlWriter.Create(filePath, settings))
+        {
+            writer.WriteStartDocument();
+            writer.WriteStartElement("RoomStretch");
+            #region Head
+            writer.WriteStartElement("Head");
+
+            writer.WriteElementString("Version", data.Version);
+            writer.WriteElementString("Seed", data.Seed);
+
+            writer.WriteEndElement();
+            #endregion
+            #region Body
+            writer.WriteStartElement("Body");
+
+            foreach (RoomData roomData in data.Rooms)
+            {
+                writer.WriteStartElement("Room");
+
+                writer.WriteElementString("ID", roomData.Id.ToString());
+
+                writer.WriteElementString("Height", roomData.Size.z.ToString());
+                writer.WriteElementString("Width", roomData.Size.y.ToString());
+                writer.WriteElementString("Depth", roomData.Size.x.ToString());
+
+
+                foreach (DoorData doorData in roomData.Doors)
+                {
+                    writer.WriteStartElement("Door");
+
+                    writer.WriteElementString("ID", doorData.DoorID.ToString());
+
+                    writer.WriteElementString("LinkedRoomID", doorData.LinkedRoom.Id.ToString());
+
+                    writer.WriteElementString("Height", doorData.Position.z.ToString());
+                    writer.WriteElementString("Width", doorData.Position.y.ToString());
+                    writer.WriteElementString("Depth", doorData.Position.x.ToString());
+
+                    writer.WriteEndElement();
+                }
+
+
+                foreach (ObjectData objectData in roomData.Objects)
+                {
+                    writer.WriteStartElement("Object");
+
+                    writer.WriteElementString("ObjectName", objectData.Object.name);
+
+                    writer.WriteElementString("Height", objectData.Position.z.ToString());
+                    writer.WriteElementString("Width", objectData.Position.y.ToString());
+                    writer.WriteElementString("Depth", objectData.Position.x.ToString());
+
+                    writer.WriteEndElement();
+                }
+
+                writer.WriteEndElement();
+            }
+
+            writer.WriteEndElement();
+            #endregion
+
+            writer.WriteEndElement();
+            writer.WriteEndDocument();
+        }
+        Debug.Log("File: Temp.dnd created at: " + filePath);
     }
 }

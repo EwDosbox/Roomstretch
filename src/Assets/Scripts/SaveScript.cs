@@ -9,5 +9,7 @@ public class SaveScript : ScriptableObject
     public string seed;
     public string filePath;
 
+    public DNDFileData DNDFileData;
+
     public float FOV = 60f;
 }

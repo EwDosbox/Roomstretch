@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RoomStretch>
+  <Head>
+    <Version>1.0</Version>
+    <Seed>123</Seed>
+  </Head>
+  <Body>
+    <Room>
+      <ID>1</ID>
+      <Height>3</Height>
+      <Width>2</Width>
+      <Depth>1</Depth>
+    </Room>
+  </Body>
+</RoomStretch>
