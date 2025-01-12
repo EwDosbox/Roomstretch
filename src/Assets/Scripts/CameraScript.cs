@@ -9,7 +9,7 @@ public class CameraScript : MonoBehaviour
     [SerializeField]
     private GameObject player;
     [SerializeField]
-    private SaveScript save;
+    private DNDFileData save;
 
     [SerializeField]
     private float baseHorizontalSensitivity;
@@ -27,14 +27,14 @@ public class CameraScript : MonoBehaviour
     {
         camComponent = GetComponent<Camera>();
         playerInputScript = player.GetComponent<PlayerInputScript>();
-        camComponent.fieldOfView = save.FOV;
+        camComponent.fieldOfView = save.Settings.FOV;
     }
 
     private void LateUpdate()
     {
         transform.position = player.transform.position;
 
-        float fovScale = save.FOV / 60f;
+        float fovScale = save.Settings.FOV / 60f;
         float horizontalSensitivity = baseHorizontalSensitivity * fovScale;
         float verticalSensitivity = baseVerticalSensitivity * fovScale;
 
@@ -51,6 +51,6 @@ public class CameraScript : MonoBehaviour
             transform.localRotation = Quaternion.Euler(verticalRotation, horizontalRotation, 0f);
         }
 
-        camComponent.fieldOfView = save.FOV;
+        camComponent.fieldOfView = save.Settings.FOV;
     }
 }

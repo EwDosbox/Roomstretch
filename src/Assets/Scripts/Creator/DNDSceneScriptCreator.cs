@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 public class DNDSceneScriptCreator : MonoBehaviour
 {
     [SerializeField]
-    private SaveScript save;
+    private DNDFileData fileData;
 
     private Dictionary<string, GameObject> Models;
 
@@ -19,7 +19,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "LevelScene")
         {
-            if (!string.IsNullOrEmpty(save.filePath))
+            if (!string.IsNullOrEmpty(fileData.Save.FilePath))
             {
                 LoadModels();
                 MakeMap();
@@ -45,9 +45,9 @@ public class DNDSceneScriptCreator : MonoBehaviour
     }
     private void MakeMap()
     {
-        DNDFileData dNDFile = ParseDNDFile(save.filePath);
+        fileData = ParseDNDFile(fileData.Save.FilePath);
 
-        Debug.Log("Creator: " + dNDFile.ToString());
+        Debug.Log("Creator: " + fileData.ToString());
 
     }
 
@@ -56,7 +56,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
         string fileContent = File.ReadAllText(filePath);
         XDocument document = XDocument.Parse(fileContent);
 
-        DNDFileData file = new DNDFileData(save.version, save.seed);
+        DNDFileData file = ScriptableObject.CreateInstance<DNDFileData>();
 
         XElement roomstretch = document.Element("RoomStretch");
 
@@ -95,6 +95,5 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         return file;
     }
-
 
 }

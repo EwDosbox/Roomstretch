@@ -9,8 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc6599604db913a4a9dc81797b8d4c56, type: 3}
-  m_Name: SaveMainPC
+  m_Script: {fileID: 11500000, guid: 6cb0df77e03dc294d94480c15ee2f107, type: 3}
+  m_Name: MainPC
   m_EditorClassIdentifier: 
-  filePath: D:\1_Git\Roomstretch\documentation\TestDNDFile.dnd
-  FOV: 60

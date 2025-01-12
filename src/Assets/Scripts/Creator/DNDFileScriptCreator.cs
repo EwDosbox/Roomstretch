@@ -11,7 +11,7 @@ public class DNDFileScriptCreator : MonoBehaviour
     private string filePath;
     
     [SerializeField]
-    private SaveScript save;
+    private DNDFileData fileData;
 
     public string FilePath
     {
@@ -27,7 +27,30 @@ public class DNDFileScriptCreator : MonoBehaviour
         Directory.CreateDirectory(Application.persistentDataPath + "/Files");
     }
 
-    public void CreateFile(SaveScript save)
+    public void PrepareSave(DNDFileData save, bool shouldGenRanNoOfRooms, int noOfRooms)
+    {
+        System.Random ran = save.Save.Random;
+
+        save.Save.ShouldGenRanNoOfRooms = shouldGenRanNoOfRooms;
+        if (save.Save.ShouldGenRanNoOfRooms)
+        {
+            save.Save.NoOfRooms = ran.Next(save.Save.LowerBoundNoOfRooms, save.Save.UpperBoundNoOfRooms + 1);
+        }
+        else
+        {
+            save.Save.NoOfRooms = noOfRooms;
+        }
+
+
+        Vector3 size = new Vector3(1, 2, 3);
+        Vector3 position = new Vector3(3, 2, 1);
+
+        List<DoorData> doors = new List<DoorData>();
+        List<ObjectData> objects = new List<ObjectData>();
+
+        save.AddRoom(size, position, doors, objects);
+    }
+    public void CreateFile(DNDFileData fileData)
     {
         XmlWriterSettings settings = new()
         {
@@ -36,8 +59,6 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         };
 
-        DNDFileData data = save.DNDFileData;
-
         using (XmlWriter writer = XmlWriter.Create(filePath, settings))
         {
             writer.WriteStartDocument();
@@ -45,15 +66,15 @@ public class DNDFileScriptCreator : MonoBehaviour
             #region Head
             writer.WriteStartElement("Head");
 
-            writer.WriteElementString("Version", data.Version);
-            writer.WriteElementString("Seed", data.Seed);
+            writer.WriteElementString("Version", fileData.Save.Version);
+            writer.WriteElementString("Seed", fileData.Save.Seed);
 
             writer.WriteEndElement();
             #endregion
             #region Body
             writer.WriteStartElement("Body");
 
-            foreach (RoomData roomData in data.Rooms)
+            foreach (RoomData roomData in fileData.Rooms)
             {
                 writer.WriteStartElement("Room");
 

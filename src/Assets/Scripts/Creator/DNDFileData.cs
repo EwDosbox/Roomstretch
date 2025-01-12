@@ -2,32 +2,36 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DNDFileData
+[CreateAssetMenu(fileName = "FileData", menuName = "ScriptableObjects/FileData", order = 1)]
+public class DNDFileData : ScriptableObject
 {
     private int lastUsedID;
-    private string version;
-    private string seed;
     private List<RoomData> rooms;
+    [SerializeField]
+    private Settings settings;
+    [SerializeField]
+    private Save save;
 
-    public string Version
-    {
-        get { return version; }
-    }
-    public string Seed
-    {
-        get { return seed; }
-    }
     public List<RoomData> Rooms
     {
         get { return rooms; }
     }
 
-    public DNDFileData(string version, string seed)
+    public Settings Settings
     {
+        get { return settings; }
+    }
+    public Save Save
+    {
+        get { return save; }
+    }
+
+    private void OnEnable()
+    {      
         lastUsedID = 0;
-        this.version = version;
-        this.seed = seed;
         rooms = new List<RoomData>();
+        settings = new Settings();
+        save = new Save();
     }
 
     public void AddRoom(Vector3 size, Vector3 position, List<DoorData> listDoors, List<ObjectData> listObjects)
@@ -38,7 +42,7 @@ public class DNDFileData
 
     public override string ToString()
     {
-        string s = $"Version: {version}, Seed: {seed},\n Rooms : ";
+        string s = $"Version: {Save.Version}, Seed: {Save.Seed},\n Rooms : ";
         foreach (RoomData room in rooms)
         {
             s += room.ToString();
@@ -47,16 +51,94 @@ public class DNDFileData
     }
 }
 
+[System.Serializable]
+public class Settings
+{
+    [SerializeField]
+    private float fov = 60f;
+
+    public float FOV
+    {
+        get { return fov; }
+        set { fov = value; }
+    }
+
+    public Settings()
+    {
+        fov = 60;
+    }
+
+    public override string ToString()
+    {
+        return $"Settings: FOV = {fov}";
+    }
+}
+
+[System.Serializable]
+public class Save
+{
+    [SerializeField]
+    private string filepath;
+    private string version;
+    private string seed;
+    private bool shouldGenRanNoOfRooms;
+    private int noOfRooms;
+    private int upperBoundNoOfRooms = 10;
+    private int lowerBoundNoOfRooms = 1;
+
+    public string FilePath
+    {
+        get { return filepath; }
+        set { filepath = value; }
+    }
+    public string Version
+    {
+        get { return version; }
+        set { version = value; }
+    }
+    public string Seed
+    {
+        get { return seed; }
+        set { seed = value; }
+    }
+    public System.Random Random 
+    { 
+        get { return new System.Random(seed.GetHashCode()); }
+    }
+    public bool ShouldGenRanNoOfRooms
+    {
+        get { return shouldGenRanNoOfRooms; }
+        set { shouldGenRanNoOfRooms = value; }
+    }
+    public int NoOfRooms
+    {
+        get { return noOfRooms; }
+        set { noOfRooms = value; }
+    }
+    public int UpperBoundNoOfRooms
+    {
+        get { return upperBoundNoOfRooms; }
+        set { upperBoundNoOfRooms = value; }
+    }
+    public int LowerBoundNoOfRooms
+    {
+        get { return lowerBoundNoOfRooms; }
+        set { lowerBoundNoOfRooms = value; }
+    }
+
+    public override string ToString()
+    {
+        return $"Save: FilePath = {filepath}, Version = {version}, Seed = {seed}, Should Generate Random Number of Rooms = {shouldGenRanNoOfRooms}, Number of Rooms = {noOfRooms}";
+    }
+}
+
 public class RoomData
 {
     private int id;
     private Vector3 size;
     private Vector3 position;
-    private List<DoorData> listDoors
-    ;
-    private List<ObjectData> listObjects
-    ;
-
+    private List<DoorData> listDoors;
+    private List<ObjectData> listObjects;
 
     public int Id
     {
@@ -123,7 +205,7 @@ public class DoorData
         get { return position; }
     }
 
-    public DoorData(Vector3 position , RoomData linkedRoom, int id)
+    public DoorData(Vector3 position, RoomData linkedRoom, int id)
     {
         this.position = position;
         this.linkedRoom = linkedRoom;

@@ -5,20 +5,25 @@ using TMPro;
 using SFB;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class UIScript : MonoBehaviour
 {
     [SerializeField]
-    private SaveScript save;
+    private DNDFileData fileData;
 
     private DNDFileScriptCreator dNDFileScriptCreator;
     private PlayerInputScript playerInputScript;
     private Canvas canvas;
     private PlayerInput playerInput;
 
+    private Toggle toggleNoOfRooms;
+    private GameObject GONoOfRoomsInput;
+
     private GameObject player;
     private GameObject canvasGO;
     private GameObject inputs;
+    private GameObject toggles;
     private GameObject creator;
     private void Awake()
     {
@@ -33,7 +38,13 @@ public class UIScript : MonoBehaviour
                 {//Generating Scene
                     creator = GameObject.Find("Creator");
                     inputs = GameObject.Find("Inputs");
+                    toggles = GameObject.Find("Toggles");
+                    GONoOfRoomsInput = GameObject.Find("NoOfRoomsInput");
 
+                    GameObject go = GameObject.Find("NoOfRoomsToggle");
+                    Debug.Log(go.name);
+                    toggleNoOfRooms = go.GetComponent<Toggle>();
+                    Debug.Log(toggleNoOfRooms.name);
 
                     dNDFileScriptCreator = creator.GetComponent<DNDFileScriptCreator>();
                     break;
@@ -56,22 +67,39 @@ public class UIScript : MonoBehaviour
 
     private void Update()
     {
-        if (SceneManager.GetActiveScene().buildIndex == 2)
-        {//Level Scene
-            if (playerInputScript.ShouldBeInMenu)
-            {
-                canvas.enabled = true;
-                LockCursor(false);
+        switch (SceneManager.GetActiveScene().buildIndex)
+        {
+            case 1:
+                {
+                    if (!toggleNoOfRooms.isOn)
+                    {
+                        GONoOfRoomsInput.SetActive(true);
+                    }
+                    else
+                    {
+                        GONoOfRoomsInput.SetActive(false);
+                    }
+                    break;
+                }
+            case 2:
+                {//Level Scene
+                    if (playerInputScript.ShouldBeInMenu)
+                    {
+                        canvas.enabled = true;
+                        LockCursor(false);
 
-                playerInput.actions.FindActionMap("Movement").Disable();
-            }
-            else
-            {
-                canvas.enabled = false;
-                LockCursor(true);
+                        playerInput.actions.FindActionMap("Movement").Disable();
+                    }
+                    else
+                    {
+                        canvas.enabled = false;
+                        LockCursor(true);
 
-                playerInput.actions.FindActionMap("Movement").Enable();
-            }
+                        playerInput.actions.FindActionMap("Movement").Enable();
+                    }
+                    break;
+                }
+
         }
     }
 
@@ -80,10 +108,15 @@ public class UIScript : MonoBehaviour
     public void SubmitButton_Click()
     {
         string seed = GetInput("Seed");
-        save.seed = seed;
-        
-        PrepareSave(save);
-        dNDFileScriptCreator.CreateFile(save);
+        fileData.Save.Seed = seed;
+
+        bool shouldGenRanNoOfRooms = GetToggle("NoOfRooms").isOn;
+        int noOfRooms = int.Parse(GetInput("NoOfRooms").Trim());
+        dNDFileScriptCreator.PrepareSave(fileData, shouldGenRanNoOfRooms, noOfRooms);
+
+        Debug.Log(fileData.Save.ToString());
+
+        dNDFileScriptCreator.CreateFile(fileData);
 
         string dNDFilePath = StandaloneFileBrowser.SaveFilePanel("Save Your .DND File", "", "", "dnd");
 
@@ -99,22 +132,6 @@ public class UIScript : MonoBehaviour
         NextScene();
     }
 
-    private void PrepareSave(SaveScript save)
-    {
-        DNDFileData data = new DNDFileData(save.version, save.seed);
-
-
-        Vector3 size = new Vector3(1, 2, 3);
-        Vector3 position = new Vector3(3, 2, 1);
-
-        List<DoorData> doors = new List<DoorData>();
-        List<ObjectData> objects = new List<ObjectData>();
-
-        data.AddRoom(size, position, doors, objects);
-
-        save.DNDFileData = data;
-    }
-
     public void NextScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
@@ -127,7 +144,7 @@ public class UIScript : MonoBehaviour
 
     public void UpdateFOV(float value)
     {
-        save.FOV = value;
+        fileData.Settings.FOV = value;
     }
     #endregion
 
@@ -137,6 +154,15 @@ public class UIScript : MonoBehaviour
         GameObject ToFindInputGO = ToFindGO.transform.Find(ToFind + "InputField").gameObject;
         TMP_InputField ToFindTMPInputField = ToFindInputGO.GetComponent<TMP_InputField>();
         return ToFindTMPInputField.text;
+    }
+
+    private Toggle GetToggle(string ToFind)
+    {
+        Transform ToFindT = toggles.transform.Find("NoOfRoomsToggle");
+        Debug.Log(ToFindT.name);
+        GameObject toFindGO = ToFindT.gameObject;
+        Toggle toFindTOggle = ToFindT.GetComponent<Toggle>();
+        return toFindTOggle;
     }
 
     private string EndsWithDND(string file)
