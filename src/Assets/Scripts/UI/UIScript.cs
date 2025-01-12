@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using TMPro;
 using SFB;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 public class UIScript : MonoBehaviour
 {
@@ -55,19 +56,22 @@ public class UIScript : MonoBehaviour
 
     private void Update()
     {
-        if (playerInputScript.ShouldBeInMenu)
-        {
-            canvas.enabled = true;
-            LockCursor(false);
+        if (SceneManager.GetActiveScene().buildIndex == 2)
+        {//Level Scene
+            if (playerInputScript.ShouldBeInMenu)
+            {
+                canvas.enabled = true;
+                LockCursor(false);
 
-            playerInput.actions.FindActionMap("Movement").Disable();
-        }
-        else
-        {
-            canvas.enabled = false;
-            LockCursor(true);
+                playerInput.actions.FindActionMap("Movement").Disable();
+            }
+            else
+            {
+                canvas.enabled = false;
+                LockCursor(true);
 
-            playerInput.actions.FindActionMap("Movement").Enable();
+                playerInput.actions.FindActionMap("Movement").Enable();
+            }
         }
     }
 
@@ -76,7 +80,10 @@ public class UIScript : MonoBehaviour
     public void SubmitButton_Click()
     {
         string seed = GetInput("Seed");
-        dNDFileScriptCreator.CreateFile(seed);
+        save.seed = seed;
+        
+        PrepareSave(save);
+        dNDFileScriptCreator.CreateFile(save);
 
         string dNDFilePath = StandaloneFileBrowser.SaveFilePanel("Save Your .DND File", "", "", "dnd");
 
@@ -90,6 +97,22 @@ public class UIScript : MonoBehaviour
         }
 
         NextScene();
+    }
+
+    private void PrepareSave(SaveScript save)
+    {
+        DNDFileData data = new DNDFileData(save.version, save.seed);
+
+
+        Vector3 size = new Vector3(1, 2, 3);
+        Vector3 position = new Vector3(3, 2, 1);
+
+        List<DoorData> doors = new List<DoorData>();
+        List<ObjectData> objects = new List<ObjectData>();
+
+        data.AddRoom(size, position, doors, objects);
+
+        save.DNDFileData = data;
     }
 
     public void NextScene()
