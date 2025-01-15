@@ -82,3 +82,7 @@ src/ProjectSettings/Packages/com.unity.testtools.codecoverage/Settings.json
 #Blender
 *.blend1
 *.blend2
+
+#Blender with unity
+*.blend1.meta
+*.blend2.meta
