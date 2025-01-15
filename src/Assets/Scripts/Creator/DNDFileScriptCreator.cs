@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using UnityEditor.Playables;
 using UnityEngine;
@@ -41,14 +42,22 @@ public class DNDFileScriptCreator : MonoBehaviour
             save.Save.NoOfRooms = noOfRooms;
         }
 
+        foreach(int i in Enumerable.Range(0, noOfRooms))
+        {
+            Vector3 size = Vector3.zero;
+            Vector3 position = Vector3.zero;
 
-        Vector3 size = new Vector3(1, 2, 3);
-        Vector3 position = new Vector3(3, 2, 1);
+            size.x = ran.Next(2, 10);
+            size.y = ran.Next(2, 10);
 
-        List<DoorData> doors = new List<DoorData>();
-        List<ObjectData> objects = new List<ObjectData>();
+            position.x = ran.Next(2, 10);
+            position.y = ran.Next(2, 10);
 
-        save.AddRoom(size, position, doors, objects);
+            List<DoorData> doors = new List<DoorData>();
+            List<ObjectData> objects = new List<ObjectData>();
+
+            save.AddRoom(size, position, doors, objects);
+        }
     }
     public void CreateFile(DNDFileData fileData)
     {
@@ -80,9 +89,17 @@ public class DNDFileScriptCreator : MonoBehaviour
 
                 writer.WriteElementString("ID", roomData.Id.ToString());
 
+                writer.WriteStartElement("Size");
                 writer.WriteElementString("Height", roomData.Size.z.ToString());
                 writer.WriteElementString("Width", roomData.Size.y.ToString());
                 writer.WriteElementString("Depth", roomData.Size.x.ToString());
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("Position");
+                writer.WriteElementString("Height", roomData.Position.z.ToString());
+                writer.WriteElementString("Width", roomData.Position.y.ToString());
+                writer.WriteElementString("Depth", roomData.Position.x.ToString());
+                writer.WriteEndElement();
 
 
                 foreach (DoorData doorData in roomData.Doors)

@@ -1,13 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <RoomStretch>
-    <Head>
-        <Version> 1.0 </Version>
-        <Seed> 123 </Seed>
-    </Head>
-    <Scene>
-        <Room>
-            <Depth> 10 </Depth>
-            <Width> 5 </Width>
-            <Height> 2 </Height>
-        </Room>
-    </Scene>
+  <Head>
+    <Version />
+    <Seed>123</Seed>
+  </Head>
+  <Body>
+    <Room>
+      <ID>1</ID>
+      <Size>
+        <Height>3</Height>
+        <Width>2</Width>
+        <Depth>1</Depth>
+      </Size>
+      <Position>
+        <Height>1</Height>
+        <Width>2</Width>
+        <Depth>3</Depth>
+      </Position>
+    </Room>
+  </Body>
 </RoomStretch>

@@ -13,22 +13,19 @@ public class DNDSceneScriptCreator : MonoBehaviour
     [SerializeField]
     private DNDFileData fileData;
 
+    private GameObject Map;
+
     private Dictionary<string, GameObject> Models;
+    private Dictionary<string, GameObject> Prefabs;
 
     private void Awake()
     {
         if (SceneManager.GetActiveScene().name == "LevelScene")
         {
-            if (!string.IsNullOrEmpty(fileData.Save.FilePath))
-            {
-                LoadModels();
-                MakeMap();
-            }
-            else
-            {
-                Debug.LogError("Creator: Badly made DND File Path");
-            }
+            Map = GameObject.Find("Map");
+            LoadModels();
             LoadPrefabs();
+            MakeMap();
         }
     }
 
@@ -60,6 +57,16 @@ public class DNDSceneScriptCreator : MonoBehaviour
     {
         fileData = ParseDNDFile(fileData.Save.FilePath);
 
+        foreach (RoomData room in fileData.Rooms)
+        {
+            Vector3 size = room.Size;
+            Vector3 position = room.Position;
+
+            GameObject toInstantiate = Prefabs["Room"];
+            toInstantiate.transform.position = position;
+            Instantiate(toInstantiate, Map.transform, true);
+        }
+
         Debug.Log("Creator: " + fileData.ToString());
 
     }
@@ -73,21 +80,25 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         XElement roomstretch = document.Element("RoomStretch");
 
-        XElement scene = roomstretch.Element("Scene");
+        XElement body = roomstretch.Element("Body");
 
-        List<XElement> rooms = scene.Elements("Room").ToList();
+        List<XElement> rooms = body.Elements("Room").ToList();
 
         foreach (XElement room in rooms)
         {
-            float height = float.Parse( room.Element("Height").Value.Trim());
-            float width = float.Parse( room.Element("Width").Value.Trim());
-            float depth = float.Parse( room.Element("Depth").Value.Trim());
+            XElement sizeE = room.Element("Size");
+            Vector3 size = Vector3.zero;
+            size.z = float.Parse(sizeE.Element("Height").Value.Trim());
+            size.y = float.Parse(sizeE.Element("Width").Value.Trim());
+            size.x = float.Parse(sizeE.Element("Depth").Value.Trim());
 
-            Vector3 size = new Vector3(depth, width, height);
-
+            XElement postionE = room.Element("Position");
             Vector3 position = Vector3.zero;
+            position.z = float.Parse(postionE.Element("Height").Value.Trim());
+            position.y = float.Parse(postionE.Element("Width").Value.Trim());
+            position.x = float.Parse(postionE.Element("Depth").Value.Trim());
 
-            List<XElement> doors = scene.Elements("Door").ToList();
+            List<XElement> doors = body.Elements("Door").ToList();
             List<DoorData> doorsData = new List<DoorData>();
 
             foreach (XElement door in doors)
@@ -95,7 +106,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
             }
 
-            List<XElement> objects = scene.Elements("Object").ToList();
+            List<XElement> objects = body.Elements("Object").ToList();
             List<ObjectData> objectDatas = new List<ObjectData>();
 
             foreach (XElement prefab in objects)

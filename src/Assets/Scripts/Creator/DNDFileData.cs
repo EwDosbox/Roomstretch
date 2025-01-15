@@ -78,7 +78,7 @@ public class Settings
 public class Save
 {
     [SerializeField]
-    private string filepath;
+    private string filepath = "D:\\_GIT\\Roomstretch\\documentation\\Test1.dnd";
     private string version;
     private string seed;
     private bool shouldGenRanNoOfRooms;
