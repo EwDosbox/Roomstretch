@@ -10,7 +10,7 @@ using UnityEngine;
 public class DNDFileScriptCreator : MonoBehaviour
 {
     private string filePath;
-    
+
     [SerializeField]
     private DNDFileData fileData;
 
@@ -28,27 +28,32 @@ public class DNDFileScriptCreator : MonoBehaviour
         Directory.CreateDirectory(Application.persistentDataPath + "/Files");
     }
 
-    public void PrepareSave(DNDFileData save, bool shouldGenRanNoOfRooms, int noOfRooms)
+    public void PrepareSave(DNDFileData save)
     {
         System.Random ran = save.Save.Random;
 
-        save.Save.ShouldGenRanNoOfRooms = shouldGenRanNoOfRooms;
         if (save.Save.ShouldGenRanNoOfRooms)
         {
             save.Save.NoOfRooms = ran.Next(save.Save.LowerBoundNoOfRooms, save.Save.UpperBoundNoOfRooms + 1);
         }
-        else
+
+        if (save.Save.ShouldUseNormalBounds)
         {
-            save.Save.NoOfRooms = noOfRooms;
+            save.Save.MaxWidth = 10;
+            save.Save.MinWidth = 2;
+            save.Save.MaxDepth = 10;
+            save.Save.MinDepth = 2;
         }
 
-        foreach(int i in Enumerable.Range(0, noOfRooms))
+
+
+        foreach (int i in Enumerable.Range(0, save.Save.NoOfRooms))
         {
             Vector3 size = Vector3.zero;
             Vector3 position = Vector3.zero;
 
-            size.x = ran.Next(2, 10);
-            size.y = ran.Next(2, 10);
+            size.x = save.Save.MinWidth + (float)ran.NextDouble() * (save.Save.MaxWidth - save.Save.MinWidth);
+            size.y = save.Save.MinDepth + (float)ran.NextDouble() * (save.Save.MaxDepth - save.Save.MinDepth);
 
             position.x = ran.Next(2, 10);
             position.y = ran.Next(2, 10);
@@ -63,7 +68,7 @@ public class DNDFileScriptCreator : MonoBehaviour
     {
         XmlWriterSettings settings = new()
         {
-            Indent = true, 
+            Indent = true,
             NewLineOnAttributes = false
 
         };

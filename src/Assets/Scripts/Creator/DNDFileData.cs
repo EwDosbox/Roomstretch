@@ -27,7 +27,7 @@ public class DNDFileData : ScriptableObject
     }
 
     private void OnEnable()
-    {      
+    {
         lastUsedID = 0;
         rooms = new List<RoomData>();
         settings = new Settings();
@@ -78,13 +78,21 @@ public class Settings
 public class Save
 {
     [SerializeField]
-    private string filepath = "D:\\_GIT\\Roomstretch\\documentation\\Test1.dnd";
+    private string filepath = "D:\\1_Git\\Roomstretch\\documentation\\TestDNDFile.dnd";
     private string version;
     private string seed;
     private bool shouldGenRanNoOfRooms;
     private int noOfRooms;
     private int upperBoundNoOfRooms = 10;
     private int lowerBoundNoOfRooms = 1;
+
+
+    private bool shouldUseNormalBounds;
+    private float maxWidth = 10;
+    private float minWidth = 2;
+    private float maxDepth = 10;
+    private float minDepth = 2;
+
 
     public string FilePath
     {
@@ -101,8 +109,8 @@ public class Save
         get { return seed; }
         set { seed = value; }
     }
-    public System.Random Random 
-    { 
+    public System.Random Random
+    {
         get { return new System.Random(seed.GetHashCode()); }
     }
     public bool ShouldGenRanNoOfRooms
@@ -124,6 +132,32 @@ public class Save
     {
         get { return lowerBoundNoOfRooms; }
         set { lowerBoundNoOfRooms = value; }
+    }
+
+    public bool ShouldUseNormalBounds
+    {
+        get { return shouldUseNormalBounds; }
+        set { shouldUseNormalBounds = value; }
+    }
+    public float MaxWidth
+    {
+        get { return maxWidth; }
+        set { maxWidth = value; }
+    }
+    public float MinWidth
+    {
+        get { return minWidth; }
+        set { minWidth = value; }
+    }
+    public float MaxDepth
+    {
+        get { return maxDepth; }
+        set { maxDepth = value; }
+    }
+    public float MinDepth
+    {
+        get { return minDepth; }
+        set { minDepth = value; }
     }
 
     public override string ToString()

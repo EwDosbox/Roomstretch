@@ -20,6 +20,9 @@ public class UIScript : MonoBehaviour
     private Toggle toggleNoOfRooms;
     private GameObject GONoOfRoomsInput;
 
+    private Toggle toggleBounds;
+    private GameObject GOBoundsInput;
+
     private GameObject player;
     private GameObject canvasGO;
     private GameObject inputs;
@@ -40,10 +43,14 @@ public class UIScript : MonoBehaviour
                     inputs = GameObject.Find("Inputs");
                     toggles = GameObject.Find("Toggles");
                     GONoOfRoomsInput = GameObject.Find("NoOfRoomsInput");
+                    GOBoundsInput = GameObject.Find("BoundsInput");
 
                     GameObject go = GameObject.Find("NoOfRoomsToggle");
-                    Debug.Log(go.name);
                     toggleNoOfRooms = go.GetComponent<Toggle>();
+
+                    go = GameObject.Find("BoundsToggle");
+                    toggleBounds = go.GetComponent<Toggle>();
+
                     Debug.Log(toggleNoOfRooms.name);
 
                     dNDFileScriptCreator = creator.GetComponent<DNDFileScriptCreator>();
@@ -79,6 +86,14 @@ public class UIScript : MonoBehaviour
                     {
                         GONoOfRoomsInput.SetActive(false);
                     }
+                    if (toggleBounds.isOn)
+                    {
+                        GOBoundsInput.SetActive(false);
+                    }
+                    else
+                    {
+                        GOBoundsInput.SetActive(true);
+                    }
                     break;
                 }
             case 2:
@@ -110,9 +125,20 @@ public class UIScript : MonoBehaviour
         string seed = GetInput("Seed");
         fileData.Save.Seed = seed;
 
-        bool shouldGenRanNoOfRooms = GetToggle("NoOfRooms").isOn;
-        int noOfRooms = int.Parse(GetInput("NoOfRooms").Trim());
-        dNDFileScriptCreator.PrepareSave(fileData, shouldGenRanNoOfRooms, noOfRooms);
+
+        fileData.Save.NoOfRooms = int.Parse(GetInput("NoOfRooms").Trim());
+        fileData.Save.ShouldGenRanNoOfRooms = GetToggle("NoOfRooms").isOn;
+        fileData.Save.ShouldUseNormalBounds = GetToggle("Bounds").isOn;
+
+        if (!fileData.Save.ShouldUseNormalBounds)
+        {
+            fileData.Save.MaxWidth = float.Parse(GetInput("MaxWidthBounds"));
+            fileData.Save.MinWidth = float.Parse(GetInput("MinWidthBounds"));
+            fileData.Save.MaxDepth = float.Parse(GetInput("MaxDepthBounds"));
+            fileData.Save.MinDepth = float.Parse(GetInput("MinDepthBounds"));
+        }
+
+        dNDFileScriptCreator.PrepareSave(fileData);
 
         Debug.Log(fileData.Save.ToString());
 
@@ -148,18 +174,16 @@ public class UIScript : MonoBehaviour
     }
     #endregion
 
-    private string GetInput(string ToFind)
+    private string GetInput(string toFind)
     {
-        GameObject ToFindGO = inputs.transform.Find(ToFind + "Input").gameObject;
-        GameObject ToFindInputGO = ToFindGO.transform.Find(ToFind + "InputField").gameObject;
-        TMP_InputField ToFindTMPInputField = ToFindInputGO.GetComponent<TMP_InputField>();
-        return ToFindTMPInputField.text;
+        var inputField = GameObject.Find(toFind + "InputField").GetComponent<TMP_InputField>();
+        return inputField.text;
     }
+
 
     private Toggle GetToggle(string ToFind)
     {
-        Transform ToFindT = toggles.transform.Find("NoOfRoomsToggle");
-        Debug.Log(ToFindT.name);
+        Transform ToFindT = toggles.transform.Find(ToFind + "Toggle");
         GameObject toFindGO = ToFindT.gameObject;
         Toggle toFindTOggle = ToFindT.GetComponent<Toggle>();
         return toFindTOggle;

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -975,7 +975,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1248146342}
-  save: {fileID: 11400000, guid: 9a5e7a13c8f8a294dbdc1dc622a7cfec, type: 2}
+  save: {fileID: 11400000, guid: b0f3b87cc163de949bf5ae5046f94177, type: 2}
   baseHorizontalSensitivity: 10
   baseVerticalSensitivity: 10
   inputThreshold: 3
@@ -1180,18 +1180,10 @@ PrefabInstance:
       propertyPath: wall
       value: 
       objectReference: {fileID: 919132149155446097, guid: 8215cf170b208e841bfddf0f39cbc8db, type: 3}
-    - target: {fileID: -6052821952859787314, guid: dac77d3904f9e254eac63bce7489f276, type: 3}
-      propertyPath: fileData
-      value: 
-      objectReference: {fileID: 11400000, guid: 9a5e7a13c8f8a294dbdc1dc622a7cfec, type: 2}
     - target: {fileID: 636094330016942250, guid: dac77d3904f9e254eac63bce7489f276, type: 3}
       propertyPath: save
       value: 
       objectReference: {fileID: 11400000, guid: 5d3e3f25348826a47be062eef626707c, type: 2}
-    - target: {fileID: 636094330016942250, guid: dac77d3904f9e254eac63bce7489f276, type: 3}
-      propertyPath: fileData
-      value: 
-      objectReference: {fileID: 11400000, guid: 9a5e7a13c8f8a294dbdc1dc622a7cfec, type: 2}
     - target: {fileID: 887916036250106390, guid: dac77d3904f9e254eac63bce7489f276, type: 3}
       propertyPath: m_Name
       value: Creator
