@@ -28,6 +28,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
             {
                 Debug.LogError("Creator: Badly made DND File Path");
             }
+            LoadPrefabs();
         }
     }
 
@@ -42,6 +43,18 @@ public class DNDSceneScriptCreator : MonoBehaviour
         }
 
         Debug.Log("Creator: Imported: " + Models.ToSeparatedString("; "));
+    }
+    private void LoadPrefabs()
+    {
+        List<GameObject> resources = Resources.LoadAll<GameObject>("Prefabs").ToList();
+        Prefabs = new Dictionary<string, GameObject>();
+
+        foreach (GameObject resource in resources)
+        {
+            Prefabs.Add(resource.name, resource);
+        }
+
+        Debug.Log("Creator: Imported: " + Prefabs.ToSeparatedString("; "));
     }
     private void MakeMap()
     {
