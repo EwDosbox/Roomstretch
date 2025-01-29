@@ -8,22 +8,22 @@
     <Room>
       <ID>1</ID>
       <Size>
-        <Height>3.429207</Height>
+        <Height>12.14381</Height>
         <Width>0</Width>
-        <Depth>9.811157</Depth>
+        <Depth>21.71674</Depth>
       </Size>
       <Position>
-        <Height>4</Height>
+        <Height>5</Height>
         <Width>0</Width>
-        <Depth>5</Depth>
+        <Depth>6</Depth>
       </Position>
     </Room>
     <Room>
       <ID>2</ID>
       <Size>
-        <Height>8.782829</Height>
+        <Height>20.17424</Height>
         <Width>0</Width>
-        <Depth>6.470642</Depth>
+        <Depth>16.70596</Depth>
       </Size>
       <Position>
         <Height>7</Height>
@@ -34,12 +34,12 @@
     <Room>
       <ID>3</ID>
       <Size>
-        <Height>9.502178</Height>
+        <Height>21.25327</Height>
         <Width>0</Width>
-        <Depth>9.129341</Depth>
+        <Depth>20.69401</Depth>
       </Size>
       <Position>
-        <Height>7</Height>
+        <Height>8</Height>
         <Width>0</Width>
         <Depth>2</Depth>
       </Position>
@@ -47,22 +47,22 @@
     <Room>
       <ID>4</ID>
       <Size>
-        <Height>8.727007</Height>
+        <Height>20.09051</Height>
         <Width>0</Width>
-        <Depth>8.024325</Depth>
+        <Depth>19.03649</Depth>
       </Size>
       <Position>
         <Height>2</Height>
         <Width>0</Width>
-        <Depth>4</Depth>
+        <Depth>5</Depth>
       </Position>
     </Room>
     <Room>
       <ID>5</ID>
       <Size>
-        <Height>4.106294</Height>
+        <Height>13.15944</Height>
         <Width>0</Width>
-        <Depth>5.161081</Depth>
+        <Depth>14.74162</Depth>
       </Size>
       <Position>
         <Height>5</Height>
@@ -73,12 +73,12 @@
     <Room>
       <ID>6</ID>
       <Size>
-        <Height>9.498257</Height>
+        <Height>21.24739</Height>
         <Width>0</Width>
-        <Depth>2.248126</Depth>
+        <Depth>10.37219</Depth>
       </Size>
       <Position>
-        <Height>3</Height>
+        <Height>4</Height>
         <Width>0</Width>
         <Depth>3</Depth>
       </Position>
@@ -86,12 +86,12 @@
     <Room>
       <ID>7</ID>
       <Size>
-        <Height>3.406093</Height>
+        <Height>12.10914</Height>
         <Width>0</Width>
-        <Depth>4.908543</Depth>
+        <Depth>14.36281</Depth>
       </Size>
       <Position>
-        <Height>7</Height>
+        <Height>8</Height>
         <Width>0</Width>
         <Depth>7</Depth>
       </Position>

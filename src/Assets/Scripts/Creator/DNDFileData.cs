@@ -110,9 +110,9 @@ public class Save
         get { return seed; }
         set { seed = value; }
     }
-    public System.Random Random
+    public BetterRandom Random
     {
-        get { return new System.Random(seed.GetHashCode()); }
+        get { return new BetterRandom(HashedSeed); }
     }
     public bool ShouldGenRanNoOfRooms
     {
@@ -159,6 +159,11 @@ public class Save
     {
         get { return minDepth; }
         set { minDepth = value; }
+    }
+
+    private int HashedSeed
+    {
+        get { return seed.GetHashCode(); }
     }
 
     public override string ToString()
@@ -298,5 +303,30 @@ public class ObjectData
     public override string ToString()
     {
         return $"Position: {position}; Object: {prefab.name}";
+    }
+}
+
+public class BetterRandom
+{
+    private System.Random rnd;
+
+    public BetterRandom(int seed)
+    {
+        rnd = new System.Random(seed);
+    }
+
+    public int Random(int a, int b)
+    {
+        return rnd.Next(a, b + 1);
+    }
+
+    public double RandomDouble(double a, double b)
+    {
+        return rnd.NextDouble() * (a+b) + a;
+    }
+
+    public float RandomFloat(float a, float b)
+    {
+        return (float)(rnd.NextDouble() * (a + b) + a);
     }
 }

@@ -30,11 +30,11 @@ public class DNDFileScriptCreator : MonoBehaviour
 
     public void PrepareSave(DNDFileData save)
     {
-        System.Random ran = save.Save.Random;
+        BetterRandom ran = save.Save.Random;
 
         if (save.Save.ShouldGenRanNoOfRooms)
         {
-            save.Save.NoOfRooms = ran.Next(save.Save.LowerBoundNoOfRooms, save.Save.UpperBoundNoOfRooms + 1);
+            save.Save.NoOfRooms = ran.Random(save.Save.LowerBoundNoOfRooms, save.Save.UpperBoundNoOfRooms);
         }
 
         if (save.Save.ShouldUseNormalBounds)
@@ -52,11 +52,11 @@ public class DNDFileScriptCreator : MonoBehaviour
             Vector3 size = Vector3.zero;
             Vector3 position = Vector3.zero;
 
-            size.x = save.Save.MinWidth + (float)ran.NextDouble() * (save.Save.MaxWidth - save.Save.MinWidth);
-            size.z = save.Save.MinDepth + (float)ran.NextDouble() * (save.Save.MaxDepth - save.Save.MinDepth);
+            size.x = ran.RandomFloat(save.Save.MaxWidth, save.Save.MinWidth);
+            size.z = ran.RandomFloat(save.Save.MaxDepth, save.Save.MinDepth);
 
-            position.x = ran.Next(2, 10);
-            position.z = ran.Next(2, 10);
+            position.x = ran.Random(2, 10);
+            position.z = ran.Random(2, 10);
 
             List<DoorData> doors = new List<DoorData>();
             List<ObjectData> objects = new List<ObjectData>();
