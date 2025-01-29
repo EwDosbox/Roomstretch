@@ -8,40 +8,14 @@
     <Room>
       <ID>1</ID>
       <Size>
-        <Height>17.59721</Height>
+        <Height>11.14632</Height>
         <Width>0</Width>
-        <Depth>11.14632</Depth>
-      </Size>
-      <Position>
-        <Height>4</Height>
-        <Width>0</Width>
-        <Depth>10</Depth>
-      </Position>
-    </Room>
-    <Room>
-      <ID>2</ID>
-      <Size>
-        <Height>13.71981</Height>
-        <Width>0</Width>
-        <Depth>13.86362</Depth>
+        <Depth>12.43515</Depth>
       </Size>
       <Position>
         <Height>10</Height>
         <Width>0</Width>
-        <Depth>8</Depth>
-      </Position>
-    </Room>
-    <Room>
-      <ID>3</ID>
-      <Size>
-        <Height>17.54968</Height>
-        <Width>0</Width>
-        <Depth>12.87504</Depth>
-      </Size>
-      <Position>
-        <Height>5</Height>
-        <Width>0</Width>
-        <Depth>10</Depth>
+        <Depth>7</Depth>
       </Position>
     </Room>
   </Body>

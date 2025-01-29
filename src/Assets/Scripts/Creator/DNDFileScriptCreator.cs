@@ -45,8 +45,7 @@ public class DNDFileScriptCreator : MonoBehaviour
             save.Save.MinDepth = 2;
         }
 
-
-
+        List<Rect> existingRooms = new List<Rect>();
         foreach (int i in Enumerable.Range(0, save.Save.NoOfRooms))
         {
             Vector3 size = Vector3.zero;
@@ -55,8 +54,35 @@ public class DNDFileScriptCreator : MonoBehaviour
             size.x = ran.RandomFloat(save.Save.MaxWidth, save.Save.MinWidth);
             size.z = ran.RandomFloat(save.Save.MaxDepth, save.Save.MinDepth);
 
-            position.x = ran.Random(2, 10);
-            position.z = ran.Random(2, 10);
+            Rect newRoom;
+            bool overlapping;
+            int attempts = 0;
+            const int maxAttempts = 100;
+
+            do
+            {
+                position = new Vector3(
+                    ran.Random(2, 10),
+                    0, // Assuming flat ground
+                    ran.Random(2, 10)
+                );
+
+                newRoom = new Rect(position.x, position.z, size.x, size.z);
+
+                overlapping = existingRooms.Any(existingRoom =>
+                    existingRoom.Overlaps(newRoom)
+                );
+
+                attempts++;
+            } while (overlapping && attempts < maxAttempts);
+
+            if (attempts >= maxAttempts)
+            {
+                Debug.LogWarning("Failed to place room after " + maxAttempts + " attempts.");
+                continue;
+            }
+
+            existingRooms.Add(newRoom);
 
             List<DoorData> doors = new List<DoorData>();
             List<ObjectData> objects = new List<ObjectData>();
