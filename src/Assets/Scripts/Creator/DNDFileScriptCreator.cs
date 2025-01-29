@@ -53,10 +53,10 @@ public class DNDFileScriptCreator : MonoBehaviour
             Vector3 position = Vector3.zero;
 
             size.x = save.Save.MinWidth + (float)ran.NextDouble() * (save.Save.MaxWidth - save.Save.MinWidth);
-            size.y = save.Save.MinDepth + (float)ran.NextDouble() * (save.Save.MaxDepth - save.Save.MinDepth);
+            size.z = save.Save.MinDepth + (float)ran.NextDouble() * (save.Save.MaxDepth - save.Save.MinDepth);
 
             position.x = ran.Next(2, 10);
-            position.y = ran.Next(2, 10);
+            position.z = ran.Next(2, 10);
 
             List<DoorData> doors = new List<DoorData>();
             List<ObjectData> objects = new List<ObjectData>();

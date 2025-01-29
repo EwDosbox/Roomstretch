@@ -8,79 +8,92 @@
     <Room>
       <ID>1</ID>
       <Size>
-        <Height>0</Height>
-        <Width>19.71674</Width>
-        <Depth>10.77841</Depth>
+        <Height>3.429207</Height>
+        <Width>0</Width>
+        <Depth>9.811157</Depth>
       </Size>
       <Position>
-        <Height>0</Height>
-        <Width>5</Width>
-        <Depth>3</Depth>
+        <Height>4</Height>
+        <Width>0</Width>
+        <Depth>5</Depth>
       </Position>
     </Room>
     <Room>
       <ID>2</ID>
       <Size>
-        <Height>0</Height>
-        <Width>14.70596</Width>
-        <Depth>7.785591</Depth>
+        <Height>8.782829</Height>
+        <Width>0</Width>
+        <Depth>6.470642</Depth>
       </Size>
       <Position>
-        <Height>0</Height>
-        <Width>3</Width>
-        <Depth>8</Depth>
+        <Height>7</Height>
+        <Width>0</Width>
+        <Depth>3</Depth>
       </Position>
     </Room>
     <Room>
       <ID>3</ID>
       <Size>
-        <Height>0</Height>
-        <Width>18.69401</Width>
-        <Depth>10.9601</Depth>
+        <Height>9.502178</Height>
+        <Width>0</Width>
+        <Depth>9.129341</Depth>
       </Size>
       <Position>
-        <Height>0</Height>
-        <Width>2</Width>
-        <Depth>9</Depth>
+        <Height>7</Height>
+        <Width>0</Width>
+        <Depth>2</Depth>
       </Position>
     </Room>
     <Room>
       <ID>4</ID>
       <Size>
-        <Height>0</Height>
-        <Width>17.03649</Width>
-        <Depth>11.3843</Depth>
+        <Height>8.727007</Height>
+        <Width>0</Width>
+        <Depth>8.024325</Depth>
       </Size>
       <Position>
-        <Height>0</Height>
-        <Width>4</Width>
-        <Depth>8</Depth>
+        <Height>2</Height>
+        <Width>0</Width>
+        <Depth>4</Depth>
       </Position>
     </Room>
     <Room>
       <ID>5</ID>
       <Size>
-        <Height>0</Height>
-        <Width>12.74162</Width>
-        <Depth>4.016898</Depth>
+        <Height>4.106294</Height>
+        <Width>0</Width>
+        <Depth>5.161081</Depth>
       </Size>
       <Position>
-        <Height>0</Height>
-        <Width>2</Width>
-        <Depth>4</Depth>
+        <Height>5</Height>
+        <Width>0</Width>
+        <Depth>2</Depth>
       </Position>
     </Room>
     <Room>
       <ID>6</ID>
       <Size>
-        <Height>0</Height>
-        <Width>8.372189</Width>
-        <Depth>8.265508</Depth>
+        <Height>9.498257</Height>
+        <Width>0</Width>
+        <Depth>2.248126</Depth>
       </Size>
       <Position>
-        <Height>0</Height>
-        <Width>3</Width>
-        <Depth>9</Depth>
+        <Height>3</Height>
+        <Width>0</Width>
+        <Depth>3</Depth>
+      </Position>
+    </Room>
+    <Room>
+      <ID>7</ID>
+      <Size>
+        <Height>3.406093</Height>
+        <Width>0</Width>
+        <Depth>4.908543</Depth>
+      </Size>
+      <Position>
+        <Height>7</Height>
+        <Width>0</Width>
+        <Depth>7</Depth>
       </Position>
     </Room>
   </Body>

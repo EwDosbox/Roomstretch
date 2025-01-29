@@ -126,8 +126,15 @@ public class UIScript : MonoBehaviour
         fileData.Save.Seed = seed;
 
 
-        fileData.Save.NoOfRooms = int.Parse(GetInput("NoOfRooms").Trim());
         fileData.Save.ShouldGenRanNoOfRooms = GetToggle("NoOfRooms").isOn;
+        if (fileData.Save.ShouldGenRanNoOfRooms)
+        {
+            fileData.Save.NoOfRooms = 5;
+        }
+        else
+        {
+            fileData.Save.NoOfRooms = int.Parse(GetInput("NoOfRooms").Trim());
+        }
         fileData.Save.ShouldUseNormalBounds = GetToggle("Bounds").isOn;
 
         if (!fileData.Save.ShouldUseNormalBounds)
