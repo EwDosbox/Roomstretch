@@ -37,7 +37,8 @@ public class DNDFileData : ScriptableObject
     public void AddRoom(Vector3 size, Vector3 position, List<DoorData> listDoors, List<ObjectData> listObjects)
     {
         lastUsedID++;
-        rooms.Add(new RoomData(size, position, listDoors, listObjects, lastUsedID));
+        RoomData room = new RoomData(size, position, listDoors, listObjects,lastUsedID);
+        rooms.Add(room);
     }
 
     public override string ToString()
@@ -203,6 +204,29 @@ public class RoomData
         this.listObjects = listObjects;
         this.id = id;
     }
+
+    public void AddDoor(DoorData door)
+    {
+        listDoors.Add(door);
+    }
+
+    public void AddDoor(Vector3 position, RoomData linkedRoom, int id)
+    {
+        DoorData door = new DoorData(position, linkedRoom, id);
+        listDoors.Add(door);
+    }
+
+    public void AddObject(ObjectData obj)
+    {
+        listObjects.Add(obj);
+    }
+
+    public void AddObject(Vector3 position, GameObject prefab)
+    {
+        ObjectData obj = new ObjectData(position, prefab);
+        listObjects.Add(obj);
+    }
+
 
     public override string ToString()
     {
