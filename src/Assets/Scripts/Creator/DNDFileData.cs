@@ -163,7 +163,24 @@ public class Save
 
     private int HashedSeed
     {
-        get { return seed.GetHashCode(); }
+        get
+        {
+            if (string.IsNullOrEmpty(seed))
+                return 0;
+
+            const uint FNV_offset_basis = 2166136261;
+            const uint FNV_prime = 16777619;
+
+            uint hash = FNV_offset_basis; 
+
+            foreach (char c in seed)
+            {
+                hash ^= c;
+                hash *= FNV_prime;
+            }
+
+            return (int)hash;
+        }
     }
 
     public override string ToString()
