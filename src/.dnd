@@ -8,14 +8,14 @@
     <Room>
       <ID>1</ID>
       <Size>
-        <Height>100</Height>
+        <Height>11,14632</Height>
         <Width>0</Width>
-        <Depth>100</Depth>
+        <Depth>12,43515</Depth>
       </Size>
       <Position>
-        <Height>-100</Height>
+        <Height>12,81273</Height>
         <Width>0</Width>
-        <Depth>-100</Depth>
+        <Depth>9,59721</Depth>
       </Position>
     </Room>
   </Body>

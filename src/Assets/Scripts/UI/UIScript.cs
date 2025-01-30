@@ -127,16 +127,12 @@ public class UIScript : MonoBehaviour
 
 
         fileData.Save.ShouldGenRanNoOfRooms = GetToggle("NoOfRooms").isOn;
-        if (fileData.Save.ShouldGenRanNoOfRooms)
-        {
-            fileData.Save.NoOfRooms = 5;
-        }
-        else
+        if (!fileData.Save.ShouldGenRanNoOfRooms)
         {
             fileData.Save.NoOfRooms = int.Parse(GetInput("NoOfRooms").Trim());
         }
-        fileData.Save.ShouldUseNormalBounds = GetToggle("Bounds").isOn;
 
+        fileData.Save.ShouldUseNormalBounds = GetToggle("Bounds").isOn;
         if (!fileData.Save.ShouldUseNormalBounds)
         {
             fileData.Save.MaxWidth = float.Parse(GetInput("MaxWidthBounds"));

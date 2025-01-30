@@ -39,14 +39,14 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         if (save.Save.ShouldUseNormalBounds)
         {
-            save.Save.MaxWidth = 10;
-            save.Save.MinWidth = 2;
-            save.Save.MaxDepth = 10;
-            save.Save.MinDepth = 2;
+            save.Save.MaxWidth = 100;
+            save.Save.MinWidth = -100;
+            save.Save.MaxDepth = 100;
+            save.Save.MinDepth = -100;
         }
 
         List<Rect> existingRooms = new List<Rect>();
-        foreach (int i in Enumerable.Range(0, save.Save.NoOfRooms))
+        for (int i = 0; i < save.Save.NoOfRooms; i++)
         {
             Vector3 size = Vector3.zero;
             Vector3 position = Vector3.zero;
@@ -55,26 +55,27 @@ public class DNDFileScriptCreator : MonoBehaviour
             size.z = ran.RandomFloat(save.Save.MaxDepth, save.Save.MinDepth);
 
             Rect newRoom;
-            bool overlapping;
+            bool isNewRoomOverlaping = false;
             int attempts = 0;
-            const int maxAttempts = 100;
+            const int maxAttempts = 5000;
 
             do
             {
                 position = new Vector3(
-                    ran.Random(2, 10),
-                    0, // Assuming flat ground
-                    ran.Random(2, 10)
+                    ran.RandomFloat(save.Save.MinDepth, save.Save.MaxDepth),
+                    0,
+                    ran.RandomFloat(save.Save.MinWidth, save.Save.MaxWidth)
                 );
 
                 newRoom = new Rect(position.x, position.z, size.x, size.z);
 
-                overlapping = existingRooms.Any(existingRoom =>
-                    existingRoom.Overlaps(newRoom)
-                );
+                foreach (Rect room in existingRooms)
+                {
+                    if (room.Overlaps(newRoom)) isNewRoomOverlaping = true; break;
+                }
 
                 attempts++;
-            } while (overlapping && attempts < maxAttempts);
+            } while (isNewRoomOverlaping && attempts < maxAttempts);
 
             if (attempts >= maxAttempts)
             {

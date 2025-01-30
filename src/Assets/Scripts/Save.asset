@@ -12,7 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cb0df77e03dc294d94480c15ee2f107, type: 3}
   m_Name: Save
   m_EditorClassIdentifier: 
+  rooms:
+  - size: {x: 100, y: 0, z: 100}
+    position: {x: -100, y: 0, z: -100}
+    listDoors: []
+    listObjects: []
   settings:
     fov: 60
   save:
-    filepath: D:\1_Git\Roomstretch\documentation\TestDNDFile.dnd
+    filepath: D:\_GIT\Roomstretch\documentation\TestDNDFile.dnd

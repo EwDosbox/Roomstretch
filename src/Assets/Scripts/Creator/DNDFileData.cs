@@ -6,12 +6,12 @@ using UnityEngine;
 public class DNDFileData : ScriptableObject
 {
     private int lastUsedID;
+    [SerializeField]
     private List<RoomData> rooms;
     [SerializeField]
     private Settings settings;
     [SerializeField]
     private Save save;
-
     public List<RoomData> Rooms
     {
         get { return rooms; }
@@ -79,7 +79,7 @@ public class Settings
 public class Save
 {
     [SerializeField]
-    private string filepath = "D:\\1_Git\\Roomstretch\\documentation\\TestDNDFile.dnd";
+    private string filepath = "D:\\_GIT\\Roomstretch\\documentation\\TestDNDFile.dnd";
     private string version;
     private string seed;
     private bool shouldGenRanNoOfRooms;
@@ -189,30 +189,39 @@ public class Save
     }
 }
 
+[System.Serializable]
 public class RoomData
 {
     private int id;
+    [SerializeField]
     private Vector3 size;
+    [SerializeField]
     private Vector3 position;
+    [SerializeField]
     private List<DoorData> listDoors;
+    [SerializeField]
     private List<ObjectData> listObjects;
 
     public int Id
     {
         get { return id; }
     }
+
     public Vector3 Size
     {
         get { return size; }
     }
+
     public Vector3 Position
     {
         get { return position; }
     }
+
     public List<DoorData> Doors
     {
         get { return listDoors; }
     }
+
     public List<ObjectData> Objects
     {
         get { return listObjects; }
@@ -266,10 +275,12 @@ public class RoomData
     }
 }
 
+[System.Serializable]
 public class DoorData
 {
     private int doorID;
     private RoomData linkedRoom;
+    [SerializeField]
     private Vector3 position;
 
     public int DoorID
@@ -280,6 +291,7 @@ public class DoorData
     {
         get { return linkedRoom; }
     }
+
     public Vector3 Position
     {
         get { return position; }
@@ -298,15 +310,19 @@ public class DoorData
     }
 }
 
+[System.Serializable]
 public class ObjectData
 {
+    [SerializeField]
     private Vector3 position;
+    [SerializeField]
     private GameObject prefab;
 
     public Vector3 Position
     {
         get { return position; }
     }
+
     public GameObject Object
     {
         get { return prefab; }
