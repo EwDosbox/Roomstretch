@@ -37,7 +37,7 @@ public class DNDFileData : ScriptableObject
     public void AddRoom(Vector3 size, Vector3 position, List<DoorData> listDoors, List<ObjectData> listObjects)
     {
         lastUsedID++;
-        RoomData room = new RoomData(size, position, listDoors, listObjects,lastUsedID);
+        RoomData room = new RoomData(size, position, listDoors, listObjects, lastUsedID);
         rooms.Add(room);
     }
 
@@ -79,7 +79,7 @@ public class Settings
 public class Save
 {
     [SerializeField]
-    private string filepath = "D:\\_GIT\\Roomstretch\\documentation\\TestDNDFile.dnd";
+    private string filepath = "D:\\1_Git\\Roomstretch\\documentation\\TestDNDFile.dnd";
     private string version;
     private string seed;
     private bool shouldGenRanNoOfRooms;
@@ -171,7 +171,7 @@ public class Save
             const uint FNV_offset_basis = 2166136261;
             const uint FNV_prime = 16777619;
 
-            uint hash = FNV_offset_basis; 
+            uint hash = FNV_offset_basis;
 
             foreach (char c in seed)
             {
@@ -353,13 +353,78 @@ public class BetterRandom
         return rnd.Next(a, b + 1);
     }
 
-    public double RandomDouble(double a, double b)
+    public double RandomDouble(double min, double max)
     {
-        return rnd.NextDouble() * (a+b) + a;
+        return min + (rnd.NextDouble() * (max - min));
     }
 
-    public float RandomFloat(float a, float b)
+    public float RandomFloat(float min, float max)
     {
-        return (float)(rnd.NextDouble() * (a + b) + a);
+        return min + (float)(rnd.NextDouble() * (max - min));
+    }
+
+    public Vector3 GenerateRandomSize(float minWidth, float maxWidth, float minDepth, float maxDepth)
+    {
+        return new Vector3(
+            this.RandomFloat(minWidth, maxWidth),
+            0,
+            this.RandomFloat(minDepth, maxDepth)
+        );
+    }
+
+    public Vector3 GenerateRandomPosition(float minWidth, float maxWidth, float minDepth, float maxDepth)
+    {
+        return new Vector3(
+            this.RandomFloat(minWidth, maxWidth),
+            0,
+            this.RandomFloat(minDepth, maxDepth)
+        );
+    }
+}
+public class Rectangle
+{
+    private float width;
+    private float depth;
+    private float x;
+    private float z;
+
+    public Vector2 Position
+    {
+        get { return new Vector2(x, z); }
+    }
+    public Vector2 Size
+    {
+        get { return new Vector2(width, depth); }
+    }
+
+    public Rectangle(float Width, float Depth, float X, float Z)
+    {
+        this.width = Width;
+        this.depth = Depth;
+        this.x = X;
+        this.z = Z;
+    }
+
+    public Rectangle(Vector2 position, Vector2 size)
+    {
+        this.width = size.x;
+        this.depth = size.y;
+        this.x = position.x;
+        this.z = position.y;
+    }
+
+    public bool AreOverlapping(Rectangle other)
+    {
+        bool notOverlapping =
+            this.x + this.width < other.x || // This rectangle is to the left of the other
+            other.x + other.width < this.x || // This rectangle is to the right of the other
+            this.z + this.depth < other.z || // This rectangle is above the other
+            other.z + other.depth < this.z;  // This rectangle is below the other
+
+        return !notOverlapping;
+    }
+    public override string ToString()
+    {
+        return $"Rectangle: Position = ({x}, {z}), Size = ({width}, {depth})";
     }
 }

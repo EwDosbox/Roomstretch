@@ -62,8 +62,9 @@ public class DNDSceneScriptCreator : MonoBehaviour
             Vector3 size = room.Size;
             Vector3 position = room.Position;
 
-            GameObject toInstantiate = Prefabs["Room"];
-            toInstantiate.transform.position = position;
+            GameObject toInstantiate = Instantiate(Prefabs["Room"], position, Quaternion.identity, Map.transform);
+            toInstantiate.transform.localScale = new Vector3(size.x, 1, size.z); // Adjust size, keeping Y scale fixed
+
             Instantiate(toInstantiate, Map.transform, true);
         }
 

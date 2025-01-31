@@ -30,67 +30,68 @@ public class DNDFileScriptCreator : MonoBehaviour
 
     public void PrepareSave(DNDFileData save)
     {
-        BetterRandom ran = save.Save.Random;
+        BetterRandom random = save.Save.Random;
 
+        // Set the number of rooms
         if (save.Save.ShouldGenRanNoOfRooms)
         {
-            save.Save.NoOfRooms = ran.Random(save.Save.LowerBoundNoOfRooms, save.Save.UpperBoundNoOfRooms);
+            save.Save.NoOfRooms = random.Random(save.Save.LowerBoundNoOfRooms, save.Save.UpperBoundNoOfRooms);
         }
 
+        // Set default bounds if normal bounds are enabled
         if (save.Save.ShouldUseNormalBounds)
         {
-            save.Save.MaxWidth = 100;
-            save.Save.MinWidth = -100;
-            save.Save.MaxDepth = 100;
-            save.Save.MinDepth = -100;
+            save.Save.MaxWidth = 20;
+            save.Save.MinWidth = -20;
+            save.Save.MaxDepth = 20;
+            save.Save.MinDepth = -20;
         }
 
-        List<Rect> existingRooms = new List<Rect>();
+        List<Rectangle> existingRooms = new List<Rectangle>();
+
         for (int i = 0; i < save.Save.NoOfRooms; i++)
         {
-            Vector3 size = Vector3.zero;
-            Vector3 position = Vector3.zero;
-
-            size.x = ran.RandomFloat(save.Save.MaxWidth, save.Save.MinWidth);
-            size.z = ran.RandomFloat(save.Save.MaxDepth, save.Save.MinDepth);
-
-            Rect newRoom;
-            bool isNewRoomOverlaping = false;
+            Vector3 size = random.GenerateRandomSize(save.Save.MinWidth, save.Save.MaxWidth, save.Save.MinDepth, save.Save.MaxDepth);
+            Vector3 position;
+            Rectangle newRoom;
             int attempts = 0;
-            const int maxAttempts = 5000;
+            const int maxAttempts = 100;
 
+            // Try to place the room without overlapping
             do
             {
-                position = new Vector3(
-                    ran.RandomFloat(save.Save.MinDepth, save.Save.MaxDepth),
-                    0,
-                    ran.RandomFloat(save.Save.MinWidth, save.Save.MaxWidth)
-                );
-
-                newRoom = new Rect(position.x, position.z, size.x, size.z);
-
-                foreach (Rect room in existingRooms)
-                {
-                    if (room.Overlaps(newRoom)) isNewRoomOverlaping = true; break;
-                }
-
+                position = random.GenerateRandomPosition(save.Save.MinWidth, save.Save.MaxWidth, save.Save.MinDepth, save.Save.MaxDepth);
+                newRoom = new Rectangle(size.x, size.z, position.x, position.z);
                 attempts++;
-            } while (isNewRoomOverlaping && attempts < maxAttempts);
+            } while (IsOverlapping(existingRooms, newRoom) && attempts < maxAttempts);
 
+            // Log a warning if the room couldn't be placed
             if (attempts >= maxAttempts)
             {
-                Debug.LogWarning("Failed to place room after " + maxAttempts + " attempts.");
+                Debug.LogWarning($"Failed to place room {i + 1} after {maxAttempts} attempts.");
                 continue;
             }
 
+            // Add the new room to the list of existing rooms
             existingRooms.Add(newRoom);
 
-            List<DoorData> doors = new List<DoorData>();
-            List<ObjectData> objects = new List<ObjectData>();
-
-            save.AddRoom(size, position, doors, objects);
+            // Add the room to the save data
+            save.AddRoom(size, position, new List<DoorData>(), new List<ObjectData>());
         }
     }
+    // Helper method to check if a new room overlaps with any existing rooms
+    private bool IsOverlapping(List<Rectangle> existingRooms, Rectangle newRoom)
+    {
+        foreach (Rectangle room in existingRooms)
+        {
+            if (room.AreOverlapping(newRoom))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void CreateFile(DNDFileData fileData)
     {
         XmlWriterSettings settings = new()
