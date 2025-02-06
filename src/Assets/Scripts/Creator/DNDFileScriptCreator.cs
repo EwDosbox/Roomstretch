@@ -32,26 +32,16 @@ public class DNDFileScriptCreator : MonoBehaviour
     {
         BetterRandom random = save.Save.Random;
 
-        // Set the number of rooms
-        if (save.Save.ShouldGenRanNoOfRooms)
-        {
-            save.Save.NoOfRooms = random.Random(save.Save.LowerBoundNoOfRooms, save.Save.UpperBoundNoOfRooms);
-        }
-
-        // Set default bounds if normal bounds are enabled
-        if (save.Save.ShouldUseNormalBounds)
-        {
-            save.Save.MaxWidth = 20;
-            save.Save.MinWidth = -20;
-            save.Save.MaxDepth = 20;
-            save.Save.MinDepth = -20;
-        }
+        save.Save.RoomsBounds.Generate(random);
+        save.Save.MapDepthBounds.Generate(random);
+        save.Save.MapWidthBounds.Generate(random);
+        
 
         List<Rectangle> existingRooms = new List<Rectangle>();
 
-        for (int i = 0; i < save.Save.NoOfRooms; i++)
+        for (int i = 0; i < save.Save.RoomsBounds.NoOfGenerations; i++)
         {
-            Vector3 size = random.GenerateRandomSize(save.Save.MinWidth, save.Save.MaxWidth, save.Save.MinDepth, save.Save.MaxDepth);
+            Vector3 size;
             Vector3 position;
             Rectangle newRoom;
             int attempts = 0;
@@ -60,7 +50,8 @@ public class DNDFileScriptCreator : MonoBehaviour
             // Try to place the room without overlapping
             do
             {
-                position = random.GenerateRandomPosition(save.Save.MinWidth, save.Save.MaxWidth, save.Save.MinDepth, save.Save.MaxDepth);
+                size = random.RandomVector3(save.Save.MapWidthBounds,save.Save.MapWidthBounds);
+                position = random.RandomVector3(save.Save.MapWidthBounds,save.Save.MapWidthBounds);
                 newRoom = new Rectangle(size.x, size.z, position.x, position.z);
                 attempts++;
             } while (IsOverlapping(existingRooms, newRoom) && attempts < maxAttempts);
@@ -139,9 +130,9 @@ public class DNDFileScriptCreator : MonoBehaviour
                 {
                     writer.WriteStartElement("Door");
 
-                    writer.WriteElementString("ID", doorData.DoorID.ToString());
+                    writer.WriteElementString("ID", doorData.ID.ToString());
 
-                    writer.WriteElementString("LinkedRoomID", doorData.LinkedRoom.Id.ToString());
+                    writer.WriteElementString("LinkedRoomID", doorData.LinkedRoomID.ToString());
 
                     writer.WriteElementString("Height", doorData.Position.z.ToString());
                     writer.WriteElementString("Width", doorData.Position.y.ToString());

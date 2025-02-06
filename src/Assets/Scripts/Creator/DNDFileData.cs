@@ -24,6 +24,26 @@ public class DNDFileData : ScriptableObject
     public Save Save
     {
         get { return save; }
+        set { save = value; }
+    }
+
+
+    public void AddRoom(Vector3 size, Vector3 position, List<DoorData> listDoors, List<ObjectData> listObjects)
+    {
+        lastUsedID++;
+        RoomData room = new RoomData(size, position, lastUsedID);
+
+        foreach (DoorData door in listDoors)
+        {
+            room.AddDoor(door.Position, door.LinkedRoomID);
+        }
+
+        foreach (ObjectData obj in listObjects)
+        {
+            room.AddObject(obj.Position, obj.Object);
+        }
+
+        rooms.Add(room);
     }
 
     private void OnEnable()
@@ -32,13 +52,6 @@ public class DNDFileData : ScriptableObject
         rooms = new List<RoomData>();
         settings = new Settings();
         save = new Save();
-    }
-
-    public void AddRoom(Vector3 size, Vector3 position, List<DoorData> listDoors, List<ObjectData> listObjects)
-    {
-        lastUsedID++;
-        RoomData room = new RoomData(size, position, listDoors, listObjects, lastUsedID);
-        rooms.Add(room);
     }
 
     public override string ToString()
@@ -56,17 +69,26 @@ public class DNDFileData : ScriptableObject
 public class Settings
 {
     [SerializeField]
-    private float fov = 60f;
+    private float fov;
+
+    [SerializeField]
+    private float sensitivity;
 
     public float FOV
     {
         get { return fov; }
         set { fov = value; }
     }
+    public float Sensitivity
+    {
+        get { return sensitivity; }
+        set { sensitivity = value; }
+    }
 
     public Settings()
     {
         fov = 60;
+        sensitivity = 2f;
     }
 
     public override string ToString()
@@ -79,21 +101,14 @@ public class Settings
 public class Save
 {
     [SerializeField]
-    private string filepath = "D:\\1_Git\\Roomstretch\\documentation\\TestDNDFile.dnd";
+    private string filepath = "D:\\_GIT\\Roomstretch\\documentation\\TestDNDFile.dnd";
     private string version;
     private string seed;
     private bool shouldGenRanNoOfRooms;
-    private int noOfRooms;
-    private int upperBoundNoOfRooms = 10;
-    private int lowerBoundNoOfRooms = 1;
 
-
-    private bool shouldUseNormalBounds;
-    private float maxWidth = 10;
-    private float minWidth = 2;
-    private float maxDepth = 10;
-    private float minDepth = 2;
-
+    private GenerationBounds roomsBounds;
+    private GenerationBounds mapWidthBounds;
+    private GenerationBounds mapDepthBounds;
 
     public string FilePath
     {
@@ -110,55 +125,25 @@ public class Save
         get { return seed; }
         set { seed = value; }
     }
+
+    public GenerationBounds RoomsBounds
+    {
+        get { return roomsBounds; }
+    }
+
+    public GenerationBounds MapWidthBounds
+    {
+        get { return mapWidthBounds; }
+    }
+
+    public GenerationBounds MapDepthBounds
+    {
+        get { return mapDepthBounds; }
+    }
+
     public BetterRandom Random
     {
         get { return new BetterRandom(HashedSeed); }
-    }
-    public bool ShouldGenRanNoOfRooms
-    {
-        get { return shouldGenRanNoOfRooms; }
-        set { shouldGenRanNoOfRooms = value; }
-    }
-    public int NoOfRooms
-    {
-        get { return noOfRooms; }
-        set { noOfRooms = value; }
-    }
-    public int UpperBoundNoOfRooms
-    {
-        get { return upperBoundNoOfRooms; }
-        set { upperBoundNoOfRooms = value; }
-    }
-    public int LowerBoundNoOfRooms
-    {
-        get { return lowerBoundNoOfRooms; }
-        set { lowerBoundNoOfRooms = value; }
-    }
-
-    public bool ShouldUseNormalBounds
-    {
-        get { return shouldUseNormalBounds; }
-        set { shouldUseNormalBounds = value; }
-    }
-    public float MaxWidth
-    {
-        get { return maxWidth; }
-        set { maxWidth = value; }
-    }
-    public float MinWidth
-    {
-        get { return minWidth; }
-        set { minWidth = value; }
-    }
-    public float MaxDepth
-    {
-        get { return maxDepth; }
-        set { maxDepth = value; }
-    }
-    public float MinDepth
-    {
-        get { return minDepth; }
-        set { minDepth = value; }
     }
 
     private int HashedSeed
@@ -183,15 +168,26 @@ public class Save
         }
     }
 
+    public Save()
+    {
+        version = "1.0";
+        roomsBounds = new GenerationBounds((1, 10),20, 1);
+        mapWidthBounds = new GenerationBounds((-10, 10), 20, -20);
+        mapDepthBounds = new GenerationBounds((-10, 10), 20, -20);
+    }
+
     public override string ToString()
     {
-        return $"Save: FilePath = {filepath}, Version = {version}, Seed = {seed}, Should Generate Random Number of Rooms = {shouldGenRanNoOfRooms}, Number of Rooms = {noOfRooms}";
+        return $"Save: FilePath = {filepath}, Version = {version}, Seed = {seed}, Should Generate Random Number of Rooms = {shouldGenRanNoOfRooms}, Number of Rooms = {roomsBounds.NoOfGenerations}";
     }
 }
 
 [System.Serializable]
 public class RoomData
 {
+    private int lastUsedDoorID;
+    private int lastUsedObjectID;
+
     private int id;
     [SerializeField]
     private Vector3 size;
@@ -227,34 +223,26 @@ public class RoomData
         get { return listObjects; }
     }
 
-    public RoomData(Vector3 size, Vector3 position, List<DoorData> listDoors, List<ObjectData> listObjects, int id)
+    public RoomData(Vector3 size, Vector3 position, int id)
     {
         this.size = size;
         this.position = position;
-        this.listDoors = listDoors;
-        this.listObjects = listObjects;
+        this.listDoors = new List<DoorData>();
+        this.listObjects = new List<ObjectData>();
         this.id = id;
+        lastUsedDoorID = 0;
+        lastUsedObjectID = 0;
     }
 
-    public void AddDoor(DoorData door)
+    public void AddDoor(Vector3 position, int linkedRoomID)
     {
+        DoorData door = new DoorData(position, linkedRoomID, ++lastUsedDoorID);
         listDoors.Add(door);
-    }
-
-    public void AddDoor(Vector3 position, RoomData linkedRoom, int id)
-    {
-        DoorData door = new DoorData(position, linkedRoom, id);
-        listDoors.Add(door);
-    }
-
-    public void AddObject(ObjectData obj)
-    {
-        listObjects.Add(obj);
     }
 
     public void AddObject(Vector3 position, GameObject prefab)
     {
-        ObjectData obj = new ObjectData(position, prefab);
+        ObjectData obj = new ObjectData(position, prefab, ++lastUsedObjectID);
         listObjects.Add(obj);
     }
 
@@ -278,18 +266,18 @@ public class RoomData
 [System.Serializable]
 public class DoorData
 {
-    private int doorID;
-    private RoomData linkedRoom;
+    private int iD;
+    private int linkedRoomID;
     [SerializeField]
     private Vector3 position;
 
-    public int DoorID
+    public int ID
     {
-        get { return doorID; }
+        get { return iD; }
     }
-    public RoomData LinkedRoom
+    public int LinkedRoomID
     {
-        get { return linkedRoom; }
+        get { return linkedRoomID; }
     }
 
     public Vector3 Position
@@ -297,27 +285,32 @@ public class DoorData
         get { return position; }
     }
 
-    public DoorData(Vector3 position, RoomData linkedRoom, int id)
+    public DoorData(Vector3 position, int linkedRoomID, int id)
     {
         this.position = position;
-        this.linkedRoom = linkedRoom;
-        this.doorID = id;
+        this.linkedRoomID = linkedRoomID;
+        this.iD = id;
     }
 
     public override string ToString()
     {
-        return $"Door ID: {doorID}; Position: {position}; Linked Room ID: {linkedRoom.Id}";
+        return $"Door ID: {ID}; Position: {position}; Linked Room ID: {linkedRoomID}";
     }
 }
 
 [System.Serializable]
 public class ObjectData
 {
+    private int iD;
     [SerializeField]
     private Vector3 position;
     [SerializeField]
     private GameObject prefab;
 
+    public int ID
+    {
+        get { return iD; }
+    }
     public Vector3 Position
     {
         get { return position; }
@@ -328,8 +321,9 @@ public class ObjectData
         get { return prefab; }
     }
 
-    public ObjectData(Vector3 position, GameObject prefab)
+    public ObjectData(Vector3 position, GameObject prefab, int id)
     {
+        this.iD = id;
         this.position = position;
         this.prefab = prefab;
     }
@@ -353,32 +347,36 @@ public class BetterRandom
         return rnd.Next(a, b + 1);
     }
 
-    public double RandomDouble(double min, double max)
+    public double Random(double a, double b)
     {
-        return min + (rnd.NextDouble() * (max - min));
+        return a + (rnd.NextDouble() * (b - a));
     }
 
-    public float RandomFloat(float min, float max)
+    public float Random(float a, float b)
     {
-        return min + (float)(rnd.NextDouble() * (max - min));
+        return a + (float)(rnd.NextDouble() * (b - a));
     }
 
-    public Vector3 GenerateRandomSize(float minWidth, float maxWidth, float minDepth, float maxDepth)
+    public Vector3 RandomVector3(GenerationBounds width, GenerationBounds depth, GenerationBounds height)
     {
         return new Vector3(
-            this.RandomFloat(minWidth, maxWidth),
-            0,
-            this.RandomFloat(minDepth, maxDepth)
+            this.Random(width.Bounds.Item1, width.Bounds.Item2),
+            this.Random(height.Bounds.Item1, height.Bounds.Item2),
+            this.Random(depth.Bounds.Item1, depth.Bounds.Item2)
         );
     }
 
-    public Vector3 GenerateRandomPosition(float minWidth, float maxWidth, float minDepth, float maxDepth)
+    public Vector3 RandomVector3(GenerationBounds width, GenerationBounds depth)
     {
         return new Vector3(
-            this.RandomFloat(minWidth, maxWidth),
+            this.Random(width.Bounds.Item1, width.Bounds.Item2),
             0,
-            this.RandomFloat(minDepth, maxDepth)
+            this.Random(depth.Bounds.Item1, depth.Bounds.Item2)
         );
+    }
+    public (float, float) RandomBounds(GenerationBounds bounds)
+    {
+        return (this.Random(bounds.MinBounds.Item1, bounds.MaxBounds.Item1), this.Random(bounds.MinBounds.Item2, bounds.MaxBounds.Item2));
     }
 }
 public class Rectangle
@@ -426,5 +424,80 @@ public class Rectangle
     public override string ToString()
     {
         return $"Rectangle: Position = ({x}, {z}), Size = ({width}, {depth})";
+    }
+}
+
+public class GenerationBounds
+{
+    private int noOfGenerations;
+    private bool shouldGenerate;
+    private (float, float) bounds;
+    private (float, float) defaultBounds;
+    private (float, float) maxBounds;
+    private (float, float) minBounds;
+
+    public int NoOfGenerations
+    {
+        get { return noOfGenerations; }
+        set { noOfGenerations = value; }
+    }
+
+    public bool ShouldGenerate
+    {
+        get { return shouldGenerate; }
+        set { shouldGenerate = value; }
+    }
+
+    public (float, float) Bounds
+    {
+        get { return bounds; }
+        set { bounds = value; }
+    }
+
+    public (float, float) DefaultBounds
+    {
+        get { return defaultBounds; }
+        set { defaultBounds = value; }
+    }
+
+    public (float, float) MaxBounds
+    {
+        get { return maxBounds; }
+        set { maxBounds = value; }
+    }
+    public (float, float) MinBounds
+    {
+        get { return minBounds; }
+        set { minBounds = value; }
+    }
+    public GenerationBounds((float, float) defaultBounds, float maxBound, float minBound)
+    {
+        noOfGenerations = 0;
+        shouldGenerate = false;
+        bounds = defaultBounds;
+        this.defaultBounds = defaultBounds;
+        this.maxBounds = (maxBound, maxBound);
+        this.minBounds = (minBound, minBound);
+
+    }
+    public GenerationBounds((float, float) defaultBounds, (float, float) maxBounds, (float, float) minBounds)
+    {
+        noOfGenerations = 0;
+        shouldGenerate = false;
+        bounds = defaultBounds;
+        this.defaultBounds = defaultBounds;
+        this.maxBounds = maxBounds;
+        this.minBounds = minBounds;
+    }
+
+    public void Generate(BetterRandom rnd){
+        if(shouldGenerate)
+        {
+            bounds = rnd.RandomBounds(this);
+        }
+        else
+        {
+            bounds = defaultBounds;
+        }
     }
 }

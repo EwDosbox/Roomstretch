@@ -122,23 +122,30 @@ public class UIScript : MonoBehaviour
 
     public void SubmitButton_Click()
     {
+        fileData.Save = new Save();
+
         string seed = GetInput("Seed");
         fileData.Save.Seed = seed;
 
 
-        fileData.Save.ShouldGenRanNoOfRooms = GetToggle("NoOfRooms").isOn;
-        if (!fileData.Save.ShouldGenRanNoOfRooms)
+        fileData.Save.RoomsBounds.ShouldGenerate = GetToggle("NoOfRooms").isOn;
+        if (!fileData.Save.RoomsBounds.ShouldGenerate)
         {
-            fileData.Save.NoOfRooms = int.Parse(GetInput("NoOfRooms").Trim());
+            fileData.Save.RoomsBounds.NoOfGenerations = int.Parse(GetInput("NoOfRooms").Trim());
         }
 
-        fileData.Save.ShouldUseNormalBounds = GetToggle("Bounds").isOn;
-        if (!fileData.Save.ShouldUseNormalBounds)
+        fileData.Save.MapDepthBounds.ShouldGenerate = GetToggle("Bounds").isOn;
+        if (!fileData.Save.MapDepthBounds.ShouldGenerate)
         {
-            fileData.Save.MaxWidth = float.Parse(GetInput("MaxWidthBounds"));
-            fileData.Save.MinWidth = float.Parse(GetInput("MinWidthBounds"));
-            fileData.Save.MaxDepth = float.Parse(GetInput("MaxDepthBounds"));
-            fileData.Save.MinDepth = float.Parse(GetInput("MinDepthBounds"));
+            fileData.Save.MapDepthBounds.MaxBounds = (float.Parse(GetInput("MaxDepth")), float.Parse(GetInput("MaxWidth")));
+            fileData.Save.MapDepthBounds.MinBounds = (float.Parse(GetInput("MinDepth")), float.Parse(GetInput("MinWidth")));
+        }
+
+        fileData.Save.MapWidthBounds.ShouldGenerate = GetToggle("Bounds").isOn;
+        if (!fileData.Save.MapWidthBounds.ShouldGenerate)
+        {
+            fileData.Save.MapWidthBounds.MaxBounds = (float.Parse(GetInput("MaxDepth")), float.Parse(GetInput("MaxWidth")));
+            fileData.Save.MapWidthBounds.MinBounds = (float.Parse(GetInput("MinDepth")), float.Parse(GetInput("MinWidth")));
         }
 
         dNDFileScriptCreator.PrepareSave(fileData);
