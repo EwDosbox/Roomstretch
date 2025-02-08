@@ -32,14 +32,14 @@ public class DNDFileScriptCreator : MonoBehaviour
     {
         BetterRandom random = save.Save.Random;
 
-        save.Save.RoomsBounds.Generate(random);
-        save.Save.MapDepthBounds.Generate(random);
-        save.Save.MapWidthBounds.Generate(random);
+        save.Save.RoomsCountBounds.Generate(random);
+        save.Save.DepthBounds.Generate(random);
+        save.Save.WidthBounds.Generate(random);
         
 
         List<Rectangle> existingRooms = new List<Rectangle>();
 
-        for (int i = 0; i < save.Save.RoomsBounds.NoOfGenerations; i++)
+        for (int i = 0; i < save.Save.RoomsCountBounds.NoOfGenerations; i++)
         {
             Vector3 size;
             Vector3 position;
@@ -50,8 +50,8 @@ public class DNDFileScriptCreator : MonoBehaviour
             // Try to place the room without overlapping
             do
             {
-                size = random.RandomVector3(save.Save.MapWidthBounds,save.Save.MapWidthBounds);
-                position = random.RandomVector3(save.Save.MapWidthBounds,save.Save.MapWidthBounds);
+                size = random.RandomVector3(save.Save.WidthBounds,save.Save.WidthBounds);
+                position = random.RandomVector3(save.Save.WidthBounds,save.Save.WidthBounds);
                 newRoom = new Rectangle(size.x, size.z, position.x, position.z);
                 attempts++;
             } while (IsOverlapping(existingRooms, newRoom) && attempts < maxAttempts);
@@ -111,7 +111,7 @@ public class DNDFileScriptCreator : MonoBehaviour
             {
                 writer.WriteStartElement("Room");
 
-                writer.WriteElementString("ID", roomData.Id.ToString());
+                writer.WriteElementString("ID", roomData.ID.ToString());
 
                 writer.WriteStartElement("Size");
                 writer.WriteElementString("Height", roomData.Size.z.ToString());

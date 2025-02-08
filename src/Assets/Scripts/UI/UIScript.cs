@@ -128,44 +128,42 @@ public class UIScript : MonoBehaviour
         fileData.Save.Seed = seed;
 
 
-        fileData.Save.RoomsBounds.ShouldGenerate = GetToggle("NoOfRooms").isOn;
-        if (!fileData.Save.RoomsBounds.ShouldGenerate)
+        fileData.Save.RoomsCountBounds.ShouldGenerate = GetToggle("NoOfRooms").isOn;
+        if (!fileData.Save.RoomsCountBounds.ShouldGenerate)
         {
-            fileData.Save.RoomsBounds.NoOfGenerations = int.Parse(GetInput("NoOfRooms").Trim());
+            fileData.Save.RoomsCountBounds.NoOfGenerations = int.Parse(GetInput("NoOfRooms").Trim());
         }
 
-        fileData.Save.MapDepthBounds.ShouldGenerate = GetToggle("Bounds").isOn;
-        if (!fileData.Save.MapDepthBounds.ShouldGenerate)
+        fileData.Save.DepthBounds.ShouldGenerate = GetToggle("Bounds").isOn;
+        if (!fileData.Save.DepthBounds.ShouldGenerate)
         {
-            fileData.Save.MapDepthBounds.MaxBounds = (float.Parse(GetInput("MaxDepth")), float.Parse(GetInput("MaxWidth")));
-            fileData.Save.MapDepthBounds.MinBounds = (float.Parse(GetInput("MinDepth")), float.Parse(GetInput("MinWidth")));
+            fileData.Save.DepthBounds.ExtremesBounds = new Bounds(float.Parse(GetInput("MinDepth")), float.Parse(GetInput("MaxDepth")));
         }
 
-        fileData.Save.MapWidthBounds.ShouldGenerate = GetToggle("Bounds").isOn;
-        if (!fileData.Save.MapWidthBounds.ShouldGenerate)
+        fileData.Save.WidthBounds.ShouldGenerate = GetToggle("Bounds").isOn;
+        if (!fileData.Save.WidthBounds.ShouldGenerate)
         {
-            fileData.Save.MapWidthBounds.MaxBounds = (float.Parse(GetInput("MaxDepth")), float.Parse(GetInput("MaxWidth")));
-            fileData.Save.MapWidthBounds.MinBounds = (float.Parse(GetInput("MinDepth")), float.Parse(GetInput("MinWidth")));
+            fileData.Save.WidthBounds.ExtremesBounds = new Bounds(float.Parse(GetInput("MinWidth")), float.Parse(GetInput("MaxWidth")));
+
+            dNDFileScriptCreator.PrepareSave(fileData);
+
+            Debug.Log(fileData.Save.ToString());
+
+            dNDFileScriptCreator.CreateFile(fileData);
+
+            string dNDFilePath = StandaloneFileBrowser.SaveFilePanel("Save Your .DND File", "", "", "dnd");
+
+            dNDFilePath = EndsWithDND(dNDFilePath);
+
+            if (!string.IsNullOrEmpty(dNDFilePath))
+            {
+                File.Copy(dNDFileScriptCreator.FilePath, dNDFilePath, true);
+                File.Delete(dNDFileScriptCreator.FilePath);
+                Debug.Log("File: .dnd was created at " + dNDFilePath);
+            }
+
+            NextScene();
         }
-
-        dNDFileScriptCreator.PrepareSave(fileData);
-
-        Debug.Log(fileData.Save.ToString());
-
-        dNDFileScriptCreator.CreateFile(fileData);
-
-        string dNDFilePath = StandaloneFileBrowser.SaveFilePanel("Save Your .DND File", "", "", "dnd");
-
-        dNDFilePath = EndsWithDND(dNDFilePath);
-
-        if (!string.IsNullOrEmpty(dNDFilePath))
-        {
-            File.Copy(dNDFileScriptCreator.FilePath, dNDFilePath, true);
-            File.Delete(dNDFileScriptCreator.FilePath);
-            Debug.Log("File: .dnd was created at " + dNDFilePath);
-        }
-
-        NextScene();
     }
 
     public void NextScene()
