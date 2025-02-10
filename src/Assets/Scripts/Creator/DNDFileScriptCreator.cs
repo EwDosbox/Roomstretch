@@ -39,7 +39,7 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         List<Rectangle> existingRooms = new List<Rectangle>();
 
-        for (int i = 0; i < save.Save.RoomsCountBounds.NoOfGenerations; i++)
+        for (int i = 0; i < save.Save.RoomsCountBounds.Value; i++)
         {
             Vector3 size;
             Vector3 position;
@@ -50,8 +50,8 @@ public class DNDFileScriptCreator : MonoBehaviour
             // Try to place the room without overlapping
             do
             {
-                size = random.RandomVector3(save.Save.WidthBounds,save.Save.WidthBounds);
-                position = random.RandomVector3(save.Save.WidthBounds,save.Save.WidthBounds);
+                size = random.RandomVector3(save.Save.WidthBounds.ExtremesBounds, save.Save.WidthBounds.ExtremesBounds);
+                position = random.RandomVector3(save.Save.WidthBounds.ExtremesBounds,save.Save.WidthBounds.ExtremesBounds);
                 newRoom = new Rectangle(size.x, size.z, position.x, position.z);
                 attempts++;
             } while (IsOverlapping(existingRooms, newRoom) && attempts < maxAttempts);
@@ -111,8 +111,8 @@ public class DNDFileScriptCreator : MonoBehaviour
             writer.WriteEndElement();
             writer.WriteStartElement("Settings");
 
-            writer.WriteElementString("FOV", fileData.Settings.FOV);
-            writer.WriteElementString("Sensitivity", fileData.Settings.Sensitivity);
+            writer.WriteElementString("FOV", fileData.Settings.FOV.ToString());
+            writer.WriteElementString("Sensitivity", fileData.Settings.Sensitivity.ToString());
 
             writer.WriteEndElement();
 
@@ -181,23 +181,24 @@ public class DNDFileScriptCreator : MonoBehaviour
         Debug.Log("File: Temp.dnd created at: " + filePath);
     }
 
-    private void WriteGenerationBounds(XmlWriter writer, GenerationBounds bounds)
+    private void WriteGenerationBounds<T>(XmlWriter writer, GenerationBounds<T> bounds) where T : IComparable<T>
     {
         writer.WriteStartElement("GenerationBounds");
 
-        writer.WriteElementString("ShouldGenerate", bounds.ShouldGenerate);
-        writer.WriteElementString("Value", bounds.Value);
-        writer.WriteElementString("DefaultValue", bounds.DefaultValue);
+        writer.WriteElementString("ShouldGenerate", bounds.ShouldGenerate.ToString());
+        writer.WriteElementString("Value", bounds.Value.ToString());
+        writer.WriteElementString("DefaultValue", bounds.DefaultValue.ToString());
 
         WriteBound(writer, bounds.ExtremesBounds);
 
         writer.WriteEndElement();
     }
-    private void WriteBound(XmlWriter writer,Bound bound){
+    private void WriteBound<T>(XmlWriter writer,Bounds<T> bound) where T : IComparable<T>
+    {
         writer.WriteStartElement("Bound");
 
-        writer.WriteElementString("Min", bound.Min);
-        writer.WriteElementString("Max", bound.Max);
+        writer.WriteElementString("Min", bound.Min.ToString());
+        writer.WriteElementString("Max", bound.Max.ToString());
 
         writer.WriteEndElement();
     }

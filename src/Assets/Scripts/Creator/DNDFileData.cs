@@ -15,7 +15,7 @@ public class DNDFileData : ScriptableObject
 
     public List<RoomData> Rooms => rooms;
     public Settings Settings => settings;
-    public Save Save = > Save;
+    public Save Save => save;
 
     public void AddRoom(Vector3 size, Vector3 position, List<DoorData> listDoors, List<ObjectData> listObjects)
     {
@@ -35,7 +35,7 @@ public class DNDFileData : ScriptableObject
         rooms.Add(room);
     }
 
-    private void Initialize()
+    public void Initialize()
     {
         rooms = new List<RoomData>();
         settings = new Settings();
@@ -52,9 +52,8 @@ public class DNDFileData : ScriptableObject
         return s;
     }
 }
-
 #endregion
-#region Settings and Saves
+#region Settings
 [System.Serializable]
 public class Settings
 {
@@ -69,7 +68,7 @@ public class Settings
     }
     public float Sensitivity
     {
-        get => return sensitivity;
+        get => sensitivity;
         set => sensitivity = value;
     }
 
@@ -84,36 +83,37 @@ public class Settings
         return $"Settings: FOV = {fov}";
     }
 }
-
+#endregion
+#region Save
 [System.Serializable]
 public class Save
 {
     [SerializeField] private string version = "1.0";
     [SerializeField] private string seed;
-    [SerializeField] private GenerationBounds roomCountBounds;
-    [SerializeField] private GenerationBounds widthBounds;
-    [SerializeField] private GenerationBounds depthBounds;
-    [SerializeField] private string filepath = Application.persistentDataPath + "//TestDNDFile.dnd";
+    [SerializeField] private GenerationBounds<int> roomCountBounds;
+    [SerializeField] private GenerationBounds<float> widthBounds;
+    [SerializeField] private GenerationBounds<float> depthBounds;
+    [SerializeField] private string filepath;
 
     public string FilePath
     {
-        get => return filepath; 
+        get => Application.persistentDataPath + "//TestDNDFile.dnd"; 
         set => filepath = value; 
     }
     public string Version
     {
-        get => return version; 
+        get => version; 
         set => version = value; 
     }
     public string Seed
     {
-        get => return seed; 
+        get => seed; 
         set => seed = value; 
     }
 
-    public GenerationBounds RoomsCountBounds => roomCountBounds;
-    public GenerationBounds WidthBounds => widthBounds;
-    public GenerationBounds DepthBounds => depthBounds;
+    public GenerationBounds<int> RoomsCountBounds => roomCountBounds;
+    public GenerationBounds<float> WidthBounds => widthBounds;
+    public GenerationBounds<float> DepthBounds => depthBounds;
     public BetterRandom Random => new BetterRandom(hashedSeed);
 
     private int hashedSeed
@@ -141,9 +141,9 @@ public class Save
     public Save()
     {
         version = "1.0";
-        roomCountBounds = new GenerationBounds(new Bounds(1, 5), new Bounds(1, 10));
-        widthBounds = new GenerationBounds(new Bounds(5, 10), new Bounds(5, 20));
-        depthBounds = new GenerationBounds(new Bounds(5, 10), new Bounds(5, 20));
+        roomCountBounds = new GenerationBounds<int>(6, new Bounds<int>(2,10));
+        widthBounds = new GenerationBounds<float>(0, new Bounds<float>(-10, +10));
+        depthBounds = new GenerationBounds<float>(0, new Bounds<float>(-10, +10));
     }
 
     public override string ToString()
@@ -153,7 +153,7 @@ public class Save
     }
 }
 #endregion
-#region Data Classes
+#region RoomData
 [System.Serializable]
 public class RoomData : BaseEntityData
 {
@@ -205,7 +205,8 @@ public class RoomData : BaseEntityData
         return s;
     }
 }
-
+#endregion
+#region DoorData
 [System.Serializable]
 public class DoorData : BaseEntityData
 {
@@ -222,7 +223,8 @@ public class DoorData : BaseEntityData
         return base.ToString() + $"Linked Room ID: {linkedRoomID}";
     }
 }
-
+#endregion
+#region ObjectData
 [System.Serializable]
 public class ObjectData : BaseEntityData
 {
@@ -240,7 +242,7 @@ public class ObjectData : BaseEntityData
     }
 }
 #endregion
-#region Helping Classes
+#region Rectangle
 public class Rectangle
 {
     private float width;
@@ -289,8 +291,7 @@ public class Rectangle
     }
 }
 #endregion
-#region Generation
-
+#region BetterRandom
 public class BetterRandom
 {
     private readonly System.Random rnd;
@@ -300,45 +301,40 @@ public class BetterRandom
         rnd = new System.Random(seed);
     }
 
-    public T Random<T>(T min, T max) where T : IComparable<T>
+    public T Random<T>(T min, T max)  where T : IComparable<T>
     {
-        ValidateRange(Convert.ToSingle(min), Convert.ToSingle(max));
-        if (typeof(T) == typeof(int))
-        {
-            return (T)(object)rnd.Next(Convert.ToInt32(min), Convert.ToInt32(max) + 1);
-        }
-        else if (typeof(T) == typeof(double))
-        {
-            return (T)(object)(Convert.ToDouble(min) + (rnd.NextDouble() * (Convert.ToDouble(max) - Convert.ToDouble(min))));
-        }
-        else if (typeof(T) == typeof(float))
-        {
-            return (T)(object)(Convert.ToSingle(min) + (float)(rnd.NextDouble() * (Convert.ToSingle(max) - Convert.ToSingle(min))));
-        }
-        else if(typeof(T) == typeof(Bounds))
-        {
-            return new Bounds<T>(Random(bounds.ExtremesBounds.Min, bounds.ExtremesBounds.Max), bounds.ExtremesBounds);
-        }
+        if (min is int)
+            return (T)(object)rnd.Next((int)(object)min, (int)(object)max);
+        else if (min is float)
+            return (T)(object)((float)(object)min + (float)rnd.NextDouble() * ((float)(object)max - (float)(object)min));
+        else if (min is double)
+            return (T)(object)((double)(object)min + (double)rnd.NextDouble() * ((double)(object)max - (double)(object)min));
         else
-        {
-            throw new ArgumentException("Unsupported type");
-        }
-    }
-    public Vector3 RandomVector3(GenerationBounds width, GenerationBounds depth, GenerationBounds height)
-    {
-        return new Vector3(
-            this.Random(width.Bounds.Max, width.Bounds.Min),
-            this.Random(height.Bounds.Max, height.Bounds.Min),
-            this.Random(depth.Bounds.Max, depth.Bounds.Min)
-        );
+            throw new ArgumentException("Type not supported");
     }
 
-    public Vector3 RandomVector3(GenerationBounds width, GenerationBounds depth)
+    public T RandomVector3<T>(Bounds<T> xBounds, Bounds<T> yBounds, Bounds<T> zBounds)where T : IComparable<T>
+    {
+        return (T)(object)new Vector3(
+            (float)(object)Random(xBounds.Min, xBounds.Max),
+            (float)(object)Random(yBounds.Min, yBounds.Max),
+            (float)(object)Random(zBounds.Min, zBounds.Max)
+        );
+    }
+    public T RandomVector3<T>(Bounds<T> xBounds, Bounds<T> zBounds)where T: IComparable<T>
+    {
+        return (T)(object)new Vector3(
+            (float)(object)Random(xBounds.Min, xBounds.Max),
+            0f,
+            (float)(object)Random(zBounds.Min, zBounds.Max)
+        );
+    } 
+    public Vector3 RandomVector3(Bounds<float> xBounds, Bounds<float> zBounds)
     {
         return new Vector3(
-            this.Random(width.Bounds.Max, width.Bounds.Min),
-            0,
-            this.Random(depth.Bounds.Max, depth.Bounds.Min)
+            Random(xBounds.Min, xBounds.Max),
+            0f,
+            Random(zBounds.Min, zBounds.Max)
         );
     }
 
@@ -347,6 +343,8 @@ public class BetterRandom
         if (min > max) throw new ArgumentException("Min must be <= Max");
     }
 }
+#endregion
+#region GenerationBounds
 [System.Serializable]
 public class GenerationBounds<T> where T : IComparable<T>
 {
@@ -360,9 +358,21 @@ public class GenerationBounds<T> where T : IComparable<T>
         get => shouldGenerate;
         set => shouldGenerate = value;
     }
-    public T Value => value;
-    public T DefaultValue => defaultValue;
-    public Bounds ExtremesBounds => extremesBounds;
+    public T Value
+    {
+        get => value;
+        set => this.value = value;
+    }
+    public T DefaultValue
+    {
+        get => defaultValue;
+        set => defaultValue = value;
+    }
+    public Bounds<T> ExtremesBounds
+    {
+        get => extremesBounds;
+        set => extremesBounds = value;
+    }
 
     public GenerationBounds(T defaultValue, Bounds<T> extremes)
     {
@@ -376,14 +386,10 @@ public class GenerationBounds<T> where T : IComparable<T>
     {
         if (shouldGenerate)
         {
-            if (defaultValue is int)
-                value = rnd.Random(extremesBounds.Min, extremesBounds.Max);
-            else if (defaultValue is float)
-                value = rnd.Random(extremesBounds.Min, extremesBounds.Max);
-            else if (defaultValue is double)
-                value = rnd.Random(extremesBounds.Min, extremesBounds.Max);
-            else if (defaultValue is Vector3)
+            if (defaultValue is Vector3)
                 value = rnd.RandomVector3(extremesBounds, extremesBounds);
+            else 
+                value = rnd.Random(extremesBounds.Min, extremesBounds.Max);
         }
         else
         {
@@ -393,7 +399,8 @@ public class GenerationBounds<T> where T : IComparable<T>
     public override string ToString() =>
             $"GenerationBounds: ShouldGenerate={shouldGenerate}, Value={value}, Default={defaultValue}, Bounds={extremesBounds.ToString()}";
 }
-
+#endregion
+#region Bounds
 [System.Serializable]
 public struct Bounds<T> where T : IComparable<T>
 {
@@ -416,8 +423,7 @@ public struct Bounds<T> where T : IComparable<T>
     }
 }
 #endregion
-#region Abstract Classes
-
+#region Base Entity Data
 [System.Serializable]
 public abstract class BaseEntityData
 {
