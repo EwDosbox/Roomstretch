@@ -4,31 +4,18 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
+#region  DNDFileData
 [CreateAssetMenu(fileName = "FileData", menuName = "ScriptableObjects/FileData", order = 1)]
 public class DNDFileData : ScriptableObject
 {
-    private int lastUsedID;
-    [SerializeField]
-    private List<RoomData> rooms;
-    [SerializeField]
-    private Settings settings;
-    [SerializeField]
-    private Save save;
-    public List<RoomData> Rooms
-    {
-        get { return rooms; }
-    }
+    [SerializeField] private int lastUsedID;
+    [SerializeField] private List<RoomData> rooms;
+    [SerializeField] private Settings settings;
+    [SerializeField] private Save save;
 
-    public Settings Settings
-    {
-        get { return settings; }
-    }
-    public Save Save
-    {
-        get { return save; }
-        set { save = value; }
-    }
-
+    public List<RoomData> Rooms => rooms;
+    public Settings Settings => settings;
+    public Save Save = > Save;
 
     public void AddRoom(Vector3 size, Vector3 position, List<DoorData> listDoors, List<ObjectData> listObjects)
     {
@@ -48,7 +35,7 @@ public class DNDFileData : ScriptableObject
         rooms.Add(room);
     }
 
-    private void Awake()
+    private void Initialize()
     {
         rooms = new List<RoomData>();
         settings = new Settings();
@@ -60,30 +47,30 @@ public class DNDFileData : ScriptableObject
         string s = $"Version: {Save.Version}, Seed: {Save.Seed},\n Rooms : ";
         foreach (RoomData room in rooms)
         {
-            s += room.ToString();
+            s += room.ToString() + "\n";
         }
         return s;
     }
 }
 
+#endregion
+#region Settings and Saves
 [System.Serializable]
 public class Settings
 {
-    [SerializeField]
-    private float fov;
+    [SerializeField] private float fov;
 
-    [SerializeField]
-    private float sensitivity;
+    [SerializeField] private float sensitivity;
 
     public float FOV
     {
-        get { return fov; }
-        set { fov = value; }
+        get => fov;
+        set => fov = value;
     }
     public float Sensitivity
     {
-        get { return sensitivity; }
-        set { sensitivity = value; }
+        get => return sensitivity;
+        set => sensitivity = value;
     }
 
     public Settings()
@@ -106,22 +93,22 @@ public class Save
     [SerializeField] private GenerationBounds roomCountBounds;
     [SerializeField] private GenerationBounds widthBounds;
     [SerializeField] private GenerationBounds depthBounds;
-    [SerializeField] private string filepath = "D:\\_GIT\\Roomstretch\\documentation\\TestDNDFile.dnd";
+    [SerializeField] private string filepath = Application.persistentDataPath + "//TestDNDFile.dnd";
 
     public string FilePath
     {
-        get { return filepath; }
-        set { filepath = value; }
+        get => return filepath; 
+        set => filepath = value; 
     }
     public string Version
     {
-        get { return version; }
-        set { version = value; }
+        get => return version; 
+        set => version = value; 
     }
     public string Seed
     {
-        get { return seed; }
-        set { seed = value; }
+        get => return seed; 
+        set => seed = value; 
     }
 
     public GenerationBounds RoomsCountBounds => roomCountBounds;
@@ -165,7 +152,7 @@ public class Save
                $"RoomCountBounds = {roomCountBounds.ToString()}, WidthBounds = {widthBounds.ToString()}, DepthBounds = {depthBounds.ToString()}";
     }
 }
-
+#endregion
 #region Data Classes
 [System.Serializable]
 public class RoomData : BaseEntityData
@@ -177,20 +164,9 @@ public class RoomData : BaseEntityData
     [SerializeField] private List<DoorData> listDoors;
     [SerializeField] private List<ObjectData> listObjects;
 
-    public Vector3 Size
-    {
-        get { return size; }
-    }
-
-    public List<DoorData> Doors
-    {
-        get { return listDoors; }
-    }
-
-    public List<ObjectData> Objects
-    {
-        get { return listObjects; }
-    }
+    public Vector3 Size => size;
+    public List<DoorData> Doors => listDoors;
+    public List<ObjectData> Objects => listObjects;
 
     public RoomData(Vector3 size, Vector3 position, int id) : base(position, id)
     {
@@ -219,12 +195,12 @@ public class RoomData : BaseEntityData
         string s = $"\nRoom ID: {id};\nSize: {size};\nPosition: {position};\nDoors: ";
         foreach (DoorData door in listDoors)
         {
-            s += door.ToString();
+            s += door.ToString() + "\n";
         }
         s += "\n Objects: ";
         foreach (ObjectData obj in listObjects)
         {
-            s += obj.ToString();
+            s += obj.ToString() + "\n";
         }
         return s;
     }
@@ -315,32 +291,38 @@ public class Rectangle
 #endregion
 #region Generation
 
-
 public class BetterRandom
 {
     private readonly System.Random rnd;
 
-    public BetterRandom(int seed)
+    public BetterRandom(int seed) 
     {
         rnd = new System.Random(seed);
     }
 
-    public int Random(int a, int b)
+    public T Random<T>(T min, T max) where T : IComparable<T>
     {
-        ValidateRange(a, b);
-        return rnd.Next(a, b + 1);
-    }
-
-    public double Random(double a, double b)
-    {
-        ValidateRange((float)a, (float)b);
-        return a + (rnd.NextDouble() * (b - a));
-    }
-
-    public float Random(float a, float b)
-    {
-        ValidateRange(a, b);
-        return a + (float)(rnd.NextDouble() * (b - a));
+        ValidateRange(Convert.ToSingle(min), Convert.ToSingle(max));
+        if (typeof(T) == typeof(int))
+        {
+            return (T)(object)rnd.Next(Convert.ToInt32(min), Convert.ToInt32(max) + 1);
+        }
+        else if (typeof(T) == typeof(double))
+        {
+            return (T)(object)(Convert.ToDouble(min) + (rnd.NextDouble() * (Convert.ToDouble(max) - Convert.ToDouble(min))));
+        }
+        else if (typeof(T) == typeof(float))
+        {
+            return (T)(object)(Convert.ToSingle(min) + (float)(rnd.NextDouble() * (Convert.ToSingle(max) - Convert.ToSingle(min))));
+        }
+        else if(typeof(T) == typeof(Bounds))
+        {
+            return new Bounds<T>(Random(bounds.ExtremesBounds.Min, bounds.ExtremesBounds.Max), bounds.ExtremesBounds);
+        }
+        else
+        {
+            throw new ArgumentException("Unsupported type");
+        }
     }
     public Vector3 RandomVector3(GenerationBounds width, GenerationBounds depth, GenerationBounds height)
     {
@@ -360,88 +342,73 @@ public class BetterRandom
         );
     }
 
-    public (float, float) RandomBounds(GenerationBounds bounds)
-    {
-        return (this.Random(bounds.Bounds.Max, bounds.Bounds.Min), this.Random(bounds.Bounds.Max, bounds.Bounds.Min));
-    }
     private void ValidateRange(float min, float max)
     {
         if (min > max) throw new ArgumentException("Min must be <= Max");
     }
 }
-public class GenerationBounds
+[System.Serializable]
+public class GenerationBounds<T> where T : IComparable<T>
 {
-    private int noOfGenerations;
     private bool shouldGenerate;
-    private Bounds bounds;
-    private Bounds defaultBounds;
-    private Bounds extremesBounds;
-    public int NoOfGenerations
-    {
-        get { return noOfGenerations; }
-        set { noOfGenerations = value; }
-    }
+    private T value;
+    private T defaultValue;
+    private Bounds<T> extremesBounds;
 
     public bool ShouldGenerate
     {
-        get { return shouldGenerate; }
-        set { shouldGenerate = value; }
+        get => shouldGenerate;
+        set => shouldGenerate = value;
     }
+    public T Value => value;
+    public T DefaultValue => defaultValue;
+    public Bounds ExtremesBounds => extremesBounds;
 
-    public Bounds Bounds => bounds;
-
-    public Bounds DefaultBounds
+    public GenerationBounds(T defaultValue, Bounds<T> extremes)
     {
-        get { return defaultBounds; }
-        set { defaultBounds = value; }
-    }
-
-    public Bounds ExtremesBounds
-    {
-        get { return extremesBounds; }
-        set { extremesBounds = value; }
-    }
-    public GenerationBounds(Bounds defaultBounds, Bounds extremes)
-    {
-        noOfGenerations = 0;
         shouldGenerate = false;
-        bounds = defaultBounds;
-        this.defaultBounds = defaultBounds;
+        this.defaultValue = defaultValue;
         this.extremesBounds = extremes;
+        this.value = defaultValue;
     }
 
     public void Generate(BetterRandom rnd)
     {
         if (shouldGenerate)
         {
-            bounds = new Bounds(rnd.Random(extremesBounds.Max, extremesBounds.Min),
-                rnd.Random(extremesBounds.Max, extremesBounds.Max));
+            if (defaultValue is int)
+                value = rnd.Random(extremesBounds.Min, extremesBounds.Max);
+            else if (defaultValue is float)
+                value = rnd.Random(extremesBounds.Min, extremesBounds.Max);
+            else if (defaultValue is double)
+                value = rnd.Random(extremesBounds.Min, extremesBounds.Max);
+            else if (defaultValue is Vector3)
+                value = rnd.RandomVector3(extremesBounds, extremesBounds);
         }
         else
         {
-            bounds = defaultBounds;
+            value = defaultValue;
         }
     }
-    public override string ToString()
-    {
-        return $"GenerationBounds: NoOfGenerations = {noOfGenerations}, ShouldGenerate = {shouldGenerate}, " +
-            $"Bounds = {bounds.ToString()}, DefaultBounds = {defaultBounds.ToString()}, ExtremesBounds = {extremesBounds.ToString()}";
-    }
+    public override string ToString() =>
+            $"GenerationBounds: ShouldGenerate={shouldGenerate}, Value={value}, Default={defaultValue}, Bounds={extremesBounds.ToString()}";
 }
 
 [System.Serializable]
-public struct Bounds
+public struct Bounds<T> where T : IComparable<T>
 {
-    public float Min;
-    public float Max;
+    private T min;
+    private T max;
+    public T Min => min;
+    public T Max => max;
 
-    public Bounds(float min, float max)
+    public Bounds(T min, T max)
     {
-        Min = min;
-        Max = max;
+        this.min = min;
+        this.max = max;
     }
 
-    public bool IsValid => Min <= Max;
+    public bool IsValid => Min.CompareTo(Max) <= 0;
 
     public override string ToString()
     {
@@ -471,5 +438,4 @@ public abstract class BaseEntityData
         return $"ID: {id}; Position: {position}";
     }
 }
-
 #endregion
