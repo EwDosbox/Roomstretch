@@ -99,8 +99,22 @@ public class DNDFileScriptCreator : MonoBehaviour
             #region Head
             writer.WriteStartElement("Head");
 
+            writer.WriteStartElement("Save");
+
             writer.WriteElementString("Version", fileData.Save.Version);
             writer.WriteElementString("Seed", fileData.Save.Seed);
+            writer.WriteElementString("FilePath", fileData.Save.FilePath);
+            WriteGenerationBounds(writer, fileData.Save.RoomsCountBounds);
+            WriteGenerationBounds(writer, fileData.Save.WidthBounds);
+            WriteGenerationBounds(writer, fileData.Save.DepthBounds);
+
+            writer.WriteEndElement();
+            writer.WriteStartElement("Settings");
+
+            writer.WriteElementString("FOV", fileData.Settings.FOV);
+            writer.WriteElementString("Sensitivity", fileData.Settings.Sensitivity);
+
+            writer.WriteEndElement();
 
             writer.WriteEndElement();
             #endregion
@@ -165,5 +179,26 @@ public class DNDFileScriptCreator : MonoBehaviour
             writer.WriteEndDocument();
         }
         Debug.Log("File: Temp.dnd created at: " + filePath);
+    }
+
+    private void WriteGenerationBounds(XmlWriter writer, GenerationBounds bounds)
+    {
+        writer.WriteStartElement("GenerationBounds");
+
+        writer.WriteElementString("ShouldGenerate", bounds.ShouldGenerate);
+        writer.WriteElementString("Value", bounds.Value);
+        writer.WriteElementString("DefaultValue", bounds.DefaultValue);
+
+        WriteBound(writer, bounds.ExtremesBounds);
+
+        writer.WriteEndElement();
+    }
+    private void WriteBound(XmlWriter writer,Bound bound){
+        writer.WriteStartElement("Bound");
+
+        writer.WriteElementString("Min", bound.Min);
+        writer.WriteElementString("Max", bound.Max);
+
+        writer.WriteEndElement();
     }
 }
