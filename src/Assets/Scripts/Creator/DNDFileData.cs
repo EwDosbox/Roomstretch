@@ -37,6 +37,7 @@ public class DNDFileData : ScriptableObject
 
     public void Initialize()
     {
+        lastUsedID = 0;
         rooms = new List<RoomData>();
         settings = new Settings();
         save = new Save();
@@ -90,10 +91,10 @@ public class Save
 {
     [SerializeField] private string version = "1.0";
     [SerializeField] private string seed;
+    [SerializeField] private string filepath;
     [SerializeField] private GenerationBounds<int> roomCountBounds;
     [SerializeField] private GenerationBounds<float> widthBounds;
     [SerializeField] private GenerationBounds<float> depthBounds;
-    [SerializeField] private string filepath;
 
     public string FilePath
     {
@@ -111,9 +112,21 @@ public class Save
         set => seed = value; 
     }
 
-    public GenerationBounds<int> RoomsCountBounds => roomCountBounds;
-    public GenerationBounds<float> WidthBounds => widthBounds;
-    public GenerationBounds<float> DepthBounds => depthBounds;
+    public GenerationBounds<int> RoomsCountBounds
+    {
+        get => roomCountBounds;
+        set => roomCountBounds = value;
+    }
+    public GenerationBounds<float> WidthBounds
+    {
+        get => widthBounds;
+        set => widthBounds = value;
+    }
+    public GenerationBounds<float> DepthBounds
+    {
+        get => depthBounds;
+        set => depthBounds = value;
+    }
     public BetterRandom Random => new BetterRandom(hashedSeed);
 
     private int hashedSeed

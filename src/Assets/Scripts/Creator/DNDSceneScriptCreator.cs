@@ -29,6 +29,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
         }
     }
 
+#region LoadResources
     private void LoadModels()
     {
         List<GameObject> resources = Resources.LoadAll<GameObject>("Models").ToList();
@@ -53,6 +54,8 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         Debug.Log("Creator: Imported: " + Prefabs.ToSeparatedString("; "));
     }
+    #endregion
+    #region MakeMap
     private void MakeMap()
     {
         fileData = ParseDNDFile(fileData.Save.FilePath);
@@ -64,22 +67,38 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
             GameObject toInstantiate = Instantiate(Prefabs["Room"], position, Quaternion.identity, Map.transform);
             toInstantiate.transform.localScale = new Vector3(size.x, 1, size.z); // Adjust size, keeping Y scale fixed
-
-            Instantiate(toInstantiate, Map.transform, true);
         }
 
         Debug.Log("Creator: " + fileData.ToString());
 
     }
-
+    #endregion
+#region ParseDNDFile
     private DNDFileData ParseDNDFile(string filePath)
     {
         string fileContent = File.ReadAllText(filePath);
         XDocument document = XDocument.Parse(fileContent);
 
         DNDFileData file = ScriptableObject.CreateInstance<DNDFileData>();
+        file.Initialize();
 
         XElement roomstretch = document.Element("RoomStretch");
+
+        XElement head = roomstretch.Element("Head");
+        XElement save = head.Element("Save");
+
+        file.Save.Version = save.Element("Version").Value.Trim();
+        file.Save.Seed = save.Element("Seed").Value.Trim();
+        file.Save.FilePath = save.Element("FilePath").Value.Trim();
+
+        file.Save.RoomsCountBounds = ParseGenerationBounds<int>(save.Element("RoomsCountBounds"));
+        file.Save.WidthBounds = ParseGenerationBounds<float>(save.Element("WidthBounds"));
+        file.Save.DepthBounds = ParseGenerationBounds<float>(save.Element("DepthBounds"));
+
+        XElement settings = head.Element("Settings");
+
+        file.Settings.FOV = float.Parse(settings.Element("FOV").Value.Trim());
+        file.Settings.Sensitivity = float.Parse(settings.Element("Sensitivity").Value.Trim());
 
         XElement body = roomstretch.Element("Body");
 
@@ -87,58 +106,71 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         foreach (XElement room in rooms)
         {
-            XElement sizeE = room.Element("Size");
-            Vector3 size = Vector3.zero;
-            size.z = float.Parse(sizeE.Element("Height").Value.Trim());
-            size.y = float.Parse(sizeE.Element("Width").Value.Trim());
-            size.x = float.Parse(sizeE.Element("Depth").Value.Trim());
+            int id = int.Parse(room.Element("ID").Value.Trim());
 
-            XElement postionE = room.Element("Position");
-            Vector3 position = Vector3.zero;
-            position.z = float.Parse(postionE.Element("Height").Value.Trim());
-            position.y = float.Parse(postionE.Element("Width").Value.Trim());
-            position.x = float.Parse(postionE.Element("Depth").Value.Trim());
+            Vector3 position = ParseVector3(room.Element("Position"));
+            Vector3 size = ParseVector3(room.Element("Size"));
 
-            List<XElement> doors = body.Elements("Door").ToList();
+            List<XElement> doors = room.Elements("Door").ToList();
             List<DoorData> doorsData = new List<DoorData>();
 
             foreach (XElement door in doors)
             {
-                int id = int.Parse(door.Element("ID").Value.Trim());
+                int doorId = int.Parse(door.Element("ID").Value.Trim());
                 int linkedRoomID = int.Parse(door.Element("LinkedRoomID").Value.Trim());
+                Vector3 doorPosition = ParseVector3(door.Element("Position"));
 
-                Vector3 doorPosition = Vector3.zero;
-                doorPosition.z = float.Parse(door.Element("Height").Value.Trim());
-                doorPosition.y = float.Parse(door.Element("Width").Value.Trim());
-                doorPosition.x = float.Parse(door.Element("Depth").Value.Trim());
-
-                doorsData.Add(new DoorData(doorPosition, linkedRoomID, id));
+                doorsData.Add(new DoorData(doorPosition, linkedRoomID, doorId));
             }
 
-            List<XElement> objects = body.Elements("Object").ToList();
+            List<XElement> objects = room.Elements("Object").ToList();
             List<ObjectData> objectDatas = new List<ObjectData>();
 
             foreach (XElement prefab in objects)
             {
-                int id = int.Parse(prefab.Element("ID").Value.Trim());
+                int objectId = int.Parse(prefab.Element("ID").Value.Trim());
+                Vector3 objectPosition = ParseVector3(prefab.Element("Position"));
                 string objectName = prefab.Element("ObjectName").Value.Trim();
 
-                Vector3 objectPosition = Vector3.zero;
-                objectPosition.z = float.Parse(prefab.Element("Height").Value.Trim());
-                objectPosition.y = float.Parse(prefab.Element("Width").Value.Trim());
-                objectPosition.x = float.Parse(prefab.Element("Depth").Value.Trim());
-
-                objectDatas.Add(new ObjectData(objectPosition, Models[objectName], id));
+                objectDatas.Add(new ObjectData(objectPosition, Models[objectName], objectId));
             }
 
-            file.AddRoom(
-                size,
-                 position,
-                  doorsData,
-                   objectDatas);
+            file.AddRoom(size, position, doorsData, objectDatas);
         }
 
         return file;
     }
+#endregion
+#region Helping Parse Methods
+    private GenerationBounds<T> ParseGenerationBounds<T>(XElement element) where T : IComparable<T>
+    {
+        bool shouldGenerate = element.Element("ShouldGenerate").Value.Trim() == "True";
+        T value = (T)Convert.ChangeType(element.Element("Value").Value.Trim(), typeof(T));
+        T defaultValue = (T)Convert.ChangeType(element.Element("DefaultValue").Value.Trim(), typeof(T));
+        Bounds<T> extremesBounds = ParseBounds<T>(element.Element("ExtremesBounds"));
 
+        GenerationBounds<T> generationBounds = new GenerationBounds<T>(defaultValue, extremesBounds);
+        generationBounds.ShouldGenerate = shouldGenerate;
+        generationBounds.Value = value;
+
+        return generationBounds;
+    }
+    private Bounds<T> ParseBounds<T>(XElement element) where T : IComparable<T>
+    {
+        T min = (T)Convert.ChangeType(element.Element("Min").Value.Trim(), typeof(T));
+        T max = (T)Convert.ChangeType(element.Element("Max").Value.Trim(), typeof(T));
+
+        return new Bounds<T>(min, max);
+    }
+    private Vector3 ParseVector3(XElement element)
+    {
+        Vector3 vector = Vector3.zero;
+
+        vector.x = float.Parse(element.Element("X").Value.Trim());
+        vector.y = float.Parse(element.Element("Y").Value.Trim());
+        vector.z = float.Parse(element.Element("Z").Value.Trim());
+
+        return vector;
+    }
+#endregion
 }

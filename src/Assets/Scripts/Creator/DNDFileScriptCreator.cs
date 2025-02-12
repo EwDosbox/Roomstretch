@@ -90,9 +90,9 @@ public class DNDFileScriptCreator : MonoBehaviour
             writer.WriteElementString("Version", fileData.Save.Version);
             writer.WriteElementString("Seed", fileData.Save.Seed);
             writer.WriteElementString("FilePath", fileData.Save.FilePath);
-            WriteGenerationBounds(writer, fileData.Save.RoomsCountBounds);
-            WriteGenerationBounds(writer, fileData.Save.WidthBounds);
-            WriteGenerationBounds(writer, fileData.Save.DepthBounds);
+            WriteGenerationBounds(writer, fileData.Save.RoomsCountBounds, "RoomsCountBounds");
+            WriteGenerationBounds(writer, fileData.Save.WidthBounds, "WidthBounds");
+            WriteGenerationBounds(writer, fileData.Save.DepthBounds, "DepthBounds");
 
             writer.WriteEndElement();
             writer.WriteStartElement("Settings");
@@ -113,31 +113,18 @@ public class DNDFileScriptCreator : MonoBehaviour
 
                 writer.WriteElementString("ID", roomData.ID.ToString());
 
-                writer.WriteStartElement("Size");
-                writer.WriteElementString("Height", roomData.Size.z.ToString());
-                writer.WriteElementString("Width", roomData.Size.y.ToString());
-                writer.WriteElementString("Depth", roomData.Size.x.ToString());
-                writer.WriteEndElement();
-
-                writer.WriteStartElement("Position");
-                writer.WriteElementString("Height", roomData.Position.z.ToString());
-                writer.WriteElementString("Width", roomData.Position.y.ToString());
-                writer.WriteElementString("Depth", roomData.Position.x.ToString());
-                writer.WriteEndElement();
-
+                WriteVector3(writer, roomData.Position, "Position");
+                WriteVector3(writer, roomData.Size, "Size");
 
                 foreach (DoorData doorData in roomData.Doors)
                 {
                     writer.WriteStartElement("Door");
 
                     writer.WriteElementString("ID", doorData.ID.ToString());
+                    WriteVector3(writer, doorData.Position, "Position");
 
                     writer.WriteElementString("LinkedRoomID", doorData.LinkedRoomID.ToString());
-
-                    writer.WriteElementString("Height", doorData.Position.z.ToString());
-                    writer.WriteElementString("Width", doorData.Position.y.ToString());
-                    writer.WriteElementString("Depth", doorData.Position.x.ToString());
-
+                    
                     writer.WriteEndElement();
                 }
 
@@ -146,11 +133,9 @@ public class DNDFileScriptCreator : MonoBehaviour
                 {
                     writer.WriteStartElement("Object");
 
+                    writer.WriteElementString("ID", objectData.ID.ToString());
+                    WriteVector3(writer, objectData.Position, "Position");
                     writer.WriteElementString("ObjectName", objectData.Object.name);
-
-                    writer.WriteElementString("Height", objectData.Position.z.ToString());
-                    writer.WriteElementString("Width", objectData.Position.y.ToString());
-                    writer.WriteElementString("Depth", objectData.Position.x.ToString());
 
                     writer.WriteEndElement();
                 }
@@ -168,26 +153,38 @@ public class DNDFileScriptCreator : MonoBehaviour
     }
     #endregion
     #region WriteGenerationBounds
-    private void WriteGenerationBounds<T>(XmlWriter writer, GenerationBounds<T> bounds) where T : IComparable<T>
+    private void WriteGenerationBounds<T>(XmlWriter writer, GenerationBounds<T> bounds, string name) where T : IComparable<T>
     {
-        writer.WriteStartElement("GenerationBounds");
+        writer.WriteStartElement(name);
 
         writer.WriteElementString("ShouldGenerate", bounds.ShouldGenerate.ToString());
         writer.WriteElementString("Value", bounds.Value.ToString());
         writer.WriteElementString("DefaultValue", bounds.DefaultValue.ToString());
 
-        WriteBound(writer, bounds.ExtremesBounds);
+        WriteBounds(writer, bounds.ExtremesBounds, "ExtremesBounds");
 
         writer.WriteEndElement();
     }
     #endregion
     #region WriteBound
-    private void WriteBound<T>(XmlWriter writer, Bounds<T> bound) where T : IComparable<T>
+    private void WriteBounds<T>(XmlWriter writer, Bounds<T> bound, string name) where T : IComparable<T>
     {
-        writer.WriteStartElement("Bound");
+        writer.WriteStartElement(name);
 
         writer.WriteElementString("Min", bound.Min.ToString());
         writer.WriteElementString("Max", bound.Max.ToString());
+
+        writer.WriteEndElement();
+    }
+    #endregion
+    #region WritePosition
+    private void WriteVector3(XmlWriter writer, Vector3 position, string name)
+    {
+        writer.WriteStartElement(name);
+
+        writer.WriteElementString("X", position.x.ToString());
+        writer.WriteElementString("Y", position.y.ToString());
+        writer.WriteElementString("Z", position.z.ToString());
 
         writer.WriteEndElement();
     }
