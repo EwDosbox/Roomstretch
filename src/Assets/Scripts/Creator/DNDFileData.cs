@@ -98,18 +98,18 @@ public class Save
 
     public string FilePath
     {
-        get => Application.persistentDataPath + "/TestDNDFile.dnd"; 
-        set => filepath = value; 
+        get => Application.persistentDataPath + "/TestDNDFile.dnd";
+        set => filepath = value;
     }
     public string Version
     {
-        get => version; 
-        set => version = value; 
+        get => version;
+        set => version = value;
     }
     public string Seed
     {
-        get => seed; 
-        set => seed = value; 
+        get => seed;
+        set => seed = value;
     }
 
     public GenerationBounds<int> RoomsCountBounds
@@ -154,7 +154,7 @@ public class Save
     public Save()
     {
         version = "1.0";
-        roomCountBounds = new GenerationBounds<int>(6, new Bounds<int>(2,10));
+        roomCountBounds = new GenerationBounds<int>(6, new Bounds<int>(2, 10));
         widthBounds = new GenerationBounds<float>(0, new Bounds<float>(-10, +10));
         depthBounds = new GenerationBounds<float>(0, new Bounds<float>(-10, +10));
     }
@@ -255,66 +255,17 @@ public class ObjectData : BaseEntityData
     }
 }
 #endregion
-#region Rectangle
-public class Rectangle
-{
-    private float width;
-    private float depth;
-    private float x;
-    private float z;
-
-    public Vector2 Position
-    {
-        get { return new Vector2(x, z); }
-    }
-    public Vector2 Size
-    {
-        get { return new Vector2(width, depth); }
-    }
-
-    public Rectangle(float Width, float Depth, float X, float Z)
-    {
-        this.width = Width;
-        this.depth = Depth;
-        this.x = X;
-        this.z = Z;
-    }
-
-    public Rectangle(Vector2 position, Vector2 size)
-    {
-        this.width = size.x;
-        this.depth = size.y;
-        this.x = position.x;
-        this.z = position.y;
-    }
-
-    public bool AreOverlapping(Rectangle other)
-    {
-        bool notOverlapping =
-            this.x + this.width < other.x || // This rectangle is to the left of the other
-            other.x + other.width < this.x || // This rectangle is to the right of the other
-            this.z + this.depth < other.z || // This rectangle is above the other
-            other.z + other.depth < this.z;  // This rectangle is below the other
-
-        return !notOverlapping;
-    }
-    public override string ToString()
-    {
-        return $"Rectangle: Position = ({x}, {z}), Size = ({width}, {depth})";
-    }
-}
-#endregion
 #region BetterRandom
 public class BetterRandom
 {
     private readonly System.Random rnd;
 
-    public BetterRandom(int seed) 
+    public BetterRandom(int seed)
     {
         rnd = new System.Random(seed);
     }
 
-    public T Random<T>(T min, T max)  where T : IComparable<T>
+    public T Random<T>(T min, T max) where T : IComparable<T>
     {
         if (min is int)
             return (T)(object)rnd.Next((int)(object)min, (int)(object)max);
@@ -326,7 +277,7 @@ public class BetterRandom
             throw new ArgumentException("Type not supported");
     }
 
-    public T RandomVector3<T>(Bounds<T> xBounds, Bounds<T> yBounds, Bounds<T> zBounds)where T : IComparable<T>
+    public T RandomVector3<T>(Bounds<T> xBounds, Bounds<T> yBounds, Bounds<T> zBounds) where T : IComparable<T>
     {
         return (T)(object)new Vector3(
             (float)(object)Random(xBounds.Min, xBounds.Max),
@@ -334,14 +285,14 @@ public class BetterRandom
             (float)(object)Random(zBounds.Min, zBounds.Max)
         );
     }
-    public T RandomVector3<T>(Bounds<T> xBounds, Bounds<T> zBounds)where T: IComparable<T>
+    public T RandomVector3<T>(Bounds<T> xBounds, Bounds<T> zBounds) where T : IComparable<T>
     {
         return (T)(object)new Vector3(
             (float)(object)Random(xBounds.Min, xBounds.Max),
             0f,
             (float)(object)Random(zBounds.Min, zBounds.Max)
         );
-    } 
+    }
     public Vector3 RandomVector3(Bounds<float> xBounds, Bounds<float> zBounds)
     {
         return new Vector3(
@@ -401,7 +352,7 @@ public class GenerationBounds<T> where T : IComparable<T>
         {
             if (defaultValue is Vector3)
                 value = rnd.RandomVector3(extremesBounds, extremesBounds);
-            else 
+            else
                 value = rnd.Random(extremesBounds.Min, extremesBounds.Max);
         }
         else
@@ -455,6 +406,45 @@ public abstract class BaseEntityData
     public override string ToString()
     {
         return $"ID: {id}; Position: {position}";
+    }
+}
+#endregion
+#region RectangleF
+[System.Serializable]
+public class RectangleF
+{
+    [SerializeField] private float x;
+    [SerializeField] private float z;
+    [SerializeField] private float width;
+    [SerializeField] private float depth;
+
+    public Vector3 Position => new Vector3(x, 0, z);
+    public Vector3 Size => new Vector3(width, 0, depth);
+    public float X => x;
+    public float Z => z;
+    public float Width => width;
+    public float Depth => depth;
+    
+    public RectangleF(Vector3 position, Vector3 size)
+    {
+        x = position.x;
+        z = position.z;
+        width = Mathf.Abs(size.x);
+        depth = Mathf.Abs(size.z);
+    }
+
+    public bool Overlaps(RectangleF other, float padding = 0f)
+    {
+        return (x - padding) < (other.x + other.width + padding) &&
+               (x + width + padding) > (other.x - padding) &&
+               (z - padding) < (other.z + other.depth + padding) &&
+               (z + depth + padding) > (other.z - padding);
+    }
+
+    public override string ToString()
+    {
+        return $"RectangleF: X={x.ToString("F2")}, Z={z.ToString("F2")}, " +
+               $"W={width.ToString("F2")}, D={depth.ToString("F2")}";
     }
 }
 #endregion

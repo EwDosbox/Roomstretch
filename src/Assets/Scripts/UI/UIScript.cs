@@ -50,8 +50,6 @@ public class UIScript : MonoBehaviour
                     go = GameObject.Find("BoundsToggle");
                     toggleBounds = go.GetComponent<Toggle>();
 
-                    Debug.Log(toggleNoOfRooms.name);
-
                     dNDFileScriptCreator = creator.GetComponent<DNDFileScriptCreator>();
                     break;
                 }

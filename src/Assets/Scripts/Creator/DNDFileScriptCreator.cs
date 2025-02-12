@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -22,52 +23,50 @@ public class DNDFileScriptCreator : MonoBehaviour
         save.Save.DepthBounds.Generate(random);
         save.Save.WidthBounds.Generate(random);
 
+        List<RectangleF> rooms = new List<RectangleF>();
 
-        List<Rectangle> existingRooms = new List<Rectangle>();
-
-        for (int i = 0; i < save.Save.RoomsCountBounds.Value; i++)
+        for (int i = 0; i <= save.Save.RoomsCountBounds.Value; i++)
         {
-            Vector3 size;
-            Vector3 position;
-            Rectangle newRoom;
-            int attempts = 0;
-            const int maxAttempts = 100;
-
-            // Try to place the room without overlapping
+            Vector3 roomPosition, roomSize;
+            RectangleF room;
+            int attempts = 0, maxAttemts = 100;
             do
             {
-                size = random.RandomVector3(save.Save.WidthBounds.ExtremesBounds, save.Save.WidthBounds.ExtremesBounds);
-                position = random.RandomVector3(save.Save.WidthBounds.ExtremesBounds, save.Save.WidthBounds.ExtremesBounds);
-                newRoom = new Rectangle(size.x, size.z, position.x, position.z);
-                attempts++;
-            } while (IsOverlapping(existingRooms, newRoom) && attempts < maxAttempts);
+                roomPosition = random.RandomVector3(save.Save.WidthBounds.ExtremesBounds, save.Save.DepthBounds.ExtremesBounds);
+                roomSize = random.RandomVector3(save.Save.WidthBounds.ExtremesBounds, save.Save.DepthBounds.ExtremesBounds);
 
-            // Log a warning if the room couldn't be placed
-            if (attempts >= maxAttempts)
+                Debug.Log("Room: " + roomPosition.ToString() + " " + roomSize.ToString());
+
+                room = new RectangleF(roomPosition, roomSize);
+                attempts++;
+
+            } while (rooms.Any(r => r.Overlaps(room)) && attempts < maxAttemts);
+            rooms.Add(room);
+
+            RoomData roomData = new RoomData(roomSize, roomPosition, i);
+
+            for (int j = 0; j <= 1; j++)//jedny dvere zatim
             {
-                Debug.LogWarning($"Failed to place room {i + 1} after {maxAttempts} attempts.");
-                continue;
+                Vector3 doorPosition = roomData.Position;
+                int linkedRoomID = random.Random(0, save.Save.RoomsCountBounds.Value);
+                DoorData doorData = new DoorData(doorPosition, linkedRoomID, j);
+
+                roomData.Doors.Add(doorData);
             }
 
-            // Add the new room to the list of existing rooms
-            existingRooms.Add(newRoom);
+            for (int j = 0; j <= 1; j++)//jeden objekt zatim
+            {
+                Vector3 objectPosition = roomData.Position;
+                GameObject prefab = new GameObject("Vial_1");//TEMP
+                ObjectData objectData = new ObjectData(objectPosition, prefab, j);
 
-            // Add the room to the save data
-            save.AddRoom(size, position, new List<DoorData>(), new List<ObjectData>());
+                roomData.Objects.Add(objectData);
+            }
+
+            save.Rooms.Add(roomData);
         }
     }
     #endregion
-    private bool IsOverlapping(List<Rectangle> existingRooms, Rectangle newRoom)
-    {
-        foreach (Rectangle room in existingRooms)
-        {
-            if (room.AreOverlapping(newRoom))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
     #region CreateFile
     public void CreateFile(DNDFileData fileData)
     {
@@ -124,7 +123,7 @@ public class DNDFileScriptCreator : MonoBehaviour
                     WriteVector3(writer, doorData.Position, "Position");
 
                     writer.WriteElementString("LinkedRoomID", doorData.LinkedRoomID.ToString());
-                    
+
                     writer.WriteEndElement();
                 }
 
