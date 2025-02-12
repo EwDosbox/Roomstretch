@@ -97,7 +97,7 @@ public class Save
 
     public string FilePath
     {
-        get => Application.persistentDataPath + "//TestDNDFile.dnd"; 
+        get => Application.persistentDataPath + "/TestDNDFile.dnd"; 
         set => filepath = value; 
     }
     public string Version

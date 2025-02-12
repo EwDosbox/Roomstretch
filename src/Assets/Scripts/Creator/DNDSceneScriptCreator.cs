@@ -104,7 +104,15 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
             foreach (XElement door in doors)
             {
+                int id = int.Parse(door.Element("ID").Value.Trim());
+                int linkedRoomID = int.Parse(door.Element("LinkedRoomID").Value.Trim());
 
+                Vector3 doorPosition = Vector3.zero;
+                doorPosition.z = float.Parse(door.Element("Height").Value.Trim());
+                doorPosition.y = float.Parse(door.Element("Width").Value.Trim());
+                doorPosition.x = float.Parse(door.Element("Depth").Value.Trim());
+
+                doorsData.Add(new DoorData(doorPosition, linkedRoomID, id));
             }
 
             List<XElement> objects = body.Elements("Object").ToList();
@@ -112,10 +120,22 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
             foreach (XElement prefab in objects)
             {
+                int id = int.Parse(prefab.Element("ID").Value.Trim());
+                string objectName = prefab.Element("ObjectName").Value.Trim();
 
+                Vector3 objectPosition = Vector3.zero;
+                objectPosition.z = float.Parse(prefab.Element("Height").Value.Trim());
+                objectPosition.y = float.Parse(prefab.Element("Width").Value.Trim());
+                objectPosition.x = float.Parse(prefab.Element("Depth").Value.Trim());
+
+                objectDatas.Add(new ObjectData(objectPosition, Models[objectName], id));
             }
 
-            file.AddRoom(size, position, doorsData, objectDatas);
+            file.AddRoom(
+                size,
+                 position,
+                  doorsData,
+                   objectDatas);
         }
 
         return file;

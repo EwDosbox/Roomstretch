@@ -2,7 +2,6 @@ using UnityEngine;
 using System.IO;
 using UnityEngine.SceneManagement;
 using TMPro;
-using SFB;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using UnityEngine.UI;
@@ -124,8 +123,7 @@ public class UIScript : MonoBehaviour
     {
         fileData.Initialize();
 
-        string seed = GetInput("Seed");
-        fileData.Save.Seed = seed;
+        fileData.Save.Seed = GetInput("Seed");
 
 
         fileData.Save.RoomsCountBounds.ShouldGenerate = GetToggle("NoOfRooms").isOn;
@@ -144,26 +142,16 @@ public class UIScript : MonoBehaviour
         if (!fileData.Save.WidthBounds.ShouldGenerate)
         {
             fileData.Save.WidthBounds.ExtremesBounds = new Bounds<float>(float.Parse(GetInput("MinWidth")), float.Parse(GetInput("MaxWidth")));
-
-            dNDFileScriptCreator.PrepareSave(fileData);
-
-            Debug.Log(fileData.Save.ToString());
-
-            dNDFileScriptCreator.CreateFile(fileData);
-
-            string dNDFilePath = StandaloneFileBrowser.SaveFilePanel("Save Your .DND File", "", "", "dnd");
-
-            dNDFilePath = EndsWithDND(dNDFilePath);
-
-            if (!string.IsNullOrEmpty(dNDFilePath))
-            {
-                File.Copy(dNDFileScriptCreator.FilePath, dNDFilePath, true);
-                File.Delete(dNDFileScriptCreator.FilePath);
-                Debug.Log("File: .dnd was created at " + dNDFilePath);
-            }
-
-            NextScene();
         }
+
+        dNDFileScriptCreator.PrepareSave(fileData);
+
+        Debug.Log(fileData.Save.ToString());
+
+        dNDFileScriptCreator.CreateFile(fileData);
+
+        NextScene();
+
     }
 
     public void NextScene()

@@ -9,25 +9,11 @@ using UnityEngine;
 
 public class DNDFileScriptCreator : MonoBehaviour
 {
-    private string filePath;
 
     [SerializeField]
     private DNDFileData fileData;
 
-    public string FilePath
-    {
-        get
-        {
-            return filePath;
-        }
-    }
-
-    private void Awake()
-    {
-        filePath = Application.persistentDataPath + "/Files/temp";
-        Directory.CreateDirectory(Application.persistentDataPath + "/Files");
-    }
-
+    #region PrepareSave
     public void PrepareSave(DNDFileData save)
     {
         BetterRandom random = save.Save.Random;
@@ -35,7 +21,7 @@ public class DNDFileScriptCreator : MonoBehaviour
         save.Save.RoomsCountBounds.Generate(random);
         save.Save.DepthBounds.Generate(random);
         save.Save.WidthBounds.Generate(random);
-        
+
 
         List<Rectangle> existingRooms = new List<Rectangle>();
 
@@ -51,7 +37,7 @@ public class DNDFileScriptCreator : MonoBehaviour
             do
             {
                 size = random.RandomVector3(save.Save.WidthBounds.ExtremesBounds, save.Save.WidthBounds.ExtremesBounds);
-                position = random.RandomVector3(save.Save.WidthBounds.ExtremesBounds,save.Save.WidthBounds.ExtremesBounds);
+                position = random.RandomVector3(save.Save.WidthBounds.ExtremesBounds, save.Save.WidthBounds.ExtremesBounds);
                 newRoom = new Rectangle(size.x, size.z, position.x, position.z);
                 attempts++;
             } while (IsOverlapping(existingRooms, newRoom) && attempts < maxAttempts);
@@ -70,7 +56,7 @@ public class DNDFileScriptCreator : MonoBehaviour
             save.AddRoom(size, position, new List<DoorData>(), new List<ObjectData>());
         }
     }
-    // Helper method to check if a new room overlaps with any existing rooms
+    #endregion
     private bool IsOverlapping(List<Rectangle> existingRooms, Rectangle newRoom)
     {
         foreach (Rectangle room in existingRooms)
@@ -82,7 +68,7 @@ public class DNDFileScriptCreator : MonoBehaviour
         }
         return false;
     }
-
+    #region CreateFile
     public void CreateFile(DNDFileData fileData)
     {
         XmlWriterSettings settings = new()
@@ -92,7 +78,7 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         };
 
-        using (XmlWriter writer = XmlWriter.Create(filePath, settings))
+        using (XmlWriter writer = XmlWriter.Create(fileData.Save.FilePath, settings))
         {
             writer.WriteStartDocument();
             writer.WriteStartElement("RoomStretch");
@@ -178,9 +164,10 @@ public class DNDFileScriptCreator : MonoBehaviour
             writer.WriteEndElement();
             writer.WriteEndDocument();
         }
-        Debug.Log("File: Temp.dnd created at: " + filePath);
+        Debug.Log("File: Temp.dnd created at: " + fileData.Save.FilePath);
     }
-
+    #endregion
+    #region WriteGenerationBounds
     private void WriteGenerationBounds<T>(XmlWriter writer, GenerationBounds<T> bounds) where T : IComparable<T>
     {
         writer.WriteStartElement("GenerationBounds");
@@ -193,7 +180,9 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         writer.WriteEndElement();
     }
-    private void WriteBound<T>(XmlWriter writer,Bounds<T> bound) where T : IComparable<T>
+    #endregion
+    #region WriteBound
+    private void WriteBound<T>(XmlWriter writer, Bounds<T> bound) where T : IComparable<T>
     {
         writer.WriteStartElement("Bound");
 
@@ -202,4 +191,5 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         writer.WriteEndElement();
     }
+    #endregion
 }
