@@ -92,8 +92,9 @@ public class DNDSceneScriptCreator : MonoBehaviour
         file.Save.FilePath = save.Element("FilePath").Value.Trim();
 
         file.Save.RoomsCountBounds = ParseGenerationBounds<int>(save.Element("RoomsCountBounds"));
-        file.Save.WidthBounds = ParseGenerationBounds<float>(save.Element("WidthBounds"));
-        file.Save.DepthBounds = ParseGenerationBounds<float>(save.Element("DepthBounds"));
+        file.Save.XBounds = ParseGenerationBounds<float>(save.Element("XBounds"));
+        file.Save.YBounds = ParseGenerationBounds<float>(save.Element("YBounds"));
+        file.Save.ZBounds = ParseGenerationBounds<float>(save.Element("ZBounds"));
 
         XElement settings = head.Element("Settings");
 

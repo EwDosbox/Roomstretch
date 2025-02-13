@@ -10,37 +10,49 @@ using UnityEngine;
 
 public class DNDFileScriptCreator : MonoBehaviour
 {
-
-    [SerializeField]
-    private DNDFileData fileData;
-
     #region PrepareSave
     public void PrepareSave(DNDFileData save)
     {
         BetterRandom random = save.Save.Random;
 
+        save.Save.ZBounds = new GenerationBounds<float>(14, new Bounds<float>(10, 20));
+
         save.Save.RoomsCountBounds.Generate(random);
-        save.Save.DepthBounds.Generate(random);
-        save.Save.WidthBounds.Generate(random);
+        save.Save.YBounds.Generate(random);
+        save.Save.XBounds.Generate(random);
+        save.Save.ZBounds.Generate(random);
 
-        List<RectangleF> rooms = new List<RectangleF>();
+        List<Cube> rooms = new List<Cube>();
 
-        for (int i = 0; i <= save.Save.RoomsCountBounds.Value; i++)
+        for (int i = 0; i < save.Save.RoomsCountBounds.Value; i++)
         {
             Vector3 roomPosition, roomSize;
-            RectangleF room;
-            int attempts = 0, maxAttemts = 100;
+            Cube room;
+            int attempts = 0, maxAttempts = 100;
+            bool placed = true;
+
+
             do
             {
-                roomPosition = random.RandomVector3(save.Save.WidthBounds.ExtremesBounds, save.Save.DepthBounds.ExtremesBounds);
-                roomSize = random.RandomVector3(save.Save.WidthBounds.ExtremesBounds, save.Save.DepthBounds.ExtremesBounds);
+                if(!placed) Debug.LogWarning($"Could not place room {i} without overlapping after {attempts} attempts.");
+                roomPosition = random.RandomVector3(save.Save.XBounds.ExtremesBounds, save.Save.ZBounds.ExtremesBounds);
+                roomSize = random.RandomVector3(save.Save.XBounds.ExtremesBounds, save.Save.YBounds.ExtremesBounds, save.Save.ZBounds.ExtremesBounds);
 
                 Debug.Log("Room: " + roomPosition.ToString() + " " + roomSize.ToString());
 
-                room = new RectangleF(roomPosition, roomSize);
+                room = new Cube(roomPosition, roomSize);
                 attempts++;
 
-            } while (rooms.Any(r => r.Overlaps(room)) && attempts < maxAttemts);
+                placed = !rooms.Any(r => room.Overlaps(r));
+
+            } while (!placed && attempts < maxAttempts);
+
+            if (!placed)
+            {
+                Debug.LogWarning($"Could not place room {i} without overlapping after {maxAttempts} attempts.");
+                continue; // Skip this room, or handle differently.
+            }
+
             rooms.Add(room);
 
             RoomData roomData = new RoomData(roomSize, roomPosition, i);
@@ -90,8 +102,9 @@ public class DNDFileScriptCreator : MonoBehaviour
             writer.WriteElementString("Seed", fileData.Save.Seed);
             writer.WriteElementString("FilePath", fileData.Save.FilePath);
             WriteGenerationBounds(writer, fileData.Save.RoomsCountBounds, "RoomsCountBounds");
-            WriteGenerationBounds(writer, fileData.Save.WidthBounds, "WidthBounds");
-            WriteGenerationBounds(writer, fileData.Save.DepthBounds, "DepthBounds");
+            WriteGenerationBounds(writer, fileData.Save.XBounds, "XBounds");
+            WriteGenerationBounds(writer, fileData.Save.YBounds, "YBounds");
+            WriteGenerationBounds(writer, fileData.Save.ZBounds, "ZBounds");
 
             writer.WriteEndElement();
             writer.WriteStartElement("Settings");
@@ -189,3 +202,42 @@ public class DNDFileScriptCreator : MonoBehaviour
     }
     #endregion
 }
+#region Cube
+[System.Serializable]
+public class Cube
+{
+    [SerializeField] private float x;
+    [SerializeField] private float y;
+    [SerializeField] private float z;
+    [SerializeField] private float width;
+    [SerializeField] private float height;
+    [SerializeField] private float depth;
+
+    public Vector3 Position => new Vector3(x, y, z);
+    public Vector3 Size => new Vector3(width, height, depth);
+
+    public Cube(Vector3 position, Vector3 size)
+    {
+        x = position.x;
+        y = position.y;
+        z = position.z;
+        width = Mathf.Abs(size.x);
+        height = Mathf.Abs(size.y);
+        depth = Mathf.Abs(size.z);
+    }
+
+    public bool Overlaps(Cube other)
+    {
+        Bounds thisBounds = new Bounds(Position + Size / 2f, Size);
+        Bounds otherBounds = new Bounds(other.Position + other.Size / 2f, other.Size);
+
+        return thisBounds.Intersects(otherBounds);
+    }
+
+    public override string ToString()
+    {
+        return $"Box: Pos=({x:F2},{y:F2},{z:F2}), Size=({width:F2},{height:F2},{depth:F2})";
+    }
+}
+
+#endregion

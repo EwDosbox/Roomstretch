@@ -93,8 +93,9 @@ public class Save
     [SerializeField] private string seed;
     [SerializeField] private string filepath;
     [SerializeField] private GenerationBounds<int> roomCountBounds;
-    [SerializeField] private GenerationBounds<float> widthBounds;
-    [SerializeField] private GenerationBounds<float> depthBounds;
+    [SerializeField] private GenerationBounds<float> xBounds;
+    [SerializeField] private GenerationBounds<float> yBounds;
+    [SerializeField] private GenerationBounds<float> zBounds;
 
     public string FilePath
     {
@@ -117,15 +118,20 @@ public class Save
         get => roomCountBounds;
         set => roomCountBounds = value;
     }
-    public GenerationBounds<float> WidthBounds
+    public GenerationBounds<float> XBounds
     {
-        get => widthBounds;
-        set => widthBounds = value;
+        get => xBounds;
+        set => xBounds = value;
     }
-    public GenerationBounds<float> DepthBounds
+    public GenerationBounds<float> YBounds
     {
-        get => depthBounds;
-        set => depthBounds = value;
+        get => yBounds;
+        set => yBounds = value;
+    }
+    public GenerationBounds<float> ZBounds
+    {
+        get => zBounds;
+        set => zBounds = value;
     }
     public BetterRandom Random => new BetterRandom(hashedSeed);
 
@@ -155,14 +161,14 @@ public class Save
     {
         version = "1.0";
         roomCountBounds = new GenerationBounds<int>(6, new Bounds<int>(2, 10));
-        widthBounds = new GenerationBounds<float>(0, new Bounds<float>(-10, +10));
-        depthBounds = new GenerationBounds<float>(0, new Bounds<float>(-10, +10));
+        xBounds = new GenerationBounds<float>(0, new Bounds<float>(-10, +10));
+        yBounds = new GenerationBounds<float>(0, new Bounds<float>(-10, +10));
     }
 
     public override string ToString()
     {
         return $"Save: Version = {version}, Seed = {seed}, FilePath = {filepath}, " +
-               $"RoomCountBounds = {roomCountBounds.ToString()}, WidthBounds = {widthBounds.ToString()}, DepthBounds = {depthBounds.ToString()}";
+               $"RoomCountBounds = {roomCountBounds.ToString()}, WidthBounds = {xBounds.ToString()}, DepthBounds = {yBounds.ToString()}";
     }
 }
 #endregion
@@ -277,17 +283,17 @@ public class BetterRandom
             throw new ArgumentException("Type not supported");
     }
 
-    public T RandomVector3<T>(Bounds<T> xBounds, Bounds<T> yBounds, Bounds<T> zBounds) where T : IComparable<T>
+    public Vector3 RandomVector3<T>(Bounds<T> xBounds, Bounds<T> yBounds, Bounds<T> zBounds) where T : IComparable<T>
     {
-        return (T)(object)new Vector3(
+        return new Vector3(
             (float)(object)Random(xBounds.Min, xBounds.Max),
             (float)(object)Random(yBounds.Min, yBounds.Max),
             (float)(object)Random(zBounds.Min, zBounds.Max)
         );
     }
-    public T RandomVector3<T>(Bounds<T> xBounds, Bounds<T> zBounds) where T : IComparable<T>
+    public Vector3 RandomVector3<T>(Bounds<T> xBounds, Bounds<T> zBounds) where T : IComparable<T>
     {
-        return (T)(object)new Vector3(
+        return new Vector3(
             (float)(object)Random(xBounds.Min, xBounds.Max),
             0f,
             (float)(object)Random(zBounds.Min, zBounds.Max)
@@ -351,7 +357,7 @@ public class GenerationBounds<T> where T : IComparable<T>
         if (shouldGenerate)
         {
             if (defaultValue is Vector3)
-                value = rnd.RandomVector3(extremesBounds, extremesBounds);
+                value = (T)(object)rnd.RandomVector3(extremesBounds, extremesBounds);
             else
                 value = rnd.Random(extremesBounds.Min, extremesBounds.Max);
         }
@@ -406,45 +412,6 @@ public abstract class BaseEntityData
     public override string ToString()
     {
         return $"ID: {id}; Position: {position}";
-    }
-}
-#endregion
-#region RectangleF
-[System.Serializable]
-public class RectangleF
-{
-    [SerializeField] private float x;
-    [SerializeField] private float z;
-    [SerializeField] private float width;
-    [SerializeField] private float depth;
-
-    public Vector3 Position => new Vector3(x, 0, z);
-    public Vector3 Size => new Vector3(width, 0, depth);
-    public float X => x;
-    public float Z => z;
-    public float Width => width;
-    public float Depth => depth;
-    
-    public RectangleF(Vector3 position, Vector3 size)
-    {
-        x = position.x;
-        z = position.z;
-        width = Mathf.Abs(size.x);
-        depth = Mathf.Abs(size.z);
-    }
-
-    public bool Overlaps(RectangleF other, float padding = 0f)
-    {
-        return (x - padding) < (other.x + other.width + padding) &&
-               (x + width + padding) > (other.x - padding) &&
-               (z - padding) < (other.z + other.depth + padding) &&
-               (z + depth + padding) > (other.z - padding);
-    }
-
-    public override string ToString()
-    {
-        return $"RectangleF: X={x.ToString("F2")}, Z={z.ToString("F2")}, " +
-               $"W={width.ToString("F2")}, D={depth.ToString("F2")}";
     }
 }
 #endregion
