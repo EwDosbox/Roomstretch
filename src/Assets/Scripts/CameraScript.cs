@@ -32,7 +32,7 @@ public class CameraScript : MonoBehaviour
 
     private void LateUpdate()
     {
-        transform.position = player.transform.position;
+        transform.position = player.transform.position + new Vector3(0f, 1.2f, 0f);
 
         float fovScale = save.Settings.FOV / 60f;
         float horizontalSensitivity = baseHorizontalSensitivity * fovScale;

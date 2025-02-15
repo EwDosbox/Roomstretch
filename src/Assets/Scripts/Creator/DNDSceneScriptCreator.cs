@@ -29,7 +29,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
         }
     }
 
-#region LoadResources
+    #region LoadResources
     private void LoadModels()
     {
         List<GameObject> resources = Resources.LoadAll<GameObject>("Models").ToList();
@@ -62,18 +62,43 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         foreach (RoomData room in fileData.Rooms)
         {
-            Vector3 size = room.Size;
-            Vector3 position = room.Position;
-
-            GameObject toInstantiate = Instantiate(Prefabs["Room"], position, Quaternion.identity, Map.transform);
-            toInstantiate.transform.localScale = new Vector3(size.x, 1, size.z); // Adjust size, keeping Y scale fixed
+            InstantiateRoom(room);
         }
 
         Debug.Log("Creator: " + fileData.ToString());
+    }
 
+    #endregion
+    #region InstantiateRoom
+    private void InstantiateRoom(RoomData room)
+    {
+        Vector3 size = room.Size;
+        Vector3 position = room.Position;
+        position.y = 1;
+
+        GameObject roomObject = Instantiate(Prefabs["Room"], position, Quaternion.identity, Map.transform);
+
+        // Find child walls
+        Transform wallN = roomObject.transform.Find("WallN");
+        Transform wallS = roomObject.transform.Find("WallS");
+        Transform wallE = roomObject.transform.Find("WallE");
+        Transform wallW = roomObject.transform.Find("WallW");
+
+        // Scale walls
+        wallN.localScale = new Vector3(1, 1, size.x);
+        wallS.localScale = new Vector3(1, 1, size.x);
+        wallE.localScale = new Vector3(1, 1, size.z);
+        wallW.localScale = new Vector3(1, 1, size.z);
+
+        wallN.localPosition = new Vector3(size.z, 0, 0);
+        wallS.localPosition = new Vector3(-size.z, 0, 0);
+        wallE.localPosition = new Vector3(0, 0, size.x);
+        wallW.localPosition = new Vector3(0, 0, -size.x);
+
+        Debug.Log($"Room created at {position} with size {size}");
     }
     #endregion
-#region ParseDNDFile
+    #region ParseDNDFile
     private DNDFileData ParseDNDFile(string filePath)
     {
         string fileContent = File.ReadAllText(filePath);
@@ -141,8 +166,8 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         return file;
     }
-#endregion
-#region Helping Parse Methods
+    #endregion
+    #region Helping Parse Methods
     private GenerationBounds<T> ParseGenerationBounds<T>(XElement element) where T : IComparable<T>
     {
         bool shouldGenerate = element.Element("ShouldGenerate").Value.Trim() == "True";
@@ -173,5 +198,5 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         return vector;
     }
-#endregion
+    #endregion
 }

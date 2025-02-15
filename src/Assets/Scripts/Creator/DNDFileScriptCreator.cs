@@ -38,6 +38,10 @@ public class DNDFileScriptCreator : MonoBehaviour
                 roomPosition = random.RandomVector3(save.Save.XBounds.ExtremesBounds, save.Save.ZBounds.ExtremesBounds);
                 roomSize = random.RandomVector3(save.Save.XBounds.ExtremesBounds, save.Save.YBounds.ExtremesBounds, save.Save.ZBounds.ExtremesBounds);
 
+                roomSize.x = Mathf.Abs(roomSize.x);
+                roomSize.y = 0;
+                roomSize.z = Mathf.Abs(roomSize.z);
+
                 Debug.Log("Room: " + roomPosition.ToString() + " " + roomSize.ToString());
 
                 room = new Cube(roomPosition, roomSize);

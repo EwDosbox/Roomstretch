@@ -208,7 +208,6 @@ public class RoomData : BaseEntityData
         listObjects.Add(obj);
     }
 
-
     public override string ToString()
     {
         string s = $"\nRoom ID: {id};\nSize: {size};\nPosition: {position};\nDoors: ";
