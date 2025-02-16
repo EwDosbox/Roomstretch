@@ -83,17 +83,28 @@ public class DNDSceneScriptCreator : MonoBehaviour
         Transform wallS = roomObject.transform.Find("WallS");
         Transform wallE = roomObject.transform.Find("WallE");
         Transform wallW = roomObject.transform.Find("WallW");
+        // Correct Scaling
+        wallN.localScale = new Vector3(1, 1, size.x/2);
+        wallS.localScale = new Vector3(1, 1, size.x/2);
+        wallE.localScale = new Vector3(1, 1, size.z/2);
+        wallW.localScale = new Vector3(1, 1, size.z/2);
 
-        // Scale walls
-        wallN.localScale = new Vector3(1, 1, size.x);
-        wallS.localScale = new Vector3(1, 1, size.x);
-        wallE.localScale = new Vector3(1, 1, size.z);
-        wallW.localScale = new Vector3(1, 1, size.z);
+        wallN.rotation= Quaternion.Euler(new Vector3(0, 90f, 0));
+        wallS.rotation= Quaternion.Euler(new Vector3(0, 90f, 0));
+        wallE.rotation= Quaternion.Euler(new Vector3(0, 0, 0));
+        wallW.rotation= Quaternion.Euler(new Vector3(0, 0, 0));
 
-        wallN.localPosition = new Vector3(size.z, 0, 0);
-        wallS.localPosition = new Vector3(-size.z, 0, 0);
-        wallE.localPosition = new Vector3(0, 0, size.x);
-        wallW.localPosition = new Vector3(0, 0, -size.x);
+        wallN.localPosition = new Vector3(size.x/2, 0, size.z);
+        wallS.localPosition = new Vector3(size.x/2, 0, 0);
+        wallE.localPosition = new Vector3(size.x, 0, size.z/2);
+        wallW.localPosition = new Vector3(0, 0, size.z/2);
+        // Correct Positioning (half-size offsets)
+        /* 
+        wallN.localPosition = new Vector3(0, 0, size.z/2);
+        wallS.localPosition = new Vector3(0, 0, -size.z/2);
+        wallE.localPosition = new Vector3(size.x/2, 0, 0);
+        wallW.localPosition = new Vector3(-size.x/2, 0, 0); */
+
 
         Debug.Log($"Room created at {position} with size {size}");
     }
@@ -117,10 +128,10 @@ public class DNDSceneScriptCreator : MonoBehaviour
         file.Save.FilePath = save.Element("FilePath").Value.Trim();
 
         file.Save.RoomsCountBounds = ParseGenerationBounds<int>(save.Element("RoomsCountBounds"));
-        file.Save.XRoomBounds = ParseGenerationBounds<float>(save.Element("XRoomBounds"));
-        file.Save.ZRoomBounds = ParseGenerationBounds<float>(save.Element("ZRoomBounds"));
-        file.Save.XMapBounds = ParseGenerationBounds<float>(save.Element("XMapBounds"));
-        file.Save.ZMapBounds = ParseGenerationBounds<float>(save.Element("ZMapBounds"));
+        file.Save.XRoomBounds = ParseBounds<float>(save.Element("XRoomBounds"));
+        file.Save.ZRoomBounds = ParseBounds<float>(save.Element("ZRoomBounds"));
+        file.Save.XMapBounds = ParseBounds<float>(save.Element("XMapBounds"));
+        file.Save.ZMapBounds = ParseBounds<float>(save.Element("ZMapBounds"));
 
         XElement settings = head.Element("Settings");
 
@@ -171,13 +182,13 @@ public class DNDSceneScriptCreator : MonoBehaviour
     #region Helping Parse Methods
     private GenerationBounds<T> ParseGenerationBounds<T>(XElement element) where T : IComparable<T>
     {
-        bool shouldGenerate = element.Element("ShouldGenerate").Value.Trim() == "True";
+        bool ShouldUseDefaultValue = element.Element("ShouldUseDefaultValue").Value.Trim() == "True";
         T value = (T)Convert.ChangeType(element.Element("Value").Value.Trim(), typeof(T));
         T defaultValue = (T)Convert.ChangeType(element.Element("DefaultValue").Value.Trim(), typeof(T));
         Bounds<T> extremesBounds = ParseBounds<T>(element.Element("ExtremesBounds"));
 
         GenerationBounds<T> generationBounds = new GenerationBounds<T>(defaultValue, extremesBounds);
-        generationBounds.ShouldGenerate = shouldGenerate;
+        generationBounds.ShouldUseDefaultValue = ShouldUseDefaultValue;
         generationBounds.Value = value;
 
         return generationBounds;

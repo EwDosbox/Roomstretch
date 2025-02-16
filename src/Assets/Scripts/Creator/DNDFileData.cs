@@ -93,10 +93,10 @@ public class Save
     [SerializeField] private string seed;
     [SerializeField] private string filepath;
     [SerializeField] private GenerationBounds<int> roomCountBounds;
-    [SerializeField] private GenerationBounds<float> xRoomBounds;
-    [SerializeField] private GenerationBounds<float> zRoomBounds;
-    [SerializeField] private GenerationBounds<float> xMapBounds;
-    [SerializeField] private GenerationBounds<float> zMapBounds;
+    [SerializeField] private Bounds<float> xRoomBounds;
+    [SerializeField] private Bounds<float> zRoomBounds;
+    [SerializeField] private Bounds<float> xMapBounds;
+    [SerializeField] private Bounds<float> zMapBounds;
 
     public string FilePath
     {
@@ -119,25 +119,26 @@ public class Save
         get => roomCountBounds;
         set => roomCountBounds = value;
     }
-    public GenerationBounds<float> XRoomBounds
+
+    public Bounds<float> XRoomBounds
     {
         get => xRoomBounds;
         set => xRoomBounds = value;
     }
-    public GenerationBounds<float> ZRoomBounds
+    public Bounds<float> ZRoomBounds
     {
         get => zRoomBounds;
         set => zRoomBounds = value;
     }
-    public GenerationBounds<float> XMapBounds
+    public Bounds<float> XMapBounds
     {
-        get => xRoomBounds;
-        set => xRoomBounds = value;
+        get => xMapBounds;
+        set => xMapBounds = value;
     }
-    public GenerationBounds<float> ZMapBounds
+    public Bounds<float> ZMapBounds
     {
-        get => zRoomBounds;
-        set => zRoomBounds = value;
+        get => zMapBounds;
+        set => zMapBounds = value;
     }
     public BetterRandom Random => new BetterRandom(hashedSeed);
 
@@ -166,11 +167,11 @@ public class Save
     public Save()
     {
         version = "1.0";
-        roomCountBounds = new GenerationBounds<int>();
-        xRoomBounds = new GenerationBounds<float>();
-        zRoomBounds = new GenerationBounds<float>();
-        xMapBounds = new GenerationBounds<float>();
-        zMapBounds = new GenerationBounds<float>();
+        roomCountBounds = new GenerationBounds<int>(5, new Bounds<int>(5, 10));
+        xRoomBounds = new Bounds<float>(5, 10);
+        zRoomBounds = new Bounds<float>(5, 10);
+        xMapBounds = new Bounds<float>(-10, +10);
+        zMapBounds = new Bounds<float>(-10, +10);
     }
 
     public override string ToString()
@@ -188,17 +189,21 @@ public class RoomData : BaseEntityData
     private int lastUsedObjectID;
 
     [SerializeField] private Vector3 size;
-    [SerializeField] private List<DoorData> listDoors;
+    [SerializeField] private DoorData door;
     [SerializeField] private List<ObjectData> listObjects;
 
     public Vector3 Size => size;
-    public List<DoorData> Doors => listDoors;
+    public DoorData Door
+    {
+        get => door;
+        set => door = value;
+    }
     public List<ObjectData> Objects => listObjects;
 
     public RoomData(Vector3 size, Vector3 position, int id) : base(position, id)
     {
         this.size = size;
-        this.listDoors = new List<DoorData>();
+        this.door = new DoorData();
         this.listObjects = new List<ObjectData>();
         lastUsedDoorID = 0;
         lastUsedObjectID = 0;
@@ -206,8 +211,7 @@ public class RoomData : BaseEntityData
 
     public void AddDoor(Vector3 position, int linkedRoomID)
     {
-        DoorData door = new DoorData(position, linkedRoomID, ++lastUsedDoorID);
-        listDoors.Add(door);
+        this.door = new DoorData(position, linkedRoomID, ++lastUsedDoorID);
     }
 
     public void AddObject(Vector3 position, GameObject prefab)
@@ -218,12 +222,7 @@ public class RoomData : BaseEntityData
 
     public override string ToString()
     {
-        string s = $"\nRoom ID: {id};\nSize: {size};\nPosition: {position};\nDoors: ";
-        foreach (DoorData door in listDoors)
-        {
-            s += door.ToString() + "\n";
-        }
-        s += "\n Objects: ";
+        string s = $"\nRoom ID: {ID};\nSize: {Size};\nPosition: {Position};\nDoors: {Door}\nObjects: ";
         foreach (ObjectData obj in listObjects)
         {
             s += obj.ToString() + "\n";
@@ -243,6 +242,10 @@ public class DoorData : BaseEntityData
     public DoorData(Vector3 position, int linkedRoomID, int id) : base(position, id)
     {
         this.linkedRoomID = linkedRoomID;
+    }
+    public DoorData() : base(Vector3.zero, 0)
+    {
+        linkedRoomID = 0;
     }
     public override string ToString()
     {
@@ -325,20 +328,25 @@ public class BetterRandom
 [System.Serializable]
 public class GenerationBounds<T> where T : IComparable<T>
 {
-    private bool shouldGenerate;
+    private bool shouldUseDefaultValue;
+    private bool wasValueAssigned;
     private T value;
     private T defaultValue;
     private Bounds<T> extremesBounds;
 
-    public bool ShouldGenerate
+    public bool ShouldUseDefaultValue
     {
-        get => shouldGenerate;
-        set => shouldGenerate = value;
+        get => shouldUseDefaultValue;
+        set => shouldUseDefaultValue = value;
     }
     public T Value
     {
         get => value;
-        set => this.value = value;
+        set
+        {
+            this.value = value;
+            wasValueAssigned = true;
+        }
     }
     public T DefaultValue
     {
@@ -353,14 +361,24 @@ public class GenerationBounds<T> where T : IComparable<T>
 
     public GenerationBounds(T defaultValue, Bounds<T> extremes)
     {
-        shouldGenerate = false;
+        wasValueAssigned = false;
+        shouldUseDefaultValue = false;
         this.defaultValue = defaultValue;
         this.extremesBounds = extremes;
         this.value = defaultValue;
     }
+    public GenerationBounds(T defaultValue)
+    {
+        wasValueAssigned = false;
+        shouldUseDefaultValue = false;
+        this.defaultValue = defaultValue;
+        this.extremesBounds = new Bounds<T>(default, default);
+        this.value = defaultValue;
+    }
     public GenerationBounds()
     {
-        shouldGenerate = false;
+        wasValueAssigned = false;
+        shouldUseDefaultValue = false;
         defaultValue = default;
         extremesBounds = new Bounds<T>(default, default);
         value = default;
@@ -368,20 +386,20 @@ public class GenerationBounds<T> where T : IComparable<T>
 
     public void Generate(BetterRandom rnd)
     {
-        if (shouldGenerate)
+        if (shouldUseDefaultValue)
+        {
+            value = defaultValue;
+        }
+        else if (!wasValueAssigned)
         {
             if (defaultValue is Vector3)
                 value = (T)(object)rnd.RandomVector3(extremesBounds, extremesBounds);
             else
                 value = rnd.Random(extremesBounds.Min, extremesBounds.Max);
         }
-        else
-        {
-            value = defaultValue;
-        }
     }
     public override string ToString() =>
-            $"GenerationBounds: ShouldGenerate={shouldGenerate}, Value={value}, Default={defaultValue}, Bounds={extremesBounds.ToString()}";
+            $"GenerationBounds: ShouldGenerate={shouldUseDefaultValue}, Value={value}, Default={defaultValue}, Bounds={extremesBounds.ToString()}";
 }
 #endregion
 #region Bounds

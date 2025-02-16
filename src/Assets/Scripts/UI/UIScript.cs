@@ -159,34 +159,25 @@ public class UIScript : MonoBehaviour
         fileData.Save.Seed = GetInput("Seed");
 
 
-        fileData.Save.RoomsCountBounds.ShouldGenerate = GetToggle("NoOfRooms").isOn;
-        if (!fileData.Save.RoomsCountBounds.ShouldGenerate)
+        bool shouldGenerate = GetToggle("NoOfRooms").isOn;
+        if (!shouldGenerate)
         {
             fileData.Save.RoomsCountBounds.Value = int.Parse(GetInput("NoOfRooms").Trim());
         }
+        fileData.Save.RoomsCountBounds.ShouldUseDefaultValue = shouldGenerate;
 
-        bool shouldGenerate = GetToggle("RoomBounds").isOn;
-        fileData.Save.XRoomBounds.ShouldGenerate = shouldGenerate;
-        if (!fileData.Save.XRoomBounds.ShouldGenerate)
+        shouldGenerate = GetToggle("RoomBounds").isOn;
+        if (!shouldGenerate)
         {
-            fileData.Save.XRoomBounds.ExtremesBounds = new Bounds<float>(float.Parse(GetInput("MinRoomX")), float.Parse(GetInput("MaxRoomX")));
-        }
-        fileData.Save.ZRoomBounds.ShouldGenerate = shouldGenerate;
-        if (!fileData.Save.ZRoomBounds.ShouldGenerate)
-        {
-            fileData.Save.ZRoomBounds.ExtremesBounds = new Bounds<float>(float.Parse(GetInput("MinRoomZ")), float.Parse(GetInput("MaxRoomZ")));
+            fileData.Save.XRoomBounds = new Bounds<float>(float.Parse(GetInput("MinRoomX")), float.Parse(GetInput("MaxRoomX")));
+            fileData.Save.ZRoomBounds = new Bounds<float>(float.Parse(GetInput("MinRoomZ")), float.Parse(GetInput("MaxRoomZ")));
         }
 
         shouldGenerate = GetToggle("MapBounds").isOn;
-        fileData.Save.XMapBounds.ShouldGenerate = shouldGenerate;
-        if (!fileData.Save.XMapBounds.ShouldGenerate)
+        if (!shouldGenerate)
         {
-            fileData.Save.XMapBounds.ExtremesBounds = new Bounds<float>(float.Parse(GetInput("MinMapX")), float.Parse(GetInput("MaxMapX")));
-        }
-        fileData.Save.ZMapBounds.ShouldGenerate = shouldGenerate;
-        if (!fileData.Save.ZMapBounds.ShouldGenerate)
-        {
-            fileData.Save.ZMapBounds.ExtremesBounds = new Bounds<float>(float.Parse(GetInput("MinMapZ")), float.Parse(GetInput("MaxMapZ")));
+            fileData.Save.XMapBounds = new Bounds<float>(float.Parse(GetInput("MinMapX")), float.Parse(GetInput("MaxMapX")));
+            fileData.Save.ZMapBounds = new Bounds<float>(float.Parse(GetInput("MinMapZ")), float.Parse(GetInput("MaxMapZ")));
         }
 
         dNDFileScriptCreator.PrepareSave(fileData);

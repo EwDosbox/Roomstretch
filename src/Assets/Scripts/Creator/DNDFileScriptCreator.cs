@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -10,69 +9,61 @@ using UnityEngine;
 
 public class DNDFileScriptCreator : MonoBehaviour
 {
-    [Header("Size Weights")]
-    [SerializeField]
-    private AnimationCurve sizeWeightCurve = new AnimationCurve(
-        new Keyframe(0, 1),
-        new Keyframe(1, 0)
-    );
-    [Header("Size Configuration")]
-    [Tooltip("Minimum allowed room size in any dimension")]
-    [SerializeField] private float minRoomSize = 5f;
-
+    [Header("Debug Visualization")]
+    [SerializeField] private bool showRooms = true;
+    [SerializeField] private Color roomColor = Color.green;
+    private List<RectangleF> rooms; 
+    
     #region PrepareSave
     public void PrepareSave(DNDFileData save)
     {
         BetterRandom random = save.Save.Random;
 
         save.Save.RoomsCountBounds.Generate(random);
-        save.Save.XRoomBounds.Generate(random);
-        save.Save.ZRoomBounds.Generate(random);
-        save.Save.XMapBounds.Generate(random);
-        save.Save.ZMapBounds.Generate(random);
 
-        List<Cube> rooms = new List<Cube>();
+        rooms = new List<RectangleF>();
 
         for (int i = 0; i < save.Save.RoomsCountBounds.Value; i++)
         {
             Vector3 roomPosition, roomSize;
-            Cube room;
+            RectangleF room;
             int attempts = 0, maxAttempts = 100;
-            bool placed = true;
+            bool placed;
 
             do
             {
-                if (!placed) Debug.LogWarning($"Could not place room {i} without overlapping after {attempts} attempts.");
-                roomPosition = random.RandomVector3(save.Save.XMapBounds.ExtremesBounds, save.Save.ZMapBounds.ExtremesBounds);
-                roomSize = RandomRoomSize(save, random);
+                placed = false;
+
+                roomPosition = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
+                roomSize = random.RandomVector3(save.Save.XRoomBounds, save.Save.ZRoomBounds);
 
                 Debug.Log("Room: Pos" + roomPosition.ToString() + "\nSize " + roomSize.ToString());
 
-                room = new Cube(roomPosition, roomSize);
+                room = new RectangleF(roomPosition, roomSize);
                 attempts++;
 
                 placed = !rooms.Any(r => room.Overlaps(r));
 
             } while (!placed && attempts < maxAttempts);
 
-            if (!placed)
+            if (attempts >= maxAttempts)
             {
-                Debug.LogWarning($"Could not place room {i} without overlapping after {maxAttempts} attempts.");
-                continue; // Skip this room, or handle differently.
+                Debug.LogError($"Failed to place room {i} after {attempts} attempts");
+                continue;
+            }
+            else
+            {
+                Debug.Log($"Placed room {i} after {attempts} attempts");
             }
 
             rooms.Add(room);
 
             RoomData roomData = new RoomData(roomSize, roomPosition, i);
+            Vector3 doorPosition = roomData.Position;
+            int linkedRoomID = random.Random(0, save.Save.RoomsCountBounds.Value);
+            DoorData doorData = new DoorData(doorPosition, linkedRoomID, 0);
 
-            for (int j = 0; j <= 1; j++)//jedny dvere zatim
-            {
-                Vector3 doorPosition = roomData.Position;
-                int linkedRoomID = random.Random(0, save.Save.RoomsCountBounds.Value);
-                DoorData doorData = new DoorData(doorPosition, linkedRoomID, j);
-
-                roomData.Doors.Add(doorData);
-            }
+            roomData.Door = doorData;
 
             for (int j = 0; j <= 1; j++)//jeden objekt zatim
             {
@@ -86,34 +77,27 @@ public class DNDFileScriptCreator : MonoBehaviour
             save.Rooms.Add(roomData);
         }
     }
+    #region TEMP
+    public void OnDrawGizmos()
+    {
+        if (!showRooms || rooms == null)
+            return;
+
+        Gizmos.color = roomColor;
+
+        foreach (var room in rooms)
+        {
+            Vector2 pos = room.Position;
+            Vector2 size = room.Size;
+
+            // Calculate center and size for the wire cube
+            Vector3 center = new Vector3(pos.x + size.x / 2, 0.1f, pos.y + size.y / 2);
+            Vector3 cubeSize = new Vector3(size.x, 0, size.y);
+
+            Gizmos.DrawWireCube(center, cubeSize);
+        }
+    }
     #endregion
-    #region Helping Random Methods
-
-    private float GetWeightedSize(float min, float max, BetterRandom random)
-    {
-        // Ensure valid range
-        float actualMin = Mathf.Max(min, minRoomSize);
-        float actualMax = Mathf.Max(max, actualMin + 0.1f);
-
-        float t = random.Random(0f, 1f);
-        float weight = sizeWeightCurve.Evaluate(t);
-        return Mathf.Lerp(actualMin, actualMax, weight);
-    }
-    public Vector3 RandomRoomSize(DNDFileData save, BetterRandom random)
-    {
-        float minX = save.Save.XRoomBounds.ExtremesBounds.Min;
-        float maxX = save.Save.XRoomBounds.ExtremesBounds.Max;
-        float minZ = save.Save.ZRoomBounds.ExtremesBounds.Min;
-        float maxZ = save.Save.ZRoomBounds.ExtremesBounds.Max;
-
-        Vector3 roomSize = new Vector3(
-            Mathf.Abs(GetWeightedSize(minX, maxX, random)),
-            0,
-            Mathf.Abs(GetWeightedSize(minZ, maxZ, random))
-        );
-
-        return roomSize;
-    }
     #endregion
     #region CreateFile
     public void CreateFile(DNDFileData fileData)
@@ -138,11 +122,11 @@ public class DNDFileScriptCreator : MonoBehaviour
             writer.WriteElementString("Seed", fileData.Save.Seed);
             writer.WriteElementString("FilePath", fileData.Save.FilePath);
             WriteGenerationBounds(writer, fileData.Save.RoomsCountBounds, "RoomsCountBounds");
-            WriteGenerationBounds(writer, fileData.Save.XRoomBounds, "XRoomBounds");
-            WriteGenerationBounds(writer, fileData.Save.ZRoomBounds, "ZRoomBounds");
 
-            WriteGenerationBounds(writer, fileData.Save.XMapBounds, "XMapBounds");
-            WriteGenerationBounds(writer, fileData.Save.ZMapBounds, "ZMapBounds");
+            WriteBounds(writer, fileData.Save.XRoomBounds, "XRoomBounds");
+            WriteBounds(writer, fileData.Save.ZRoomBounds, "ZRoomBounds");
+            WriteBounds(writer, fileData.Save.XMapBounds, "XMapBounds");
+            WriteBounds(writer, fileData.Save.ZMapBounds, "ZMapBounds");
 
             writer.WriteEndElement();
             writer.WriteStartElement("Settings");
@@ -166,17 +150,15 @@ public class DNDFileScriptCreator : MonoBehaviour
                 WriteVector3(writer, roomData.Position, "Position");
                 WriteVector3(writer, roomData.Size, "Size");
 
-                foreach (DoorData doorData in roomData.Doors)
-                {
-                    writer.WriteStartElement("Door");
+                writer.WriteStartElement("Door");
 
-                    writer.WriteElementString("ID", doorData.ID.ToString());
-                    WriteVector3(writer, doorData.Position, "Position");
+                writer.WriteElementString("ID", roomData.Door.ID.ToString());
+                WriteVector3(writer, roomData.Door.Position, "Position");
 
-                    writer.WriteElementString("LinkedRoomID", doorData.LinkedRoomID.ToString());
+                writer.WriteElementString("LinkedRoomID", roomData.Door.LinkedRoomID.ToString());
 
-                    writer.WriteEndElement();
-                }
+                writer.WriteEndElement();
+
 
 
                 foreach (ObjectData objectData in roomData.Objects)
@@ -207,7 +189,7 @@ public class DNDFileScriptCreator : MonoBehaviour
     {
         writer.WriteStartElement(name);
 
-        writer.WriteElementString("ShouldGenerate", bounds.ShouldGenerate.ToString());
+        writer.WriteElementString("ShouldUseDefaultValue", bounds.ShouldUseDefaultValue.ToString());
         writer.WriteElementString("Value", bounds.Value.ToString());
         writer.WriteElementString("DefaultValue", bounds.DefaultValue.ToString());
 
@@ -240,42 +222,33 @@ public class DNDFileScriptCreator : MonoBehaviour
     }
     #endregion
 }
-#region Cube
+#region RectangleF
 [System.Serializable]
-public class Cube
+public class RectangleF
 {
-    [SerializeField] private float x;
-    [SerializeField] private float y;
-    [SerializeField] private float z;
-    [SerializeField] private float width;
-    [SerializeField] private float height;
-    [SerializeField] private float depth;
+    [SerializeField] private Vector2 position;
+    [SerializeField] private Vector2 size;
 
-    public Vector3 Position => new Vector3(x, y, z);
-    public Vector3 Size => new Vector3(width, height, depth);
+    public Vector2 Position => position;
+    public Vector2 Size => size;
 
-    public Cube(Vector3 position, Vector3 size)
+    public RectangleF(Vector2 position, Vector2 size)
     {
-        x = position.x;
-        y = position.y;
-        z = position.z;
-        width = Mathf.Abs(size.x);
-        height = Mathf.Abs(size.y);
-        depth = Mathf.Abs(size.z);
+        this.position = position;
+        this.size = size;
+    }
+    public RectangleF(Vector3 position3D, Vector3 size3D)
+    {
+        position = new Vector2(position3D.x, position3D.z); // Use X/Z
+        size = new Vector2(Mathf.Abs(size3D.x), Mathf.Abs(size3D.z));
     }
 
-    public bool Overlaps(Cube other)
+    public bool Overlaps(RectangleF other, float padding = 1f)
     {
-        Bounds thisBounds = new Bounds(Position + Size / 2f, Size);
-        Bounds otherBounds = new Bounds(other.Position + other.Size / 2f, other.Size);
-
-        return thisBounds.Intersects(otherBounds);
-    }
-
-    public override string ToString()
-    {
-        return $"Box: Pos=({x:F2},{y:F2},{z:F2}), Size=({width:F2},{height:F2},{depth:F2})";
+        return (position.x - padding) < (other.position.x + other.size.x + padding) &&
+               (position.x + size.x + padding) > (other.position.x - padding) &&
+               (position.y - padding) < (other.position.y + other.size.y + padding) &&
+               (position.y + size.y + padding) > (other.position.y - padding);
     }
 }
-
 #endregion

@@ -943,6 +943,51 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5580550378036402679, guid: c0e866dbe2ff3f047a9b37c10e9aaedc, type: 3}
   m_PrefabInstance: {fileID: 1018642751748898550}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1453785553
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1453785555}
+  - component: {fileID: 1453785554}
+  m_Layer: 0
+  m_Name: Gizmos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1453785554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1453785553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b7362b221d303e43883b104d5185147, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fileData: {fileID: 11400000, guid: b0f3b87cc163de949bf5ae5046f94177, type: 2}
+--- !u!4 &1453785555
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1453785553}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.9661232, y: 1, z: 2.3085756}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1596739343
 GameObject:
   m_ObjectHideFlags: 0
@@ -2085,6 +2130,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1092050152028681896, guid: c0e866dbe2ff3f047a9b37c10e9aaedc, type: 3}
+      propertyPath: m_Constraints
+      value: 112
+      objectReference: {fileID: 0}
     - target: {fileID: 2169087649865486380, guid: c0e866dbe2ff3f047a9b37c10e9aaedc, type: 3}
       propertyPath: m_DefaultActionMap
       value: Movement
@@ -2093,30 +2142,6 @@ PrefabInstance:
       propertyPath: cameraTransform
       value: 
       objectReference: {fileID: 1596739347}
-    - target: {fileID: 5396166055200450216, guid: c0e866dbe2ff3f047a9b37c10e9aaedc, type: 3}
-      propertyPath: m_Size.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5396166055200450216, guid: c0e866dbe2ff3f047a9b37c10e9aaedc, type: 3}
-      propertyPath: m_Size.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 5396166055200450216, guid: c0e866dbe2ff3f047a9b37c10e9aaedc, type: 3}
-      propertyPath: m_Size.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5396166055200450216, guid: c0e866dbe2ff3f047a9b37c10e9aaedc, type: 3}
-      propertyPath: m_Center.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5396166055200450216, guid: c0e866dbe2ff3f047a9b37c10e9aaedc, type: 3}
-      propertyPath: m_Center.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5396166055200450216, guid: c0e866dbe2ff3f047a9b37c10e9aaedc, type: 3}
-      propertyPath: m_Center.z
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5580550378036402679, guid: c0e866dbe2ff3f047a9b37c10e9aaedc, type: 3}
       propertyPath: m_Name
       value: Player
@@ -2177,3 +2202,4 @@ SceneRoots:
   - {fileID: 1596739347}
   - {fileID: 1938987402}
   - {fileID: 736031998}
+  - {fileID: 1453785555}
