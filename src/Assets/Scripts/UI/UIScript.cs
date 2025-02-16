@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.Linq;
 
 public class UIScript : MonoBehaviour
 {
@@ -19,14 +20,15 @@ public class UIScript : MonoBehaviour
     private Toggle toggleNoOfRooms;
     private GameObject GONoOfRoomsInput;
 
-    private Toggle toggleBounds;
-    private GameObject GOBoundsInput;
-
+    private Toggle roomBoundsToggle;
+    private Toggle mapBoundsToggle;
+    private GameObject[] GORoomsBoundsInput;
+    private GameObject[] GOMapBoundsInput;
     private GameObject player;
     private GameObject canvasGO;
-    private GameObject inputs;
     private GameObject toggles;
     private GameObject creator;
+
     private void Awake()
     {
         Scene activeScene = SceneManager.GetActiveScene();
@@ -39,16 +41,28 @@ public class UIScript : MonoBehaviour
             case 1:
                 {//Generating Scene
                     creator = GameObject.Find("Creator");
-                    inputs = GameObject.Find("Inputs");
                     toggles = GameObject.Find("Toggles");
                     GONoOfRoomsInput = GameObject.Find("NoOfRoomsInput");
-                    GOBoundsInput = GameObject.Find("BoundsInput");
 
-                    GameObject go = GameObject.Find("NoOfRoomsToggle");
+                    GameObject go = GameObject.Find("RoomBoundsToggle");
+                    roomBoundsToggle = go.GetComponent<Toggle>();
+                    GameObject maxXInput = GameObject.Find("MaxRoomXInput");
+                    GameObject minXInput = GameObject.Find("MinRoomXInput");
+                    GameObject maxZInput = GameObject.Find("MaxRoomZInput");
+                    GameObject minZInput = GameObject.Find("MinRoomZInput");
+                    GORoomsBoundsInput = new GameObject[] { maxXInput, maxZInput, minXInput, minZInput };
+
+                    go = GameObject.Find("MapBoundsToggle");
+                    mapBoundsToggle = go.GetComponent<Toggle>();
+                    maxXInput = GameObject.Find("MaxMapXInput");
+                    minXInput = GameObject.Find("MinMapXInput");
+                    maxZInput = GameObject.Find("MaxMapZInput");
+                    minZInput = GameObject.Find("MinMapZInput");
+                    GOMapBoundsInput = new GameObject[] { maxXInput, maxZInput, minXInput, minZInput };
+
+                    go = GameObject.Find("NoOfRoomsToggle");
                     toggleNoOfRooms = go.GetComponent<Toggle>();
 
-                    go = GameObject.Find("BoundsToggle");
-                    toggleBounds = go.GetComponent<Toggle>();
 
                     dNDFileScriptCreator = creator.GetComponent<DNDFileScriptCreator>();
                     break;
@@ -83,14 +97,35 @@ public class UIScript : MonoBehaviour
                     {
                         GONoOfRoomsInput.SetActive(false);
                     }
-                    if (toggleBounds.isOn)
+                    if (roomBoundsToggle.isOn)
                     {
-                        GOBoundsInput.SetActive(false);
+                        foreach (GameObject go in GORoomsBoundsInput)
+                        {
+                            go.SetActive(false);
+                        }
                     }
                     else
                     {
-                        GOBoundsInput.SetActive(true);
+                        foreach (GameObject go in GORoomsBoundsInput)
+                        {
+                            go.SetActive(true);
+                        }
                     }
+                    if (mapBoundsToggle.isOn)
+                    {
+                        foreach (GameObject go in GOMapBoundsInput)
+                        {
+                            go.SetActive(false);
+                        }
+                    }
+                    else
+                    {
+                        foreach (GameObject go in GOMapBoundsInput)
+                        {
+                            go.SetActive(true);
+                        }
+                    }
+
                     break;
                 }
             case 2:
@@ -130,16 +165,28 @@ public class UIScript : MonoBehaviour
             fileData.Save.RoomsCountBounds.Value = int.Parse(GetInput("NoOfRooms").Trim());
         }
 
-        fileData.Save.YBounds.ShouldGenerate = GetToggle("Bounds").isOn;
-        if (!fileData.Save.YBounds.ShouldGenerate)
+        bool shouldGenerate = GetToggle("RoomBounds").isOn;
+        fileData.Save.XRoomBounds.ShouldGenerate = shouldGenerate;
+        if (!fileData.Save.XRoomBounds.ShouldGenerate)
         {
-            fileData.Save.YBounds.ExtremesBounds = new Bounds<float>(float.Parse(GetInput("MinDepth")), float.Parse(GetInput("MaxDepth")));
+            fileData.Save.XRoomBounds.ExtremesBounds = new Bounds<float>(float.Parse(GetInput("MinRoomX")), float.Parse(GetInput("MaxRoomX")));
+        }
+        fileData.Save.ZRoomBounds.ShouldGenerate = shouldGenerate;
+        if (!fileData.Save.ZRoomBounds.ShouldGenerate)
+        {
+            fileData.Save.ZRoomBounds.ExtremesBounds = new Bounds<float>(float.Parse(GetInput("MinRoomZ")), float.Parse(GetInput("MaxRoomZ")));
         }
 
-        fileData.Save.XBounds.ShouldGenerate = GetToggle("Bounds").isOn;
-        if (!fileData.Save.XBounds.ShouldGenerate)
+        shouldGenerate = GetToggle("MapBounds").isOn;
+        fileData.Save.XMapBounds.ShouldGenerate = shouldGenerate;
+        if (!fileData.Save.XMapBounds.ShouldGenerate)
         {
-            fileData.Save.XBounds.ExtremesBounds = new Bounds<float>(float.Parse(GetInput("MinWidth")), float.Parse(GetInput("MaxWidth")));
+            fileData.Save.XMapBounds.ExtremesBounds = new Bounds<float>(float.Parse(GetInput("MinMapX")), float.Parse(GetInput("MaxMapX")));
+        }
+        fileData.Save.ZMapBounds.ShouldGenerate = shouldGenerate;
+        if (!fileData.Save.ZMapBounds.ShouldGenerate)
+        {
+            fileData.Save.ZMapBounds.ExtremesBounds = new Bounds<float>(float.Parse(GetInput("MinMapZ")), float.Parse(GetInput("MaxMapZ")));
         }
 
         dNDFileScriptCreator.PrepareSave(fileData);
@@ -170,10 +217,9 @@ public class UIScript : MonoBehaviour
 
     private string GetInput(string toFind)
     {
-        var inputField = GameObject.Find(toFind + "InputField").GetComponent<TMP_InputField>();
+        var inputField = GameObject.Find(toFind + "Input").transform.GetChild(0).GetComponent<TMP_InputField>();
         return inputField.text;
     }
-
 
     private Toggle GetToggle(string ToFind)
     {

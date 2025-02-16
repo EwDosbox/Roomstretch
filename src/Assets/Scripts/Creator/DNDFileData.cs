@@ -93,9 +93,10 @@ public class Save
     [SerializeField] private string seed;
     [SerializeField] private string filepath;
     [SerializeField] private GenerationBounds<int> roomCountBounds;
-    [SerializeField] private GenerationBounds<float> xBounds;
-    [SerializeField] private GenerationBounds<float> yBounds;
-    [SerializeField] private GenerationBounds<float> zBounds;
+    [SerializeField] private GenerationBounds<float> xRoomBounds;
+    [SerializeField] private GenerationBounds<float> zRoomBounds;
+    [SerializeField] private GenerationBounds<float> xMapBounds;
+    [SerializeField] private GenerationBounds<float> zMapBounds;
 
     public string FilePath
     {
@@ -118,20 +119,25 @@ public class Save
         get => roomCountBounds;
         set => roomCountBounds = value;
     }
-    public GenerationBounds<float> XBounds
+    public GenerationBounds<float> XRoomBounds
     {
-        get => xBounds;
-        set => xBounds = value;
+        get => xRoomBounds;
+        set => xRoomBounds = value;
     }
-    public GenerationBounds<float> YBounds
+    public GenerationBounds<float> ZRoomBounds
     {
-        get => yBounds;
-        set => yBounds = value;
+        get => zRoomBounds;
+        set => zRoomBounds = value;
     }
-    public GenerationBounds<float> ZBounds
+    public GenerationBounds<float> XMapBounds
     {
-        get => zBounds;
-        set => zBounds = value;
+        get => xRoomBounds;
+        set => xRoomBounds = value;
+    }
+    public GenerationBounds<float> ZMapBounds
+    {
+        get => zRoomBounds;
+        set => zRoomBounds = value;
     }
     public BetterRandom Random => new BetterRandom(hashedSeed);
 
@@ -160,15 +166,17 @@ public class Save
     public Save()
     {
         version = "1.0";
-        roomCountBounds = new GenerationBounds<int>(6, new Bounds<int>(2, 10));
-        xBounds = new GenerationBounds<float>(0, new Bounds<float>(-10, +10));
-        yBounds = new GenerationBounds<float>(0, new Bounds<float>(-10, +10));
+        roomCountBounds = new GenerationBounds<int>();
+        xRoomBounds = new GenerationBounds<float>();
+        zRoomBounds = new GenerationBounds<float>();
+        xMapBounds = new GenerationBounds<float>();
+        zMapBounds = new GenerationBounds<float>();
     }
 
     public override string ToString()
     {
         return $"Save: Version = {version}, Seed = {seed}, FilePath = {filepath}, " +
-               $"RoomCountBounds = {roomCountBounds.ToString()}, WidthBounds = {xBounds.ToString()}, DepthBounds = {yBounds.ToString()}";
+               $"RoomCountBounds = {roomCountBounds.ToString()}, WidthBounds = {xRoomBounds.ToString()}";
     }
 }
 #endregion
@@ -349,6 +357,13 @@ public class GenerationBounds<T> where T : IComparable<T>
         this.defaultValue = defaultValue;
         this.extremesBounds = extremes;
         this.value = defaultValue;
+    }
+    public GenerationBounds()
+    {
+        shouldGenerate = false;
+        defaultValue = default;
+        extremesBounds = new Bounds<T>(default, default);
+        value = default;
     }
 
     public void Generate(BetterRandom rnd)

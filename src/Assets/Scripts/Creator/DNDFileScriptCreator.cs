@@ -10,17 +10,26 @@ using UnityEngine;
 
 public class DNDFileScriptCreator : MonoBehaviour
 {
+    [Header("Size Weights")]
+    [SerializeField]
+    private AnimationCurve sizeWeightCurve = new AnimationCurve(
+        new Keyframe(0, 1),
+        new Keyframe(1, 0)
+    );
+    [Header("Size Configuration")]
+    [Tooltip("Minimum allowed room size in any dimension")]
+    [SerializeField] private float minRoomSize = 5f;
+
     #region PrepareSave
     public void PrepareSave(DNDFileData save)
     {
         BetterRandom random = save.Save.Random;
 
-        save.Save.ZBounds = new GenerationBounds<float>(14, new Bounds<float>(10, 20));
-
         save.Save.RoomsCountBounds.Generate(random);
-        save.Save.YBounds.Generate(random);
-        save.Save.XBounds.Generate(random);
-        save.Save.ZBounds.Generate(random);
+        save.Save.XRoomBounds.Generate(random);
+        save.Save.ZRoomBounds.Generate(random);
+        save.Save.XMapBounds.Generate(random);
+        save.Save.ZMapBounds.Generate(random);
 
         List<Cube> rooms = new List<Cube>();
 
@@ -31,18 +40,13 @@ public class DNDFileScriptCreator : MonoBehaviour
             int attempts = 0, maxAttempts = 100;
             bool placed = true;
 
-
             do
             {
-                if(!placed) Debug.LogWarning($"Could not place room {i} without overlapping after {attempts} attempts.");
-                roomPosition = random.RandomVector3(save.Save.XBounds.ExtremesBounds, save.Save.ZBounds.ExtremesBounds);
-                roomSize = random.RandomVector3(save.Save.XBounds.ExtremesBounds, save.Save.YBounds.ExtremesBounds, save.Save.ZBounds.ExtremesBounds);
+                if (!placed) Debug.LogWarning($"Could not place room {i} without overlapping after {attempts} attempts.");
+                roomPosition = random.RandomVector3(save.Save.XMapBounds.ExtremesBounds, save.Save.ZMapBounds.ExtremesBounds);
+                roomSize = RandomRoomSize(save, random);
 
-                roomSize.x = Mathf.Abs(roomSize.x);
-                roomSize.y = 0;
-                roomSize.z = Mathf.Abs(roomSize.z);
-
-                Debug.Log("Room: " + roomPosition.ToString() + " " + roomSize.ToString());
+                Debug.Log("Room: Pos" + roomPosition.ToString() + "\nSize " + roomSize.ToString());
 
                 room = new Cube(roomPosition, roomSize);
                 attempts++;
@@ -83,6 +87,34 @@ public class DNDFileScriptCreator : MonoBehaviour
         }
     }
     #endregion
+    #region Helping Random Methods
+
+    private float GetWeightedSize(float min, float max, BetterRandom random)
+    {
+        // Ensure valid range
+        float actualMin = Mathf.Max(min, minRoomSize);
+        float actualMax = Mathf.Max(max, actualMin + 0.1f);
+
+        float t = random.Random(0f, 1f);
+        float weight = sizeWeightCurve.Evaluate(t);
+        return Mathf.Lerp(actualMin, actualMax, weight);
+    }
+    public Vector3 RandomRoomSize(DNDFileData save, BetterRandom random)
+    {
+        float minX = save.Save.XRoomBounds.ExtremesBounds.Min;
+        float maxX = save.Save.XRoomBounds.ExtremesBounds.Max;
+        float minZ = save.Save.ZRoomBounds.ExtremesBounds.Min;
+        float maxZ = save.Save.ZRoomBounds.ExtremesBounds.Max;
+
+        Vector3 roomSize = new Vector3(
+            Mathf.Abs(GetWeightedSize(minX, maxX, random)),
+            0,
+            Mathf.Abs(GetWeightedSize(minZ, maxZ, random))
+        );
+
+        return roomSize;
+    }
+    #endregion
     #region CreateFile
     public void CreateFile(DNDFileData fileData)
     {
@@ -106,9 +138,11 @@ public class DNDFileScriptCreator : MonoBehaviour
             writer.WriteElementString("Seed", fileData.Save.Seed);
             writer.WriteElementString("FilePath", fileData.Save.FilePath);
             WriteGenerationBounds(writer, fileData.Save.RoomsCountBounds, "RoomsCountBounds");
-            WriteGenerationBounds(writer, fileData.Save.XBounds, "XBounds");
-            WriteGenerationBounds(writer, fileData.Save.YBounds, "YBounds");
-            WriteGenerationBounds(writer, fileData.Save.ZBounds, "ZBounds");
+            WriteGenerationBounds(writer, fileData.Save.XRoomBounds, "XRoomBounds");
+            WriteGenerationBounds(writer, fileData.Save.ZRoomBounds, "ZRoomBounds");
+
+            WriteGenerationBounds(writer, fileData.Save.XMapBounds, "XMapBounds");
+            WriteGenerationBounds(writer, fileData.Save.ZMapBounds, "ZMapBounds");
 
             writer.WriteEndElement();
             writer.WriteStartElement("Settings");
