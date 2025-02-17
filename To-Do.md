@@ -4,6 +4,7 @@
 
 - Close Button on Settings
 - UIScript generating noOfRooms
+- Anti-Aliasing to Setting
 
 ## Completed
 
@@ -14,4 +15,16 @@
 - 15 (pocet stran) * 1 800 (pocet znaku s mezerami) = 27 000
   - KB je 6 750 znaku s mezerami
   - nyni mam 7 258
-- Pozor na pomlcky, minusy a zavorky v dokumentaci 
+- Pozor na pomlcky, minusy a zavorky v dokumentaci
+
+## Post-PRocessing
+
+1. Camera > Rendering > Post Processing > enable
+2. Camera > Dithering > enable
+3. Camera > Anti-Aliasing
+4. Settings Folder > UniversalRP-HighQuality > HDR > enable
+5. Volume > Global
+6. Volume > ToneMapping > Neutral
+7. DEPTH OF FIELD
+8. Lift Gamma Gain
+9. Motion Blur
