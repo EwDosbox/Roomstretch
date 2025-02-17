@@ -12,12 +12,58 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cb0df77e03dc294d94480c15ee2f107, type: 3}
   m_Name: Save
   m_EditorClassIdentifier: 
+  lastUsedID: 4
   rooms:
-  - size: {x: 100, y: 0, z: 100}
-    position: {x: -100, y: 0, z: -100}
-    listDoors: []
-    listObjects: []
+  - id: 1
+    position: {x: -5.941425, y: 0, z: -8.089468}
+    size: {x: 8.165504, y: 0, z: 9.505306}
+    doors:
+    - id: 0
+      position: {x: 0, y: 0, z: 0}
+    listObjects:
+    - id: 1
+      position: {x: -5.941425, y: 0, z: -8.089468}
+      prefab: {fileID: 919132149155446097, guid: 132e7918e5bd4774e9a66ecd98f8a218, type: 3}
+    - id: 2
+      position: {x: -5.941425, y: 0, z: -8.089468}
+      prefab: {fileID: 919132149155446097, guid: 132e7918e5bd4774e9a66ecd98f8a218, type: 3}
+  - id: 2
+    position: {x: -3.800323, y: 0, z: 4.122611}
+    size: {x: 9.542515, y: 0, z: 6.197931}
+    doors: []
+    listObjects:
+    - id: 1
+      position: {x: -3.800323, y: 0, z: 4.122611}
+      prefab: {fileID: 919132149155446097, guid: 132e7918e5bd4774e9a66ecd98f8a218, type: 3}
+    - id: 2
+      position: {x: -3.800323, y: 0, z: 4.122611}
+      prefab: {fileID: 919132149155446097, guid: 132e7918e5bd4774e9a66ecd98f8a218, type: 3}
+  - id: 3
+    position: {x: 7.660312, y: 0, z: -4.98522}
+    size: {x: 5.962928, y: 0, z: 6.569207}
+    doors: []
+    listObjects:
+    - id: 1
+      position: {x: 7.660312, y: 0, z: -4.98522}
+      prefab: {fileID: 919132149155446097, guid: 132e7918e5bd4774e9a66ecd98f8a218, type: 3}
+    - id: 2
+      position: {x: 7.660312, y: 0, z: -4.98522}
+      prefab: {fileID: 919132149155446097, guid: 132e7918e5bd4774e9a66ecd98f8a218, type: 3}
+  - id: 4
+    position: {x: 8.3232, y: 0, z: 9.144845}
+    size: {x: 6.586274, y: 0, z: 8.646501}
+    doors: []
+    listObjects:
+    - id: 1
+      position: {x: 8.3232, y: 0, z: 9.144845}
+      prefab: {fileID: 919132149155446097, guid: 132e7918e5bd4774e9a66ecd98f8a218, type: 3}
+    - id: 2
+      position: {x: 8.3232, y: 0, z: 9.144845}
+      prefab: {fileID: 919132149155446097, guid: 132e7918e5bd4774e9a66ecd98f8a218, type: 3}
   settings:
     fov: 60
+    sensitivity: 2
   save:
-    filepath: D:\_GIT\Roomstretch\documentation\TestDNDFile.dnd
+    version: 1.0
+    seed: 123
+    filepath: C:/Users/Hartie/AppData/LocalLow/SanguineSanguis/RoomStretch/TestDNDFile.dnd

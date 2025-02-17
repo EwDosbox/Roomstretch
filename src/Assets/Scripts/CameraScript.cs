@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 public class CameraScript : MonoBehaviour
@@ -32,7 +33,7 @@ public class CameraScript : MonoBehaviour
 
     private void LateUpdate()
     {
-        transform.position = player.transform.position + new Vector3(0f, 1.2f, 0f);
+        transform.position = player.transform.position + new Vector3(0f, 1f, 0f);
 
         float fovScale = save.Settings.FOV / 60f;
         float horizontalSensitivity = baseHorizontalSensitivity * fovScale;

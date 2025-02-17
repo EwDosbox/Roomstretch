@@ -9,17 +9,15 @@ using UnityEngine;
 
 public class DNDFileScriptCreator : MonoBehaviour
 {
-    [Header("Debug Visualization")]
-    [SerializeField] private bool showRooms = true;
-    [SerializeField] private Color roomColor = Color.green;
-    private List<RectangleF> rooms; 
-    
+    private List<RectangleF> rooms;
+
     #region PrepareSave
     public void PrepareSave(DNDFileData save)
     {
         BetterRandom random = save.Save.Random;
 
         save.Save.RoomsCountBounds.Generate(random);
+        save.Save.DoorCountBounds.Generate(random);
 
         rooms = new List<RectangleF>();
 
@@ -57,13 +55,7 @@ public class DNDFileScriptCreator : MonoBehaviour
             }
 
             rooms.Add(room);
-
             RoomData roomData = new RoomData(roomSize, roomPosition, i);
-            Vector3 doorPosition = roomData.Position;
-            int linkedRoomID = random.Random(0, save.Save.RoomsCountBounds.Value);
-            DoorData doorData = new DoorData(doorPosition, linkedRoomID, 0);
-
-            roomData.Door = doorData;
 
             for (int j = 0; j <= 1; j++)//jeden objekt zatim
             {
@@ -76,28 +68,42 @@ public class DNDFileScriptCreator : MonoBehaviour
 
             save.Rooms.Add(roomData);
         }
-    }
-    #region TEMP
-    public void OnDrawGizmos()
-    {
-        if (!showRooms || rooms == null)
-            return;
 
-        Gizmos.color = roomColor;
+        save.Save.RoomsCountBounds.Value = save.Rooms.Count;
+        save.Rooms[random.Random(0, save.Rooms.Count)].IsStartRoom = true;
 
-        foreach (var room in rooms)
+        foreach (RoomData room in save.Rooms)
         {
-            Vector2 pos = room.Position;
-            Vector2 size = room.Size;
+            Vector3 doorPosition;
+            bool isOnWE;
+            int wall = random.Random(0, 4);
+            switch (wall)
+            {
+                case 0: // North
+                    doorPosition = new Vector3(room.Position.x + room.Size.x / 2, 0, room.Position.z + room.Size.z);
+                    isOnWE = false;
+                    break;
+                case 1: // East
+                    doorPosition = new Vector3(room.Position.x + room.Size.x, 0, room.Position.z + room.Size.z / 2);
+                    isOnWE = true;
+                    break;
+                case 2: // South
+                    doorPosition = new Vector3(room.Position.x + room.Size.x / 2, 0, room.Position.z);
+                    isOnWE = false;
+                    break;
+                default: // West
+                    doorPosition = new Vector3(room.Position.x, 0, room.Position.z + room.Size.z / 2);
+                    isOnWE = true  ;
+                    break;
+            }
 
-            // Calculate center and size for the wire cube
-            Vector3 center = new Vector3(pos.x + size.x / 2, 0.1f, pos.y + size.y / 2);
-            Vector3 cubeSize = new Vector3(size.x, 0, size.y);
+            DoorData doorData = new DoorData(doorPosition, -1, 1); // -1 for no linked room yet
+            doorData.IsOnWE = isOnWE;
 
-            Gizmos.DrawWireCube(center, cubeSize);
+            save.Doors.Add(doorData);
         }
     }
-    #endregion
+
     #endregion
     #region CreateFile
     public void CreateFile(DNDFileData fileData)
@@ -122,6 +128,7 @@ public class DNDFileScriptCreator : MonoBehaviour
             writer.WriteElementString("Seed", fileData.Save.Seed);
             writer.WriteElementString("FilePath", fileData.Save.FilePath);
             WriteGenerationBounds(writer, fileData.Save.RoomsCountBounds, "RoomsCountBounds");
+            WriteGenerationBounds(writer, fileData.Save.DoorCountBounds, "DoorsCountBounds");
 
             WriteBounds(writer, fileData.Save.XRoomBounds, "XRoomBounds");
             WriteBounds(writer, fileData.Save.ZRoomBounds, "ZRoomBounds");
@@ -150,17 +157,6 @@ public class DNDFileScriptCreator : MonoBehaviour
                 WriteVector3(writer, roomData.Position, "Position");
                 WriteVector3(writer, roomData.Size, "Size");
 
-                writer.WriteStartElement("Door");
-
-                writer.WriteElementString("ID", roomData.Door.ID.ToString());
-                WriteVector3(writer, roomData.Door.Position, "Position");
-
-                writer.WriteElementString("LinkedRoomID", roomData.Door.LinkedRoomID.ToString());
-
-                writer.WriteEndElement();
-
-
-
                 foreach (ObjectData objectData in roomData.Objects)
                 {
                     writer.WriteStartElement("Object");
@@ -171,6 +167,17 @@ public class DNDFileScriptCreator : MonoBehaviour
 
                     writer.WriteEndElement();
                 }
+
+                writer.WriteEndElement();
+            }
+            foreach (DoorData doorData in fileData.Doors)
+            {
+                writer.WriteStartElement("Door");
+
+                writer.WriteElementString("ID", doorData.ID.ToString());
+                WriteVector3(writer, doorData.Position, "Position");
+                writer.WriteElementString("LinkedRoomID", doorData.LinkedRoomID.ToString());
+                writer.WriteElementString("IsOnWE", doorData.IsOnWE.ToString());
 
                 writer.WriteEndElement();
             }

@@ -10,22 +10,19 @@ public class DNDFileData : ScriptableObject
 {
     [SerializeField] private int lastUsedID;
     [SerializeField] private List<RoomData> rooms;
+    [SerializeField] private List<DoorData> doors;
     [SerializeField] private Settings settings;
     [SerializeField] private Save save;
 
     public List<RoomData> Rooms => rooms;
+    public List<DoorData> Doors => doors;
     public Settings Settings => settings;
     public Save Save => save;
 
-    public void AddRoom(Vector3 size, Vector3 position, List<DoorData> listDoors, List<ObjectData> listObjects)
+    public void AddRoom(Vector3 size, Vector3 position, List<ObjectData> listObjects)
     {
         lastUsedID++;
         RoomData room = new RoomData(size, position, lastUsedID);
-
-        foreach (DoorData door in listDoors)
-        {
-            room.AddDoor(door.Position, door.LinkedRoomID);
-        }
 
         foreach (ObjectData obj in listObjects)
         {
@@ -34,11 +31,16 @@ public class DNDFileData : ScriptableObject
 
         rooms.Add(room);
     }
+    public void AddDoor(Vector3 position, int linkedRoomID)
+    {
+        doors.Add(new DoorData(position, linkedRoomID, ++lastUsedID));
+    }
 
     public void Initialize()
     {
         lastUsedID = 0;
         rooms = new List<RoomData>();
+        doors = new List<DoorData>();
         settings = new Settings();
         save = new Save();
     }
@@ -93,6 +95,7 @@ public class Save
     [SerializeField] private string seed;
     [SerializeField] private string filepath;
     [SerializeField] private GenerationBounds<int> roomCountBounds;
+    [SerializeField] private GenerationBounds<int> doorCountBounds;
     [SerializeField] private Bounds<float> xRoomBounds;
     [SerializeField] private Bounds<float> zRoomBounds;
     [SerializeField] private Bounds<float> xMapBounds;
@@ -118,6 +121,11 @@ public class Save
     {
         get => roomCountBounds;
         set => roomCountBounds = value;
+    } 
+       public GenerationBounds<int> DoorCountBounds
+    {
+        get => doorCountBounds;
+        set => doorCountBounds = value;
     }
 
     public Bounds<float> XRoomBounds
@@ -168,6 +176,7 @@ public class Save
     {
         version = "1.0";
         roomCountBounds = new GenerationBounds<int>(5, new Bounds<int>(5, 10));
+        doorCountBounds = new GenerationBounds<int>(2, new Bounds<int>(2, 4));
         xRoomBounds = new Bounds<float>(5, 10);
         zRoomBounds = new Bounds<float>(5, 10);
         xMapBounds = new Bounds<float>(-10, +10);
@@ -187,31 +196,26 @@ public class RoomData : BaseEntityData
 {
     private int lastUsedDoorID;
     private int lastUsedObjectID;
+    private bool isStartRoom;
 
     [SerializeField] private Vector3 size;
-    [SerializeField] private DoorData door;
     [SerializeField] private List<ObjectData> listObjects;
 
     public Vector3 Size => size;
-    public DoorData Door
-    {
-        get => door;
-        set => door = value;
-    }
     public List<ObjectData> Objects => listObjects;
+
+    public bool IsStartRoom
+    {
+        get => isStartRoom;
+        set => isStartRoom = value;
+    }
 
     public RoomData(Vector3 size, Vector3 position, int id) : base(position, id)
     {
         this.size = size;
-        this.door = new DoorData();
         this.listObjects = new List<ObjectData>();
         lastUsedDoorID = 0;
         lastUsedObjectID = 0;
-    }
-
-    public void AddDoor(Vector3 position, int linkedRoomID)
-    {
-        this.door = new DoorData(position, linkedRoomID, ++lastUsedDoorID);
     }
 
     public void AddObject(Vector3 position, GameObject prefab)
@@ -222,7 +226,8 @@ public class RoomData : BaseEntityData
 
     public override string ToString()
     {
-        string s = $"\nRoom ID: {ID};\nSize: {Size};\nPosition: {Position};\nDoors: {Door}\nObjects: ";
+        string s = $"\nRoom ID: {ID};\nSize: {Size};\nPosition: {Position};";
+        s += "Objects: ";
         foreach (ObjectData obj in listObjects)
         {
             s += obj.ToString() + "\n";
@@ -236,8 +241,18 @@ public class RoomData : BaseEntityData
 public class DoorData : BaseEntityData
 {
     private int linkedRoomID;
+    private bool isOnWE;
 
-    public int LinkedRoomID => linkedRoomID;
+    public int LinkedRoomID
+    {
+        get => linkedRoomID;
+        set => linkedRoomID = value;
+    } 
+       public bool IsOnWE
+    {
+        get => isOnWE;
+        set => isOnWE = value;
+    }
 
     public DoorData(Vector3 position, int linkedRoomID, int id) : base(position, id)
     {
