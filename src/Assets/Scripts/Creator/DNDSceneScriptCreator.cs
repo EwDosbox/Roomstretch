@@ -121,9 +121,9 @@ public class DNDSceneScriptCreator : MonoBehaviour
         wallE.localPosition = new Vector3(size.x, 0, size.z / 2);
         wallW.localPosition = new Vector3(0, 0, size.z / 2);
 
-        if(room.IsStartRoom)
+        if (room.IsStartRoom)
         {
-            Player.transform.position = room.Position + new Vector3(0,1,0);
+            Player.transform.position = room.Position + new Vector3(0, 1, 0);
         }
 
         Debug.Log($"Room created at {position} with size {size}");
