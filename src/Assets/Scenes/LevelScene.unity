@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -803,7 +803,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1184008763}
   - component: {fileID: 1184008762}
-  - component: {fileID: 1184008764}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -888,18 +887,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!114 &1184008764
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1184008761}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1199396221
 GameObject:
   m_ObjectHideFlags: 0
@@ -982,7 +969,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1453785553}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b7362b221d303e43883b104d5185147, type: 3}
+  m_Script: {fileID: 11500000, guid: 6f67af09dddd8fc4eb2777c52105f221, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   fileData: {fileID: 11400000, guid: b0f3b87cc163de949bf5ae5046f94177, type: 2}
@@ -1013,7 +1000,6 @@ GameObject:
   - component: {fileID: 1596739346}
   - component: {fileID: 1596739345}
   - component: {fileID: 1596739344}
-  - component: {fileID: 1596739348}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1112,18 +1098,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1596739348
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1596739343}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1632105448
 GameObject:
   m_ObjectHideFlags: 0
@@ -1337,6 +1311,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b9a305e18de0c04dbd257a21cd47087, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sharedProfile: {fileID: 0}
+  isGlobal: 0
+  blendDistance: 0
+  weight: 1
+  priority: 0
 --- !u!4 &1714056603
 Transform:
   m_ObjectHideFlags: 0
