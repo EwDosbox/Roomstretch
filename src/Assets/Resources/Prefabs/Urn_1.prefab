@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2783935705919746301}
   - component: {fileID: 4346338190970804804}
   - component: {fileID: 8008632340071791069}
+  - component: {fileID: -8582609077743021514}
   m_Layer: 0
   m_Name: Urn_1
   m_TagString: Untagged
@@ -98,3 +99,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilingMultiplier: {x: 1, y: 1}
   xx: 1
+--- !u!64 &-8582609077743021514
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5376887700739302810}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -1336318980500244277, guid: e05222cbd51567845a07f14c4341391e, type: 3}

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8117054642823054335}
   - component: {fileID: 8435490554793480468}
   - component: {fileID: 8147508188606083957}
+  - component: {fileID: 8343740794514409986}
   m_Layer: 0
   m_Name: Vase_2
   m_TagString: Untagged
@@ -98,3 +99,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilingMultiplier: {x: 1, y: 1}
   xx: 1
+--- !u!64 &8343740794514409986
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5625975082945360552}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -3646732900084882957, guid: 3bae1321e9fb3624684f99f053955088, type: 3}

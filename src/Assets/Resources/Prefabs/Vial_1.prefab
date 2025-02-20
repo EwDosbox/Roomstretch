@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 9090691351715175392}
   - component: {fileID: 9068630660095058709}
   - component: {fileID: 8526945153083665628}
+  - component: {fileID: 4693964690146360295}
   m_Layer: 0
   m_Name: Vial_1_Cork
   m_TagString: Untagged
@@ -131,6 +132,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilingMultiplier: {x: 1, y: 1}
   xx: 1
+--- !u!64 &4693964690146360295
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317731710021716665}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 2538093202382038760, guid: 132e7918e5bd4774e9a66ecd98f8a218, type: 3}
 --- !u!1 &2071669167275551106
 GameObject:
   m_ObjectHideFlags: 0
@@ -143,6 +166,7 @@ GameObject:
   - component: {fileID: 4919178506162410874}
   - component: {fileID: 4186214296707979969}
   - component: {fileID: 1286671485022389970}
+  - component: {fileID: 4807472618752677750}
   m_Layer: 0
   m_Name: Vial_1_Glass
   m_TagString: Untagged
@@ -229,3 +253,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilingMultiplier: {x: 1, y: 1}
   xx: 1
+--- !u!64 &4807472618752677750
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2071669167275551106}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 1882070196759274413, guid: 132e7918e5bd4774e9a66ecd98f8a218, type: 3}

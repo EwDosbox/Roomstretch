@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6046977446678433320}
   - component: {fileID: 6845506400262500124}
   - component: {fileID: 2506328296901917895}
+  - component: {fileID: 8462675697579266253}
   m_Layer: 0
   m_Name: Book_2_Cover
   m_TagString: Untagged
@@ -98,6 +99,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilingMultiplier: {x: 1, y: 1}
   xx: 1
+--- !u!64 &8462675697579266253
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 140040209275957812}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4745170236675703780, guid: f33eabbf1f4b2da4da82ed0504893d0f, type: 3}
 --- !u!1 &3402040341906552115
 GameObject:
   m_ObjectHideFlags: 0
@@ -143,6 +166,7 @@ GameObject:
   - component: {fileID: 8875097465961597006}
   - component: {fileID: 2903247182840917340}
   - component: {fileID: 8964932614285820881}
+  - component: {fileID: 184192955663155910}
   m_Layer: 0
   m_Name: Book_2_Pages
   m_TagString: Untagged
@@ -229,3 +253,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilingMultiplier: {x: 1, y: 1}
   xx: 1
+--- !u!64 &184192955663155910
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5026324720433967469}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 5824832991276102027, guid: f33eabbf1f4b2da4da82ed0504893d0f, type: 3}

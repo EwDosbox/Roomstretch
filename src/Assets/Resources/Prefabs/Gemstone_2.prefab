@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3100212172772579926}
   - component: {fileID: 8907056977654148635}
   - component: {fileID: 38889750045892104}
+  - component: {fileID: 2053614774104129390}
   m_Layer: 0
   m_Name: Gemstone_2
   m_TagString: Untagged
@@ -98,3 +99,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilingMultiplier: {x: 1, y: 1}
   xx: 1
+--- !u!64 &2053614774104129390
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4681995378568191328}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4716967727654519811, guid: cab7dcf319eac664f8ed79e3dfaff732, type: 3}

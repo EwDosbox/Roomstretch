@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 512181862013062937}
   - component: {fileID: 5835655893615427264}
   - component: {fileID: 5621525116550705336}
+  - component: {fileID: 3301922228670780548}
   m_Layer: 0
   m_Name: Book_1_Pages
   m_TagString: Untagged
@@ -98,6 +99,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilingMultiplier: {x: 1, y: 1}
   xx: 1
+--- !u!64 &3301922228670780548
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2710704341921447837}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4231909286399038178, guid: 8215cf170b208e841bfddf0f39cbc8db, type: 3}
 --- !u!1 &3977076803588122362
 GameObject:
   m_ObjectHideFlags: 0
@@ -110,6 +133,7 @@ GameObject:
   - component: {fileID: 4232790169928315552}
   - component: {fileID: 7190686028982121761}
   - component: {fileID: 5628435196757373466}
+  - component: {fileID: 3875635622218822309}
   m_Layer: 0
   m_Name: Book_1_Cover
   m_TagString: Untagged
@@ -196,6 +220,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilingMultiplier: {x: 1, y: 1}
   xx: 1
+--- !u!64 &3875635622218822309
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3977076803588122362}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -935868103917627656, guid: 8215cf170b208e841bfddf0f39cbc8db, type: 3}
 --- !u!1 &6437384894705878658
 GameObject:
   m_ObjectHideFlags: 0
