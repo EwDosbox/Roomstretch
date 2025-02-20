@@ -15,8 +15,6 @@ public class DNDSceneScriptCreator : MonoBehaviour
     [SerializeField] private GameObject Player;
 
     private GameObject Map;
-
-    private Dictionary<string, GameObject> Models;
     private Dictionary<string, GameObject> Prefabs;
 
     private void Awake()
@@ -24,7 +22,6 @@ public class DNDSceneScriptCreator : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "LevelScene")
         {
             Map = GameObject.Find("Map");
-            LoadModels();
             LoadPrefabs();
             MakeMap();
         }
@@ -48,18 +45,6 @@ public class DNDSceneScriptCreator : MonoBehaviour
     }
     #endregion
     #region LoadResources
-    private void LoadModels()
-    {
-        List<GameObject> resources = Resources.LoadAll<GameObject>("Models").ToList();
-        Models = new Dictionary<string, GameObject>();
-
-        foreach (GameObject resource in resources)
-        {
-            Models.Add(resource.name, resource);
-        }
-
-        Debug.Log("Creator: Imported: " + Models.ToSeparatedString("; "));
-    }
     private void LoadPrefabs()
     {
         List<GameObject> resources = Resources.LoadAll<GameObject>("Prefabs").ToList();
@@ -195,7 +180,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
                 Vector3 objectPosition = ParseVector3(prefab.Element("Position"));
                 string objectName = prefab.Element("ObjectName").Value.Trim();
 
-                objectDatas.Add(new ObjectData(objectPosition, Models[objectName], objectId));
+                objectDatas.Add(new ObjectData(objectPosition, Prefabs[objectName], objectId));
             }
 
             file.AddRoom(size, position, objectDatas);

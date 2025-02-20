@@ -194,7 +194,6 @@ public class Save
 [System.Serializable]
 public class RoomData : BaseEntityData
 {
-    private int lastUsedDoorID;
     private int lastUsedObjectID;
     private bool isStartRoom;
 
@@ -214,7 +213,6 @@ public class RoomData : BaseEntityData
     {
         this.size = size;
         this.listObjects = new List<ObjectData>();
-        lastUsedDoorID = 0;
         lastUsedObjectID = 0;
     }
 
