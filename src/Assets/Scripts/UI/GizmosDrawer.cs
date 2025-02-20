@@ -7,7 +7,6 @@ public class GizmosDrawer : MonoBehaviour
 {
     [SerializeField] private DNDFileData fileData;
 
-
     private void OnDrawGizmos()
     {
         foreach (RoomData room in fileData.Rooms)
@@ -21,7 +20,5 @@ public class GizmosDrawer : MonoBehaviour
             Gizmos.color = Color.green;
             Gizmos.DrawSphere(door.Position, 0.5f);
         }
-
     }
-
 }

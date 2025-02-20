@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Unity.VisualScripting;
 using UnityEditor.Playables;
 using UnityEngine;
 
@@ -23,38 +24,20 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         for (int i = 0; i < save.Save.RoomsCountBounds.Value; i++)
         {
-            Vector3 roomPosition, roomSize;
             RectangleF room;
-            int attempts = 0, maxAttempts = 100;
-            bool placed;
-
-            do
+            try
             {
-                placed = false;
-
-                roomPosition = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
-                roomSize = random.RandomVector3(save.Save.XRoomBounds, save.Save.ZRoomBounds);
-
-                Debug.Log("Room: Pos" + roomPosition.ToString() + "\nSize " + roomSize.ToString());
-
-                room = new RectangleF(roomPosition, roomSize);
-                attempts++;
-
-                placed = !rooms.Any(r => room.Overlaps(r));
-
-            } while (!placed && attempts < maxAttempts);
-
-            if (attempts >= maxAttempts)
+                room = PlaceRoom(rooms, save);
+            }            
+            catch (Exception e)
             {
-                Debug.LogError($"Failed to place room {i} after {attempts} attempts");
+                Debug.LogError(e.Message);
                 continue;
             }
-            else
-            {
-                Debug.Log($"Placed room {i} after {attempts} attempts");
-            }
-
             rooms.Add(room);
+            Vector3 roomPosition = new Vector3(room.Position.x, 0, room.Position.y);
+            Vector3 roomSize = new Vector3(room.Size.x, 0, room.Size.y);
+
             RoomData roomData = new RoomData(roomSize, roomPosition, i);
 
             for (int j = 0; j <= 1; j++)//jeden objekt zatim
@@ -74,28 +57,7 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         foreach (RoomData room in save.Rooms)
         {
-            Vector3 doorPosition;
-            bool isOnWE;
-            int wall = random.Random(0, 4);
-            switch (wall)
-            {
-                case 0: // North
-                    doorPosition = new Vector3(room.Position.x + room.Size.x / 2, 0, room.Position.z + room.Size.z);
-                    isOnWE = false;
-                    break;
-                case 1: // East
-                    doorPosition = new Vector3(room.Position.x + room.Size.x, 0, room.Position.z + room.Size.z / 2);
-                    isOnWE = true;
-                    break;
-                case 2: // South
-                    doorPosition = new Vector3(room.Position.x + room.Size.x / 2, 0, room.Position.z);
-                    isOnWE = false;
-                    break;
-                default: // West
-                    doorPosition = new Vector3(room.Position.x, 0, room.Position.z + room.Size.z / 2);
-                    isOnWE = true  ;
-                    break;
-            }
+            Vector3 doorPosition = PlaceDoor(rooms, save,room, out bool isOnWE);
 
             DoorData doorData = new DoorData(doorPosition, -1, 1); // -1 for no linked room yet
             doorData.IsOnWE = isOnWE;
@@ -104,6 +66,55 @@ public class DNDFileScriptCreator : MonoBehaviour
         }
     }
 
+    #endregion
+    #region Helping Placement Methods
+    private RectangleF PlaceRoom(List<RectangleF> rooms, DNDFileData save)
+    {
+        BetterRandom random = save.Save.Random;
+
+        Vector3 roomPosition, roomSize;
+        RectangleF room;
+        int attempts = 0, maxAttempts = 100;
+        bool placed;
+
+        do
+        {
+            placed = false;
+
+            roomPosition = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
+            roomSize = random.RandomPositiveVector3(save.Save.XRoomBounds, save.Save.ZRoomBounds);
+
+            Debug.Log($"Room position: {roomPosition}, Room size: {roomSize}");
+
+            room = new RectangleF(roomPosition, roomSize);
+            attempts++;
+
+            placed = !rooms.Any(r => room.Overlaps(r));
+
+        } while (!placed && attempts < maxAttempts);
+
+        if (attempts >= maxAttempts) throw new Exception($"Failed to place room after {attempts} attempts");
+
+        return room;
+    }
+
+    public static Vector3 PlaceDoor(List<RectangleF> rooms, DNDFileData save, RoomData room, out bool isOnWE)
+    {
+        BetterRandom random = save.Save.Random;
+        Vector3 doorPosition = Vector3.zero;
+
+        Wall wallN = new Wall(room.Position, new Vector3(room.Position.x + room.Size.x, 0, room.Position.z), 'N');
+        Wall wallE = new Wall(new Vector3(room.Position.x + room.Size.x, 0, room.Position.z), new Vector3(room.Position.x + room.Size.x, 0, room.Position.z + room.Size.y), 'E');
+        Wall wallS = new Wall(new Vector3(room.Position.x, 0, room.Position.z + room.Size.y), new Vector3(room.Position.x + room.Size.x, 0, room.Position.z + room.Size.y), 'S');
+        Wall wallW = new Wall(new Vector3(room.Position.x, 0, room.Position.z), new Vector3(room.Position.x, 0, room.Position.z + room.Size.y), 'W');
+        save.Walls.Add(wallN);
+        save.Walls.Add(wallE);
+        save.Walls.Add(wallS);
+        save.Walls.Add(wallW);
+
+        isOnWE = true;
+        return doorPosition;
+    }
     #endregion
     #region CreateFile
     public void CreateFile(DNDFileData fileData)
@@ -188,6 +199,18 @@ public class DNDFileScriptCreator : MonoBehaviour
             }
             writer.WriteEndElement();
 
+            writer.WriteStartElement("Walls");
+            foreach (Wall wall in fileData.Walls)
+            {
+                writer.WriteStartElement("Wall");
+
+                WriteVector3(writer, wall.Start, "Start");
+                WriteVector3(writer, wall.End, "End");
+                writer.WriteElementString("Orientation", wall.Orientation.ToString());
+
+                writer.WriteEndElement();
+            }
+
             writer.WriteEndElement();
             #endregion
 
@@ -235,6 +258,46 @@ public class DNDFileScriptCreator : MonoBehaviour
     }
     #endregion
 }
+#region Wall
+[System.Serializable]
+public class Wall
+{
+    [SerializeField] private char orientation;
+    [SerializeField] private Vector3 start;
+    [SerializeField] private Vector3 end;
+
+    public char Orientation
+    {
+        get => orientation;
+        set => orientation = value;
+    }
+    public Vector3 Start
+    {
+        get => start;
+        set => start = value;
+    }
+
+    public Vector3 End
+    {
+        get => end;
+        set => end = value;
+    }
+
+    public Wall(Vector3 start, Vector3 end, char orientation)
+    {
+        this.start = start;
+        this.end = end;
+        this.orientation = orientation;
+    }
+
+    public Wall(float startX, float startZ, float endX, float endZ, char orientation)
+    {
+        start = new Vector3(startX, 0, startZ);
+        end = new Vector3(endX, 0, endZ);
+        this.orientation = orientation;
+    }
+}
+#endregion
 #region RectangleF
 [System.Serializable]
 public class RectangleF

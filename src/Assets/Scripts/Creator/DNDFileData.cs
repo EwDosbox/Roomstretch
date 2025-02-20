@@ -11,12 +11,19 @@ public class DNDFileData : ScriptableObject
     [SerializeField] private int lastUsedID;
     [SerializeField] private List<RoomData> rooms;
     [SerializeField] private List<DoorData> doors;
+    [SerializeField] private List<Wall> walls;
     [SerializeField] private Settings settings;
     [SerializeField] private Save save;
 
-    public List<RoomData> Rooms => rooms;
+    public List<RoomData> Rooms
+    {
+        get => rooms;
+        set => rooms = value;
+    }
     public List<DoorData> Doors => doors;
+    public List<Wall> Walls => walls;
     public Settings Settings => settings;
+
     public Save Save => save;
 
     public void AddRoom(Vector3 size, Vector3 position, List<ObjectData> listObjects)
@@ -41,6 +48,7 @@ public class DNDFileData : ScriptableObject
         lastUsedID = 0;
         rooms = new List<RoomData>();
         doors = new List<DoorData>();
+        walls = new List<Wall>();
         settings = new Settings();
         save = new Save();
     }
@@ -121,8 +129,8 @@ public class Save
     {
         get => roomCountBounds;
         set => roomCountBounds = value;
-    } 
-       public GenerationBounds<int> DoorCountBounds
+    }
+    public GenerationBounds<int> DoorCountBounds
     {
         get => doorCountBounds;
         set => doorCountBounds = value;
@@ -245,8 +253,8 @@ public class DoorData : BaseEntityData
     {
         get => linkedRoomID;
         set => linkedRoomID = value;
-    } 
-       public bool IsOnWE
+    }
+    public bool IsOnWE
     {
         get => isOnWE;
         set => isOnWE = value;
@@ -328,6 +336,14 @@ public class BetterRandom
             Random(xBounds.Min, xBounds.Max),
             0f,
             Random(zBounds.Min, zBounds.Max)
+        );
+    }
+    public Vector3 RandomPositiveVector3(Bounds<float> xBounds, Bounds<float> zBounds)
+    {
+        return new Vector3(
+            MathF.Abs(Random(xBounds.Min, xBounds.Max)),
+            0f,
+            MathF.Abs(Random(zBounds.Min, zBounds.Max))
         );
     }
 

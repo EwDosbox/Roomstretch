@@ -29,18 +29,35 @@ public class DNDSceneScriptCreator : MonoBehaviour
     #region Data Visualization
     private void OnDrawGizmos()
     {
-        foreach (RoomData room in fileData.Rooms)
+        /*foreach (RoomData room in fileData.Rooms)
         {
             Gizmos.color = Color.red;
             Vector3 roomCenter = room.Position + room.Size / 2;
             Gizmos.DrawWireCube(roomCenter, room.Size);
-
-
-        }
+        }*/
         foreach (DoorData door in fileData.Doors)
         {
             Gizmos.color = Color.green;
             Gizmos.DrawSphere(door.Position, 0.5f);
+        }
+        foreach (Wall wall in fileData.Walls)
+        {
+            switch (wall.Orientation)
+            {
+                case 'N':
+                    Gizmos.color = Color.blue;
+                    break;
+                case 'S':
+                    Gizmos.color = Color.red;
+                    break;
+                case 'E':
+                    Gizmos.color = Color.green;
+                    break;
+                case 'W':
+                    Gizmos.color = Color.yellow;
+                    break;
+            }
+            Gizmos.DrawLine(wall.Start, wall.End);
         }
     }
     #endregion
@@ -108,7 +125,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         if (room.IsStartRoom)
         {
-            Player.transform.position = room.Position + room.Size/2 + new Vector3(0, 1, 0);
+            Player.transform.position = room.Position + room.Size / 2 + new Vector3(0, 1, 0);
         }
 
         Debug.Log($"Room created at {position} with size {size}");
@@ -159,11 +176,11 @@ public class DNDSceneScriptCreator : MonoBehaviour
         file.Settings.Sensitivity = float.Parse(settings.Element("Sensitivity").Value.Trim());
 
         XElement body = roomstretch.Element("Body");
-        XElement rooms = body.Element("Rooms");
+        XElement roomsElement = body.Element("Rooms");
 
-        List<XElement> rooms2 = rooms.Elements("Room").ToList();
+        List<XElement> rooms = roomsElement.Elements("Room").ToList();
 
-        foreach (XElement room in rooms2)
+        foreach (XElement room in rooms)
         {
             int id = int.Parse(room.Element("ID").Value.Trim());
             bool isStartRoom = room.Element("IsStartRoom").Value.Trim() == "True";
@@ -186,9 +203,10 @@ public class DNDSceneScriptCreator : MonoBehaviour
             file.AddRoom(size, position, objectDatas);
             file.Rooms.Where(r => r.Position == position).First().IsStartRoom = isStartRoom;
         }
-        XElement doors = body.Element("Doors");
-        List<XElement> doors2 = doors.Elements("Door").ToList();
-        foreach (XElement door in doors2)
+
+        XElement doorsElement = body.Element("Doors");
+        List<XElement> doors = doorsElement.Elements("Door").ToList();
+        foreach (XElement door in doors)
         {
             int doorID = int.Parse(door.Element("ID").Value.Trim());
             Vector3 doorPosition = ParseVector3(door.Element("Position"));
@@ -197,6 +215,18 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
             file.AddDoor(doorPosition, linkedRoomID);
             file.Doors.Where(d => d.Position == doorPosition).First().IsOnWE = isOnWE;
+        }
+
+        XElement wallsElement = body.Element("Walls");
+        List<XElement> walls = wallsElement.Elements("Wall").ToList();
+        foreach (XElement wall in walls)
+        {
+            Vector3 wallStart = ParseVector3(wall.Element("Start"));
+            Vector3 wallEnd = ParseVector3(wall.Element("End"));
+            char wallOrientation = wall.Element("Orientation").Value.Trim()[0];
+
+            Wall wallData = new Wall(wallStart, wallEnd, wallOrientation);
+            file.Walls.Add(wallData);
         }
 
         return file;
