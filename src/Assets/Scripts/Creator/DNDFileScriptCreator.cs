@@ -148,11 +148,14 @@ public class DNDFileScriptCreator : MonoBehaviour
             #region Body
             writer.WriteStartElement("Body");
 
+            writer.WriteStartElement("Rooms");
+
             foreach (RoomData roomData in fileData.Rooms)
             {
                 writer.WriteStartElement("Room");
 
                 writer.WriteElementString("ID", roomData.ID.ToString());
+                writer.WriteElementString("IsStartRoom", roomData.IsStartRoom.ToString());
 
                 WriteVector3(writer, roomData.Position, "Position");
                 WriteVector3(writer, roomData.Size, "Size");
@@ -170,6 +173,8 @@ public class DNDFileScriptCreator : MonoBehaviour
 
                 writer.WriteEndElement();
             }
+            writer.WriteEndElement();
+            writer.WriteStartElement("Doors");
             foreach (DoorData doorData in fileData.Doors)
             {
                 writer.WriteStartElement("Door");
@@ -181,6 +186,7 @@ public class DNDFileScriptCreator : MonoBehaviour
 
                 writer.WriteEndElement();
             }
+            writer.WriteEndElement();
 
             writer.WriteEndElement();
             #endregion

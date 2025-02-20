@@ -123,7 +123,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         if (room.IsStartRoom)
         {
-            Player.transform.position = room.Position + new Vector3(0, 1, 0);
+            Player.transform.position = room.Position + room.Size/2 + new Vector3(0, 1, 0);
         }
 
         Debug.Log($"Room created at {position} with size {size}");
@@ -174,12 +174,14 @@ public class DNDSceneScriptCreator : MonoBehaviour
         file.Settings.Sensitivity = float.Parse(settings.Element("Sensitivity").Value.Trim());
 
         XElement body = roomstretch.Element("Body");
+        XElement rooms = body.Element("Rooms");
 
-        List<XElement> rooms = body.Elements("Room").ToList();
+        List<XElement> rooms2 = rooms.Elements("Room").ToList();
 
-        foreach (XElement room in rooms)
+        foreach (XElement room in rooms2)
         {
             int id = int.Parse(room.Element("ID").Value.Trim());
+            bool isStartRoom = room.Element("IsStartRoom").Value.Trim() == "True";
 
             Vector3 position = ParseVector3(room.Element("Position"));
             Vector3 size = ParseVector3(room.Element("Size"));
@@ -197,9 +199,11 @@ public class DNDSceneScriptCreator : MonoBehaviour
             }
 
             file.AddRoom(size, position, objectDatas);
+            file.Rooms.Where(r => r.Position == position).First().IsStartRoom = isStartRoom;
         }
-        List<XElement> doors = body.Elements("Door").ToList();
-        foreach (XElement door in doors)
+        XElement doors = body.Element("Doors");
+        List<XElement> doors2 = doors.Elements("Door").ToList();
+        foreach (XElement door in doors2)
         {
             int doorID = int.Parse(door.Element("ID").Value.Trim());
             Vector3 doorPosition = ParseVector3(door.Element("Position"));
