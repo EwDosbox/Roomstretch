@@ -1,4 +1,4 @@
-Shader "HoleShader/Hole"
+Shader "Unlit/HoleShader"
 {
     SubShader
     {
