@@ -358,6 +358,11 @@ public class BetterRandom
     {
         return (Orientation)Random(0, 4);
     }
+    public Vector3 RandomPointOnWall(Vector3 start, Vector3 end)
+    {
+        if(end.x < start.x) return new Vector3(Random(end.x, start.x),0,Random(end.z, start.z));        
+        return new Vector3(Random(start.x, end.x),0,Random(start.z, end.z));
+    }
 }
 #endregion
 #region GenerationBounds

@@ -28,7 +28,7 @@ public class DNDFileScriptCreator : MonoBehaviour
             RectangleF room;
             try
             {
-                room = PlaceRoom(rooms, save);
+                room = PlaceRoom(rooms, save, random);
             }
             catch (Exception e)
             {
@@ -56,9 +56,16 @@ public class DNDFileScriptCreator : MonoBehaviour
         save.Save.RoomsCountBounds.Value = save.Rooms.Count;
         save.Rooms[random.Random(0, save.Rooms.Count)].IsStartRoom = true;
 
-        foreach (RoomData room in save.Rooms)
+        List<RoomData> roomsCopy = new List<RoomData>(save.Rooms);
+        foreach (RoomData room in roomsCopy)
         {
-            Vector3 doorPosition = PlaceDoor(rooms, save, room, out bool isOnWE);
+            Vector3 doorPosition = PlaceDoor(rooms, save, room, random, out bool isOnWE, out RectangleF hall);
+
+            Vector3 hallPosition = new Vector3(hall.Position.x, 0, hall.Position.y);
+            Vector3 hallSize = new Vector3(hall.Size.x, 0, hall.Size.y);
+            RoomData roomData = new RoomData(hallSize, hallPosition, -1);
+
+            save.Rooms.Add(roomData);
 
             DoorData doorData = new DoorData(doorPosition, -1, 1); // -1 for no linked room yet
             doorData.IsOnWE = isOnWE;
@@ -69,10 +76,8 @@ public class DNDFileScriptCreator : MonoBehaviour
 
     #endregion
     #region Helping Placement Methods
-    private RectangleF PlaceRoom(List<RectangleF> rooms, DNDFileData save)
+    private RectangleF PlaceRoom(List<RectangleF> rooms, DNDFileData save, BetterRandom random)
     {
-        BetterRandom random = save.Save.Random;
-
         Vector3 roomPosition, roomSize;
         RectangleF room;
         int attempts = 0, maxAttempts = 100;
@@ -84,8 +89,6 @@ public class DNDFileScriptCreator : MonoBehaviour
 
             roomPosition = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
             roomSize = random.RandomPositiveVector3(save.Save.XRoomBounds, save.Save.ZRoomBounds);
-
-            Debug.Log($"Room position: {roomPosition}, Room size: {roomSize}");
 
             room = new RectangleF(roomPosition, roomSize);
             attempts++;
@@ -99,9 +102,8 @@ public class DNDFileScriptCreator : MonoBehaviour
         return room;
     }
 
-    public static Vector3 PlaceDoor(List<RectangleF> rooms, DNDFileData save, RoomData room, out bool isOnWE)
+    public static Vector3 PlaceDoor(List<RectangleF> rooms, DNDFileData save, RoomData room, BetterRandom random, out bool isOnWE, out RectangleF hall)
     {
-        BetterRandom random = save.Save.Random;
         Vector3 doorPosition = Vector3.zero;
 
         Vector3 upperLeft = new(room.Position.x, 0, room.Position.z + room.Size.z);
@@ -122,7 +124,8 @@ public class DNDFileScriptCreator : MonoBehaviour
         bool isDoorPlaced = false;
         int attempts = 0, maxAttempts = 100;
         Orientation orientation;
-        Bounds<float> hallBouns = new Bounds<float>(2f, 10f);
+        Bounds<float> hallBounds = new Bounds<float>(2f, 10f);
+        float hallWidth = 1f;
 
         do
         {
@@ -131,18 +134,32 @@ public class DNDFileScriptCreator : MonoBehaviour
             switch (orientation)
             {
                 case Orientation.N:
-                    doorPosition = random.RandomPositiveVector3(upperLeft, upperRight);
+                    doorPosition = random.RandomPointOnWall(upperLeft, upperRight);
                     break;
                 case Orientation.E:
-                    doorPosition = random.RandomPositiveVector3(upperLeft, lowerLeft);
+                    doorPosition = random.RandomPointOnWall(upperLeft, lowerLeft);
                     break;
                 case Orientation.S:
-                    doorPosition = random.RandomPositiveVector3(lowerLeft, lowerRight);
+                    doorPosition = random.RandomPointOnWall(lowerLeft, lowerRight);
                     break;
                 case Orientation.W:
-                    doorPosition = random.RandomPositiveVector3(lowerRight, upperRight);
+                    doorPosition = random.RandomPointOnWall(lowerRight, upperRight);
                     break;
             }
+
+            if (orientation == Orientation.N || orientation == Orientation.S)
+            {
+                hall = new RectangleF(new Vector2(doorPosition.x - hallWidth / 2, doorPosition.z), new Vector2(hallWidth, hallBounds.Max));
+            }
+            else
+            {
+                hall = new RectangleF(new Vector2(doorPosition.x, doorPosition.z - hallWidth / 2), new Vector2(hallBounds.Max, hallWidth));
+            }
+
+            RectangleF tempHall = hall;
+
+            isDoorPlaced = rooms.Any(r => r.Overlaps(tempHall));
+            attempts++;
 
         } while (!isDoorPlaced && attempts < maxAttempts);
 
