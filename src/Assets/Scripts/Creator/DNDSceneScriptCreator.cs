@@ -25,42 +25,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
             LoadPrefabs();
             MakeMap();
         }
-    }
-    #region Data Visualization
-    private void OnDrawGizmos()
-    {
-        /*foreach (RoomData room in fileData.Rooms)
-        {
-            Gizmos.color = Color.red;
-            Vector3 roomCenter = room.Position + room.Size / 2;
-            Gizmos.DrawWireCube(roomCenter, room.Size);
-        }*/
-        foreach (DoorData door in fileData.Doors)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawSphere(door.Position, 0.5f);
-        }
-        foreach (Wall wall in fileData.Walls)
-        {
-            switch (wall.Orientation)
-            {
-                case 'N':
-                    Gizmos.color = Color.blue;
-                    break;
-                case 'S':
-                    Gizmos.color = Color.red;
-                    break;
-                case 'E':
-                    Gizmos.color = Color.green;
-                    break;
-                case 'W':
-                    Gizmos.color = Color.yellow;
-                    break;
-            }
-            Gizmos.DrawLine(wall.Start, wall.End);
-        }
-    }
-    #endregion
+    }    
     #region LoadResources
     private void LoadPrefabs()
     {
@@ -223,7 +188,13 @@ public class DNDSceneScriptCreator : MonoBehaviour
         {
             Vector3 wallStart = ParseVector3(wall.Element("Start"));
             Vector3 wallEnd = ParseVector3(wall.Element("End"));
-            char wallOrientation = wall.Element("Orientation").Value.Trim()[0];
+            char wallOrientationValue = wall.Element("Orientation").Value.Trim()[0];
+
+            Orientation wallOrientation = Orientation.N;
+            if(wallOrientationValue == 'N') wallOrientation = Orientation.N;
+            else if(wallOrientationValue == 'S') wallOrientation = Orientation.S;
+            else if(wallOrientationValue == 'E') wallOrientation = Orientation.E;
+            else if(wallOrientationValue == 'W') wallOrientation = Orientation.W;
 
             Wall wallData = new Wall(wallStart, wallEnd, wallOrientation);
             file.Walls.Add(wallData);

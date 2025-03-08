@@ -338,6 +338,14 @@ public class BetterRandom
             Random(zBounds.Min, zBounds.Max)
         );
     }
+    public Vector3 RandomPositiveVector3(Vector3 xBounds, Vector3 zBounds)
+    {
+        return new Vector3(
+            Random(xBounds.x, xBounds.y),
+            0f,
+            Random(zBounds.x, zBounds.y)
+        );
+    }
     public Vector3 RandomPositiveVector3(Bounds<float> xBounds, Bounds<float> zBounds)
     {
         return new Vector3(
@@ -346,10 +354,9 @@ public class BetterRandom
             MathF.Abs(Random(zBounds.Min, zBounds.Max))
         );
     }
-
-    private void ValidateRange(float min, float max)
+    public Orientation RandomOrientation()
     {
-        if (min > max) throw new ArgumentException("Min must be <= Max");
+        return (Orientation)Random(0, 4);
     }
 }
 #endregion
@@ -473,6 +480,87 @@ public abstract class BaseEntityData
     public override string ToString()
     {
         return $"ID: {id}; Position: {position}";
+    }
+}
+#endregion
+
+#region Wall
+public enum
+Orientation
+{
+    N, E, S, W
+}
+[System.Serializable]
+public class Wall
+{
+    [SerializeField]
+    private
+    Orientation orientation;
+    [SerializeField] private Vector3 start;
+    [SerializeField] private Vector3 end;
+
+    public
+    Orientation Orientation
+    {
+        get => orientation;
+        set => orientation = value;
+    }
+    public Vector3 Start
+    {
+        get => start;
+        set => start = value;
+    }
+
+    public Vector3 End
+    {
+        get => end;
+        set => end = value;
+    }
+
+    public Wall(Vector3 start, Vector3 end,
+    Orientation orientation)
+    {
+        this.start = start;
+        this.end = end;
+        this.orientation = orientation;
+    }
+
+    public Wall(float startX, float startZ, float endX, float endZ,
+    Orientation orientation)
+    {
+        start = new Vector3(startX, 0, startZ);
+        end = new Vector3(endX, 0, endZ);
+        this.orientation = orientation;
+    }
+}
+#endregion
+#region RectangleF
+[System.Serializable]
+public class RectangleF
+{
+    [SerializeField] private Vector2 position;
+    [SerializeField] private Vector2 size;
+
+    public Vector2 Position => position;
+    public Vector2 Size => size;
+
+    public RectangleF(Vector2 position, Vector2 size)
+    {
+        this.position = position;
+        this.size = size;
+    }
+    public RectangleF(Vector3 position3D, Vector3 size3D)
+    {
+        position = new Vector2(position3D.x, position3D.z); // Use X/Z
+        size = new Vector2(Mathf.Abs(size3D.x), Mathf.Abs(size3D.z));
+    }
+
+    public bool Overlaps(RectangleF other, float padding = 1f)
+    {
+        return (position.x - padding) < (other.position.x + other.size.x + padding) &&
+               (position.x + size.x + padding) > (other.position.x - padding) &&
+               (position.y - padding) < (other.position.y + other.size.y + padding) &&
+               (position.y + size.y + padding) > (other.position.y - padding);
     }
 }
 #endregion

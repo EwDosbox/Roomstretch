@@ -19,11 +19,7 @@
 
 ## Post-PRocessing
 
-1. Camera > Rendering > Post Processing > enable
-2. Camera > Dithering > enable
-3. Camera > Anti-Aliasing
 4. Settings Folder > UniversalRP-HighQuality > HDR > enable
-5. Volume > Global
 6. Volume > ToneMapping > Neutral
 7. DEPTH OF FIELD
 8. Lift Gamma Gain

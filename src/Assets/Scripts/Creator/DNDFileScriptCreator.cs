@@ -12,6 +12,7 @@ public class DNDFileScriptCreator : MonoBehaviour
 {
     private List<RectangleF> rooms;
 
+
     #region PrepareSave
     public void PrepareSave(DNDFileData save)
     {
@@ -28,7 +29,7 @@ public class DNDFileScriptCreator : MonoBehaviour
             try
             {
                 room = PlaceRoom(rooms, save);
-            }            
+            }
             catch (Exception e)
             {
                 Debug.LogError(e.Message);
@@ -57,7 +58,7 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         foreach (RoomData room in save.Rooms)
         {
-            Vector3 doorPosition = PlaceDoor(rooms, save,room, out bool isOnWE);
+            Vector3 doorPosition = PlaceDoor(rooms, save, room, out bool isOnWE);
 
             DoorData doorData = new DoorData(doorPosition, -1, 1); // -1 for no linked room yet
             doorData.IsOnWE = isOnWE;
@@ -103,17 +104,57 @@ public class DNDFileScriptCreator : MonoBehaviour
         BetterRandom random = save.Save.Random;
         Vector3 doorPosition = Vector3.zero;
 
-        Wall wallN = new Wall(room.Position, new Vector3(room.Position.x + room.Size.x, 0, room.Position.z), 'N');
-        Wall wallE = new Wall(new Vector3(room.Position.x + room.Size.x, 0, room.Position.z), new Vector3(room.Position.x + room.Size.x, 0, room.Position.z + room.Size.y), 'E');
-        Wall wallS = new Wall(new Vector3(room.Position.x, 0, room.Position.z + room.Size.y), new Vector3(room.Position.x + room.Size.x, 0, room.Position.z + room.Size.y), 'S');
-        Wall wallW = new Wall(new Vector3(room.Position.x, 0, room.Position.z), new Vector3(room.Position.x, 0, room.Position.z + room.Size.y), 'W');
+        Vector3 upperLeft = new(room.Position.x, 0, room.Position.z + room.Size.z);
+        Vector3 upperRight = new(room.Position.x + room.Size.x, 0, room.Position.z + room.Size.z);
+        Vector3 lowerLeft = new(room.Position.x, 0, room.Position.z);
+        Vector3 lowerRight = new(room.Position.x + room.Size.x, 0, room.Position.z);
+
+        Wall wallN = new Wall(upperLeft, upperRight, Orientation.N);
+        Wall wallE = new Wall(lowerLeft, upperLeft, Orientation.E);
+        Wall wallS = new Wall(lowerRight, lowerLeft, Orientation.S);
+        Wall wallW = new Wall(lowerRight, upperRight, Orientation.W);
+
         save.Walls.Add(wallN);
         save.Walls.Add(wallE);
         save.Walls.Add(wallS);
         save.Walls.Add(wallW);
 
-        isOnWE = true;
-        return doorPosition;
+        bool isDoorPlaced = false;
+        int attempts = 0, maxAttempts = 100;
+        Orientation orientation;
+        Bounds<float> hallBouns = new Bounds<float>(2f, 10f);
+
+        do
+        {
+            orientation = random.RandomOrientation();
+
+            switch (orientation)
+            {
+                case Orientation.N:
+                    doorPosition = random.RandomPositiveVector3(upperLeft, upperRight);
+                    break;
+                case Orientation.E:
+                    doorPosition = random.RandomPositiveVector3(upperLeft, lowerLeft);
+                    break;
+                case Orientation.S:
+                    doorPosition = random.RandomPositiveVector3(lowerLeft, lowerRight);
+                    break;
+                case Orientation.W:
+                    doorPosition = random.RandomPositiveVector3(lowerRight, upperRight);
+                    break;
+            }
+
+        } while (!isDoorPlaced && attempts < maxAttempts);
+
+        if (isDoorPlaced)
+        {
+            isOnWE = orientation == Orientation.W || orientation == Orientation.E;
+            return doorPosition;
+        }
+        else
+        {
+            throw new Exception($"Failed to place door after {attempts} attempts");
+        }
     }
     #endregion
     #region CreateFile
@@ -258,73 +299,3 @@ public class DNDFileScriptCreator : MonoBehaviour
     }
     #endregion
 }
-#region Wall
-[System.Serializable]
-public class Wall
-{
-    [SerializeField] private char orientation;
-    [SerializeField] private Vector3 start;
-    [SerializeField] private Vector3 end;
-
-    public char Orientation
-    {
-        get => orientation;
-        set => orientation = value;
-    }
-    public Vector3 Start
-    {
-        get => start;
-        set => start = value;
-    }
-
-    public Vector3 End
-    {
-        get => end;
-        set => end = value;
-    }
-
-    public Wall(Vector3 start, Vector3 end, char orientation)
-    {
-        this.start = start;
-        this.end = end;
-        this.orientation = orientation;
-    }
-
-    public Wall(float startX, float startZ, float endX, float endZ, char orientation)
-    {
-        start = new Vector3(startX, 0, startZ);
-        end = new Vector3(endX, 0, endZ);
-        this.orientation = orientation;
-    }
-}
-#endregion
-#region RectangleF
-[System.Serializable]
-public class RectangleF
-{
-    [SerializeField] private Vector2 position;
-    [SerializeField] private Vector2 size;
-
-    public Vector2 Position => position;
-    public Vector2 Size => size;
-
-    public RectangleF(Vector2 position, Vector2 size)
-    {
-        this.position = position;
-        this.size = size;
-    }
-    public RectangleF(Vector3 position3D, Vector3 size3D)
-    {
-        position = new Vector2(position3D.x, position3D.z); // Use X/Z
-        size = new Vector2(Mathf.Abs(size3D.x), Mathf.Abs(size3D.z));
-    }
-
-    public bool Overlaps(RectangleF other, float padding = 1f)
-    {
-        return (position.x - padding) < (other.position.x + other.size.x + padding) &&
-               (position.x + size.x + padding) > (other.position.x - padding) &&
-               (position.y - padding) < (other.position.y + other.size.y + padding) &&
-               (position.y + size.y + padding) > (other.position.y - padding);
-    }
-}
-#endregion
