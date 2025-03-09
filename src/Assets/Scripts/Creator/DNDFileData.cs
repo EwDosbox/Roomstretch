@@ -546,8 +546,16 @@ public class RectangleF
     [SerializeField] private Vector2 position;
     [SerializeField] private Vector2 size;
 
-    public Vector2 Position => position;
-    public Vector2 Size => size;
+    public Vector2 Position
+    {
+        get => position;
+        set => position = value;
+    }
+    public Vector2 Size
+    {
+        get => size;
+        set => size = value;
+    }
 
     public RectangleF(Vector2 position, Vector2 size)
     {
