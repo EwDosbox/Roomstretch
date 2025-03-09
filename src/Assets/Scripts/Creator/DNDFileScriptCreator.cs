@@ -63,6 +63,7 @@ public class DNDFileScriptCreator : MonoBehaviour
 
             Vector3 hallPosition = new Vector3(hall.Position.x, 0, hall.Position.y);
             Vector3 hallSize = new Vector3(hall.Size.x, 0, hall.Size.y);
+
             RoomData roomData = new RoomData(hallSize, hallPosition, -1);
 
             save.Rooms.Add(roomData);
@@ -126,6 +127,10 @@ public class DNDFileScriptCreator : MonoBehaviour
         Orientation orientation;
         Bounds<float> hallBounds = new Bounds<float>(2f, 10f);
         float hallWidth = 1f;
+        RectangleF possibleHall;
+
+        List<RectangleF> roomsWithoutThis = new List<RectangleF>(rooms);
+        roomsWithoutThis.RemoveAll(r => r.Position.x == room.Position.x && r.Position.y == room.Position.z);
 
         do
         {
@@ -135,30 +140,31 @@ public class DNDFileScriptCreator : MonoBehaviour
             {
                 case Orientation.N:
                     doorPosition = random.RandomPointOnWall(upperLeft, upperRight);
-                    break;
-                case Orientation.E:
-                    doorPosition = random.RandomPointOnWall(upperLeft, lowerLeft);
+                    possibleHall = new RectangleF(doorPosition, new Vector3(hallWidth, 0, hallBounds.Max)); // Hall extends north
                     break;
                 case Orientation.S:
                     doorPosition = random.RandomPointOnWall(lowerLeft, lowerRight);
+                    // Offset the hall so it extends south (subtract from z)
+                    possibleHall = new RectangleF(
+                        new Vector3(doorPosition.x, doorPosition.y, doorPosition.z - hallBounds.Max),
+                        new Vector3(hallWidth, 0, hallBounds.Max));
+                    break;
+                case Orientation.E:
+                    doorPosition = random.RandomPointOnWall(upperRight, lowerRight);
+                    possibleHall = new RectangleF(doorPosition, new Vector3(hallBounds.Max, 0, hallWidth)); // Hall extends east
                     break;
                 case Orientation.W:
-                    doorPosition = random.RandomPointOnWall(lowerRight, upperRight);
+                    doorPosition = random.RandomPointOnWall(upperLeft, lowerLeft);
+                    // Offset the hall so it extends west (subtract from x)
+                    possibleHall = new RectangleF(
+                        new Vector3(doorPosition.x - hallBounds.Max, doorPosition.y, doorPosition.z),
+                        new Vector3(hallBounds.Max, 0, hallWidth));
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
-            if (orientation == Orientation.N || orientation == Orientation.S)
-            {
-                hall = new RectangleF(new Vector2(doorPosition.x - hallWidth / 2, doorPosition.z), new Vector2(hallWidth, hallBounds.Max));
-            }
-            else
-            {
-                hall = new RectangleF(new Vector2(doorPosition.x, doorPosition.z - hallWidth / 2), new Vector2(hallBounds.Max, hallWidth));
-            }
-
-            RectangleF tempHall = hall;
-
-            isDoorPlaced = rooms.Any(r => r.Overlaps(tempHall));
+            isDoorPlaced = roomsWithoutThis.Any(r => r.Overlaps(possibleHall));
             attempts++;
 
         } while (!isDoorPlaced && attempts < maxAttempts);
@@ -166,12 +172,32 @@ public class DNDFileScriptCreator : MonoBehaviour
         if (isDoorPlaced)
         {
             isOnWE = orientation == Orientation.W || orientation == Orientation.E;
+
+            RectangleF targetRoom = roomsWithoutThis.First(r => r.Overlaps(possibleHall));
+            float requiredLength = Vector3.Distance(doorPosition, targetRoom.Position);
+            possibleHall = ResizeHall(possibleHall, requiredLength);
+
+            hall = possibleHall;
             return doorPosition;
         }
         else
         {
-            throw new Exception($"Failed to place door after {attempts} attempts");
+            Debug.LogError("Failed to place door after " + attempts + " attempts");
+            isOnWE = false;
+            hall = new RectangleF(Vector3.zero, Vector3.zero);
+            return Vector3.zero;
         }
+    }
+
+    private static RectangleF ResizeHall(RectangleF hall, float requiredLength)
+    {
+        Vector2 newSize = hall.Size;
+        if (hall.Size.x > hall.Size.y) // Horizontal hall
+            newSize.x = requiredLength;
+        else // Vertical hall
+            newSize.y = requiredLength;
+
+        return new RectangleF(hall.Position, newSize);
     }
     #endregion
     #region CreateFile
