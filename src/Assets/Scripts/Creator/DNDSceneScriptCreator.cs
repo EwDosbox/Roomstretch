@@ -13,7 +13,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
 {
     [SerializeField] private DNDFileData fileData;
     [SerializeField] private GameObject Player;
-
+    private Transform doorsTransform;
     private GameObject Map;
     private Dictionary<string, GameObject> Prefabs;
 
@@ -21,6 +21,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "LevelScene")
         {
+            doorsTransform = GameObject.Find("Doors").transform;
             Map = GameObject.Find("Map");
             LoadPrefabs();
             MakeMap();
@@ -49,7 +50,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
         {
             InstantiateRoom(room);
         }
-        foreach (DoorData door in fileData.Doors)
+        foreach (Door door in fileData.DoorMap.Doors)
         {
             InstantiateDoor(door);
         }
@@ -95,17 +96,21 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         Debug.Log($"Room created at {position} with size {size}");
     }
-    private void InstantiateDoor(DoorData door)
+    private void InstantiateDoor(Door door)
     {
         Vector3 position = door.Position;
-        position.y = Prefabs["Arch"].transform.position.y;
+        position.y = Prefabs["Door"].transform.position.y;
 
-        GameObject doorObject = Instantiate(Prefabs["Arch"], position, Quaternion.identity, Map.transform);
+        GameObject doorObject = Instantiate(Prefabs["Door"], position, Quaternion.identity, doorsTransform);
 
         if (door.IsOnWE)
         {
             doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 90f, 0));
         }
+
+        doorObject.name = $"Door {door.ID}";
+        doorObject.GetComponent<DoorTeleportScript>().Destination = door.PlayerTeleportLocation;
+        doorObject.GetComponent<DoorTeleportScript>().Player = Player;
 
         Debug.Log($"Door created at {position}");
     }
@@ -129,7 +134,6 @@ public class DNDSceneScriptCreator : MonoBehaviour
         file.Save.FilePath = save.Element("FilePath").Value.Trim();
 
         file.Save.RoomsCountBounds = ParseGenerationBounds<int>(save.Element("RoomsCountBounds"));
-        file.Save.DoorCountBounds = ParseGenerationBounds<int>(save.Element("DoorsCountBounds"));
         file.Save.XRoomBounds = ParseBounds<float>(save.Element("XRoomBounds"));
         file.Save.ZRoomBounds = ParseBounds<float>(save.Element("ZRoomBounds"));
         file.Save.XMapBounds = ParseBounds<float>(save.Element("XMapBounds"));
@@ -175,11 +179,11 @@ public class DNDSceneScriptCreator : MonoBehaviour
         {
             int doorID = int.Parse(door.Element("ID").Value.Trim());
             Vector3 doorPosition = ParseVector3(door.Element("Position"));
-            int linkedRoomID = int.Parse(door.Element("LinkedRoomID").Value.Trim());
+            Vector3 playerTeleportLocation = ParseVector3(door.Element("PlayerTeleportLocation"));
             bool isOnWE = door.Element("IsOnWE").Value.Trim() == "True";
 
-            file.AddDoor(doorPosition, linkedRoomID);
-            file.Doors.Where(d => d.Position == doorPosition).First().IsOnWE = isOnWE;
+            file.AddDoor(doorPosition, playerTeleportLocation, isOnWE);
+            //file.DoorMap.Doors.Where(d => d.Position == doorPosition).First().IsOnWE = isOnWE;
         }
 
         XElement wallsElement = body.Element("Walls");

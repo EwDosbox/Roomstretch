@@ -10,7 +10,7 @@ public class DNDFileData : ScriptableObject
 {
     [SerializeField] private int lastUsedID;
     [SerializeField] private List<RoomData> rooms;
-    [SerializeField] private List<DoorData> doors;
+    [SerializeField] private DoorMap doorMap;
     [SerializeField] private List<Wall> walls;
     [SerializeField] private Settings settings;
     [SerializeField] private Save save;
@@ -20,7 +20,11 @@ public class DNDFileData : ScriptableObject
         get => rooms;
         set => rooms = value;
     }
-    public List<DoorData> Doors => doors;
+    public DoorMap DoorMap
+    {
+        get => doorMap;
+        set => doorMap = value;
+    }
     public List<Wall> Walls => walls;
     public Settings Settings => settings;
 
@@ -38,16 +42,16 @@ public class DNDFileData : ScriptableObject
 
         rooms.Add(room);
     }
-    public void AddDoor(Vector3 position, int linkedRoomID)
-    {
-        doors.Add(new DoorData(position, linkedRoomID, ++lastUsedID));
+    public void AddDoor(Vector3 doorPosition, Vector3 playerTeleportLocation, bool isOnWE)
+    {     
+        doorMap.AddDoor(doorPosition, playerTeleportLocation, isOnWE);
     }
 
     public void Initialize()
     {
         lastUsedID = 0;
         rooms = new List<RoomData>();
-        doors = new List<DoorData>();
+        doorMap = new DoorMap();
         walls = new List<Wall>();
         settings = new Settings();
         save = new Save();
@@ -103,7 +107,6 @@ public class Save
     [SerializeField] private string seed;
     [SerializeField] private string filepath;
     [SerializeField] private GenerationBounds<int> roomCountBounds;
-    [SerializeField] private GenerationBounds<int> doorCountBounds;
     [SerializeField] private Bounds<float> xRoomBounds;
     [SerializeField] private Bounds<float> zRoomBounds;
     [SerializeField] private Bounds<float> xMapBounds;
@@ -129,11 +132,6 @@ public class Save
     {
         get => roomCountBounds;
         set => roomCountBounds = value;
-    }
-    public GenerationBounds<int> DoorCountBounds
-    {
-        get => doorCountBounds;
-        set => doorCountBounds = value;
     }
 
     public Bounds<float> XRoomBounds
@@ -184,7 +182,6 @@ public class Save
     {
         version = "1.0";
         roomCountBounds = new GenerationBounds<int>(5, new Bounds<int>(5, 10));
-        doorCountBounds = new GenerationBounds<int>(2, new Bounds<int>(2, 4));
         xRoomBounds = new Bounds<float>(5, 10);
         zRoomBounds = new Bounds<float>(5, 10);
         xMapBounds = new Bounds<float>(-10, +10);
@@ -242,17 +239,37 @@ public class RoomData : BaseEntityData
     }
 }
 #endregion
-#region DoorData
+#region DoorConnection
 [System.Serializable]
-public class DoorData : BaseEntityData
+public class DoorConnection
 {
-    private int linkedRoomID;
+    private int id;
+    private Door door1;
+    private Door door2;
+
+    public int ID => id;
+    public Door Door1 => door1;
+    public Door Door2 => door2;
+
+    public DoorConnection(int id, Door door1, Door door2)
+    {
+        this.id = id;
+        this.door1 = door1;
+        this.door2 = door2;
+    }
+}
+#endregion
+#region Door
+[System.Serializable]
+public class Door : BaseEntityData
+{
+    private Vector3 playerTeleportLocation;
     private bool isOnWE;
 
-    public int LinkedRoomID
+    public Vector3 PlayerTeleportLocation
     {
-        get => linkedRoomID;
-        set => linkedRoomID = value;
+        get => playerTeleportLocation;
+        set => playerTeleportLocation = value;
     }
     public bool IsOnWE
     {
@@ -260,17 +277,40 @@ public class DoorData : BaseEntityData
         set => isOnWE = value;
     }
 
-    public DoorData(Vector3 position, int linkedRoomID, int id) : base(position, id)
+    public Door(Vector3 position, int id, Vector3 playerTeleportLocation, bool isOnWE) : base(position, id)
     {
-        this.linkedRoomID = linkedRoomID;
+        this.playerTeleportLocation = playerTeleportLocation;
+        this.isOnWE = isOnWE;
     }
-    public DoorData() : base(Vector3.zero, 0)
+}
+#endregion
+#region DoorMap
+[System.Serializable]
+public class DoorMap
+{
+    private int lastUsedDoorID;
+    private int lastUsedConnectionID;
+    private List<DoorConnection> doorConnections;
+    private List<Door> doors;
+
+    public List<DoorConnection> DoorConnections => doorConnections;
+    public List<Door> Doors => doors;
+
+    public DoorMap()
     {
-        linkedRoomID = 0;
+        doorConnections = new List<DoorConnection>();
+        doors = new List<Door>();
+        lastUsedDoorID = 0;
+        lastUsedConnectionID = 0;
     }
-    public override string ToString()
+
+    public void AddConnection(Door door1, Door door2)
     {
-        return base.ToString() + $"Linked Room ID: {linkedRoomID}";
+        doorConnections.Add(new DoorConnection(lastUsedConnectionID++,door1, door2));
+    }
+    public void AddDoor(Vector3 position, Vector3 playerTeleportLocation, bool isOnWE)
+    {
+        doors.Add(new Door(position, lastUsedDoorID++, playerTeleportLocation, isOnWE));
     }
 }
 #endregion
@@ -488,7 +528,6 @@ public abstract class BaseEntityData
     }
 }
 #endregion
-
 #region Wall
 public enum
 Orientation

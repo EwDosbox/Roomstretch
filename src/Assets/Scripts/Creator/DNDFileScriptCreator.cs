@@ -19,7 +19,6 @@ public class DNDFileScriptCreator : MonoBehaviour
         BetterRandom random = save.Save.Random;
 
         save.Save.RoomsCountBounds.Generate(random);
-        save.Save.DoorCountBounds.Generate(random);
 
         rooms = new List<RectangleF>();
 
@@ -56,22 +55,11 @@ public class DNDFileScriptCreator : MonoBehaviour
         save.Save.RoomsCountBounds.Value = save.Rooms.Count;
         save.Rooms[random.Random(0, save.Rooms.Count)].IsStartRoom = true;
 
-        List<RoomData> roomsCopy = new List<RoomData>(save.Rooms);
-        foreach (RoomData room in roomsCopy)
+        foreach(RoomData room in save.Rooms)
         {
-            Vector3 doorPosition = PlaceDoor(rooms, save, room, random, out bool isOnWE, out RectangleF hall);
+            Vector3 doorPosition = PlaceDoor(save.DoorMap, out bool isOnWE, out Vector3 playerTeleportLocation);
 
-            Vector3 hallPosition = new Vector3(hall.Position.x, 0, hall.Position.y);
-            Vector3 hallSize = new Vector3(hall.Size.x, 0, hall.Size.y);
-
-            RoomData roomData = new RoomData(hallSize, hallPosition, -1);
-
-            save.Rooms.Add(roomData);
-
-            DoorData doorData = new DoorData(doorPosition, -1, 1); // -1 for no linked room yet
-            doorData.IsOnWE = isOnWE;
-
-            save.Doors.Add(doorData);
+            save.DoorMap.AddDoor(doorPosition,playerTeleportLocation,isOnWE);
         }
     }
 
@@ -103,8 +91,13 @@ public class DNDFileScriptCreator : MonoBehaviour
         return room;
     }
 
-    public static Vector3 PlaceDoor(List<RectangleF> rooms, DNDFileData save, RoomData room, BetterRandom random, out bool isOnWE, out RectangleF hall)
+    public static Vector3 PlaceDoor(DoorMap doorMap,out bool isOnWE, out Vector3 playerTeleportLocation)
     {
+        Vector3 doorPosition = Vector3.zero;
+        isOnWE = false;
+        playerTeleportLocation = Vector3.zero;
+        return doorPosition;
+        /*
         Vector3 doorPosition = Vector3.zero;
 
         Vector3 upperLeft = new(room.Position.x, 0, room.Position.z + room.Size.z);
@@ -187,17 +180,7 @@ public class DNDFileScriptCreator : MonoBehaviour
             hall = new RectangleF(Vector3.zero, Vector3.zero);
             return Vector3.zero;
         }
-    }
-
-    private static RectangleF ResizeHall(RectangleF hall, float requiredLength)
-    {
-        Vector2 newSize = hall.Size;
-        if (hall.Size.x > hall.Size.y) // Horizontal hall
-            newSize.x = requiredLength;
-        else // Vertical hall
-            newSize.y = requiredLength;
-
-        return new RectangleF(hall.Position, newSize);
+        */
     }
     #endregion
     #region CreateFile
@@ -223,7 +206,6 @@ public class DNDFileScriptCreator : MonoBehaviour
             writer.WriteElementString("Seed", fileData.Save.Seed);
             writer.WriteElementString("FilePath", fileData.Save.FilePath);
             WriteGenerationBounds(writer, fileData.Save.RoomsCountBounds, "RoomsCountBounds");
-            WriteGenerationBounds(writer, fileData.Save.DoorCountBounds, "DoorsCountBounds");
 
             WriteBounds(writer, fileData.Save.XRoomBounds, "XRoomBounds");
             WriteBounds(writer, fileData.Save.ZRoomBounds, "ZRoomBounds");
@@ -270,14 +252,14 @@ public class DNDFileScriptCreator : MonoBehaviour
             }
             writer.WriteEndElement();
             writer.WriteStartElement("Doors");
-            foreach (DoorData doorData in fileData.Doors)
+            foreach (Door door in fileData.DoorMap.Doors)
             {
                 writer.WriteStartElement("Door");
 
-                writer.WriteElementString("ID", doorData.ID.ToString());
-                WriteVector3(writer, doorData.Position, "Position");
-                writer.WriteElementString("LinkedRoomID", doorData.LinkedRoomID.ToString());
-                writer.WriteElementString("IsOnWE", doorData.IsOnWE.ToString());
+                writer.WriteElementString("ID", door.ID.ToString());
+                WriteVector3(writer, door.Position, "Position");
+                WriteVector3(writer, door.PlayerTeleportLocation, "PlayerTeleportLocation");
+                writer.WriteElementString("IsOnWE", door.IsOnWE.ToString());
 
                 writer.WriteEndElement();
             }

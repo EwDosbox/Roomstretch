@@ -18,7 +18,7 @@ public class GizmosDrawer : MonoBehaviour
 
             Gizmos.DrawLine(wall.Start, wall.End);
         }
-        foreach (DoorData door in fileData.Doors)
+        foreach (Door door in fileData.DoorMap.Doors)
         {
             Gizmos.color = Color.green;
             Gizmos.DrawSphere(door.Position, 0.5f);
