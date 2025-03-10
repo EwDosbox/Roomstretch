@@ -5,21 +5,22 @@ public class DoorTeleportScript : MonoBehaviour
 {
     [SerializeField] public Vector3 Destination;
     private CanvasGroup canvasGroup;
-    private GameObject Player;
+    [SerializeField] private GameObject Player;
     private PlayerInputScript playerInputScript;
+    private bool isTeleporting = false;
 
     private void Awake()
     {
         Player = GameObject.Find("Player");
-        canvasGroup = GameObject.Find("BlackBG").GetComponent<CanvasGroup>(); // Find the CanvasGroup component
-        //Co m
+        canvasGroup = GameObject.Find("BlackBackground").GetComponent<CanvasGroup>();
         playerInputScript = Player.GetComponent<PlayerInputScript>();
     }
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject == Player && playerInputScript.ShouldTeleport)
+        if (!isTeleporting && other.gameObject == Player && playerInputScript.ShouldTeleport)
         {
+            isTeleporting = true;
             StartCoroutine(FadeAndTeleport());
         }
     }
@@ -28,7 +29,9 @@ public class DoorTeleportScript : MonoBehaviour
     {
         yield return StartCoroutine(Fade(canvasGroup, 2f, FadeEnum.In));
         Player.transform.position = Destination;
+        yield return null;
         yield return StartCoroutine(Fade(canvasGroup, 2f, FadeEnum.Out));
+        isTeleporting = false;
     }
 
     private IEnumerator Fade(CanvasGroup canvasGroup, float time, FadeEnum fade)
