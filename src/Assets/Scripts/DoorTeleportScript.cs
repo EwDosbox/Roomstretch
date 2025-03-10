@@ -3,13 +3,16 @@ using UnityEngine;
 
 public class DoorTeleportScript : MonoBehaviour
 {
-    [SerializeField] private Vector3 Destination;
-    [SerializeField] private GameObject Player;
-    [SerializeField] private CanvasGroup canvasGroup;
+    [SerializeField] public Vector3 Destination;
+    private CanvasGroup canvasGroup;
+    private GameObject Player;
     private PlayerInputScript playerInputScript;
 
     private void Awake()
     {
+        Player = GameObject.Find("Player");
+        canvasGroup = GameObject.Find("BlackBG").GetComponent<CanvasGroup>(); // Find the CanvasGroup component
+        //Co m
         playerInputScript = Player.GetComponent<PlayerInputScript>();
     }
 
@@ -23,14 +26,14 @@ public class DoorTeleportScript : MonoBehaviour
 
     private IEnumerator FadeAndTeleport()
     {
-        yield return StartCoroutine(Fade(canvasGroup, 2f, Fade.In));
+        yield return StartCoroutine(Fade(canvasGroup, 2f, FadeEnum.In));
         Player.transform.position = Destination;
-        yield return StartCoroutine(Fade(canvasGroup, 2f, Fade.Out));
+        yield return StartCoroutine(Fade(canvasGroup, 2f, FadeEnum.Out));
     }
 
-    private IEnumerator Fade(CanvasGroup canvasGroup, float time, Fade fade)
+    private IEnumerator Fade(CanvasGroup canvasGroup, float time, FadeEnum fade)
     {
-        if (fade == Fade.In)
+        if (fade == FadeEnum.In)
         {
             canvasGroup.alpha = 0;
             while (canvasGroup.alpha < 1)
@@ -40,7 +43,7 @@ public class DoorTeleportScript : MonoBehaviour
             }
             canvasGroup.alpha = 1;
         }
-        else if (fade == Fade.Out)
+        else if (fade == FadeEnum.Out)
         {
             canvasGroup.alpha = 1;
             while (canvasGroup.alpha > 0)
@@ -53,7 +56,7 @@ public class DoorTeleportScript : MonoBehaviour
     }
 }
 
-public enum Fade
+public enum FadeEnum
 {
     In,
     Out

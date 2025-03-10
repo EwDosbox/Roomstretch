@@ -95,7 +95,7 @@ public class DNDFileScriptCreator : MonoBehaviour
     {
         Vector3 doorPosition = Vector3.zero;
         isOnWE = false;
-        playerTeleportLocation = Vector3.zero;
+        playerTeleportLocation = new(3,0,3);
         return doorPosition;
         /*
         Vector3 doorPosition = Vector3.zero;

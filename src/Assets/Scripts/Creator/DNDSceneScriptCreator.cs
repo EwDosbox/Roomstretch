@@ -110,7 +110,6 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         doorObject.name = $"Door {door.ID}";
         doorObject.GetComponent<DoorTeleportScript>().Destination = door.PlayerTeleportLocation;
-        doorObject.GetComponent<DoorTeleportScript>().Player = Player;
 
         Debug.Log($"Door created at {position}");
     }
