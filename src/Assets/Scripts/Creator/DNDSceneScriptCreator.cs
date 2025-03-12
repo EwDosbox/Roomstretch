@@ -26,7 +26,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
             LoadPrefabs();
             MakeMap();
         }
-    }    
+    }
     #region LoadResources
     private void LoadPrefabs()
     {
@@ -103,9 +103,20 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         GameObject doorObject = Instantiate(Prefabs["Door"], position, Quaternion.identity, doorsTransform);
 
-        if (!door.IsOnWE)
+        switch (door.Orientation)
         {
-            doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 90f, 0));
+            case Orientation.W:
+                doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 270f, 0));
+                break;
+            case Orientation.S:                      
+                doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 90f, 0));
+                break;
+            case Orientation.E:
+                doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+                break;
+            case Orientation.N:
+                doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 180f, 0));
+                break;
         }
 
         doorObject.name = $"Door {door.ID}";
@@ -179,9 +190,15 @@ public class DNDSceneScriptCreator : MonoBehaviour
             int doorID = int.Parse(door.Element("ID").Value.Trim());
             Vector3 doorPosition = ParseVector3(door.Element("Position"));
             Vector3 playerTeleportLocation = ParseVector3(door.Element("PlayerTeleportLocation"));
-            bool isOnWE = door.Element("IsOnWE").Value.Trim() == "True";
+            char orientationString = door.Element("Orientation").Value.Trim()[0];
 
-            file.AddDoor(doorPosition, playerTeleportLocation, isOnWE);
+            Orientation orientation = Orientation.N;
+            if (orientationString == 'N') orientation = Orientation.N;
+            else if (orientationString == 'S') orientation = Orientation.S;
+            else if (orientationString == 'E') orientation = Orientation.E;
+            else if (orientationString == 'W') orientation = Orientation.W;
+
+            file.AddDoor(doorPosition, playerTeleportLocation, orientation);
             //file.DoorMap.Doors.Where(d => d.Position == doorPosition).First().IsOnWE = isOnWE;
         }
 
@@ -194,10 +211,10 @@ public class DNDSceneScriptCreator : MonoBehaviour
             char wallOrientationValue = wall.Element("Orientation").Value.Trim()[0];
 
             Orientation wallOrientation = Orientation.N;
-            if(wallOrientationValue == 'N') wallOrientation = Orientation.N;
-            else if(wallOrientationValue == 'S') wallOrientation = Orientation.S;
-            else if(wallOrientationValue == 'E') wallOrientation = Orientation.E;
-            else if(wallOrientationValue == 'W') wallOrientation = Orientation.W;
+            if (wallOrientationValue == 'N') wallOrientation = Orientation.N;
+            else if (wallOrientationValue == 'S') wallOrientation = Orientation.S;
+            else if (wallOrientationValue == 'E') wallOrientation = Orientation.E;
+            else if (wallOrientationValue == 'W') wallOrientation = Orientation.W;
 
             Wall wallData = new Wall(wallStart, wallEnd, wallOrientation);
             file.Walls.Add(wallData);

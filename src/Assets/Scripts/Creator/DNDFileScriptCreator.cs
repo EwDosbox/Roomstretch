@@ -58,8 +58,8 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         foreach (RoomData room in save.Rooms)
         {
-            Vector3 doorPosition = PlaceDoor(room, save, random, out bool isOnWE, out Vector3 playerTeleportLocation);
-            save.DoorMap.AddDoor(doorPosition, playerTeleportLocation, isOnWE);
+            Vector3 doorPosition = PlaceDoor(room, save, random, out Orientation orientation, out Vector3 playerTeleportLocation);
+            save.DoorMap.AddDoor(doorPosition, playerTeleportLocation, orientation);
         }
     }
     #endregion
@@ -89,26 +89,31 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         return room;
     }
-    public static Vector3 PlaceDoor(RoomData room, DNDFileData save, BetterRandom random, out bool isOnWE, out Vector3 playerTeleportLocation)
+    public static Vector3 PlaceDoor(RoomData room, DNDFileData save, BetterRandom random, out Orientation orientation, out Vector3 playerTeleportLocation)
     {
         List<RoomData> rooms = save.Rooms;
         Vector3 doorPosition;
 
-        Orientation orientation = random.RandomOrientation();
+        orientation = random.RandomOrientation();
         PointOfWalls(room, out Vector3 upperLeft, out Vector3 upperRight, out Vector3 lowerLeft, out Vector3 lowerRight);
+        float offsetDoor = 0.75f;
         switch (orientation)
         {
             case Orientation.N:
                 doorPosition = random.RandomPointOnWall(upperLeft, upperRight);
+                doorPosition.z -= offsetDoor;
                 break;
             case Orientation.S:
                 doorPosition = random.RandomPointOnWall(lowerLeft, lowerRight);
+                doorPosition.z += offsetDoor;
                 break;
             case Orientation.E:
                 doorPosition = random.RandomPointOnWall(upperRight, lowerRight);
+                doorPosition.x -= offsetDoor;
                 break;
             case Orientation.W:
                 doorPosition = random.RandomPointOnWall(upperLeft, lowerLeft);
+                doorPosition.x += offsetDoor;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -123,21 +128,25 @@ public class DNDFileScriptCreator : MonoBehaviour
         {
             case Orientation.N:
                 playerTeleportLocation = random.RandomPointOnWall(upperLeftTeleport, upperRightTeleport);
+                playerTeleportLocation.z -= offsetDoor;
                 break;
             case Orientation.S:
                 playerTeleportLocation = random.RandomPointOnWall(lowerLeftTeleport, lowerRightTeleport);
+                doorPosition.z += offsetDoor;
                 break;
             case Orientation.E:
                 playerTeleportLocation = random.RandomPointOnWall(upperRightTeleport, lowerRightTeleport);
+                doorPosition.x -= offsetDoor;
                 break;
             case Orientation.W:
                 playerTeleportLocation = random.RandomPointOnWall(upperLeftTeleport, lowerLeftTeleport);
+                doorPosition.x += offsetDoor;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
 
-        isOnWE = orientation == Orientation.W || orientation == Orientation.E;
+        playerTeleportLocation.y = 0.5f;
         return doorPosition;
         /*
         Vector3 doorPosition = Vector3.zero;
@@ -310,7 +319,7 @@ public class DNDFileScriptCreator : MonoBehaviour
                 writer.WriteElementString("ID", door.ID.ToString());
                 WriteVector3(writer, door.Position, "Position");
                 WriteVector3(writer, door.PlayerTeleportLocation, "PlayerTeleportLocation");
-                writer.WriteElementString("IsOnWE", door.IsOnWE.ToString());
+                writer.WriteElementString("Orientation", door.Orientation.ToString());
 
                 writer.WriteEndElement();
             }

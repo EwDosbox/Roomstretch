@@ -42,9 +42,9 @@ public class DNDFileData : ScriptableObject
 
         rooms.Add(room);
     }
-    public void AddDoor(Vector3 doorPosition, Vector3 playerTeleportLocation, bool isOnWE)
-    {     
-        doorMap.AddDoor(doorPosition, playerTeleportLocation, isOnWE);
+    public void AddDoor(Vector3 doorPosition, Vector3 playerTeleportLocation, Orientation orientation)
+    {
+        doorMap.AddDoor(doorPosition, playerTeleportLocation, orientation);
     }
 
     public void Initialize()
@@ -302,23 +302,23 @@ public class DoorConnection
 public class Door : BaseEntityData
 {
     private Vector3 playerTeleportLocation;
-    private bool isOnWE;
+    private Orientation orientation;
 
     public Vector3 PlayerTeleportLocation
     {
         get => playerTeleportLocation;
         set => playerTeleportLocation = value;
     }
-    public bool IsOnWE
+    public Orientation Orientation
     {
-        get => isOnWE;
-        set => isOnWE = value;
+        get => orientation;
+        set => orientation = value;
     }
 
-    public Door(Vector3 position, int id, Vector3 playerTeleportLocation, bool isOnWE) : base(position, id)
+    public Door(Vector3 position, int id, Vector3 playerTeleportLocation, Orientation orientation) : base(position, id)
     {
         this.playerTeleportLocation = playerTeleportLocation;
-        this.isOnWE = isOnWE;
+        this.orientation = orientation;
     }
 }
 #endregion
@@ -344,11 +344,11 @@ public class DoorMap
 
     public void AddConnection(Door door1, Door door2)
     {
-        doorConnections.Add(new DoorConnection(lastUsedConnectionID++,door1, door2));
+        doorConnections.Add(new DoorConnection(lastUsedConnectionID++, door1, door2));
     }
-    public void AddDoor(Vector3 position, Vector3 playerTeleportLocation, bool isOnWE)
+    public void AddDoor(Vector3 position, Vector3 playerTeleportLocation, Orientation orientation)
     {
-        doors.Add(new Door(position, lastUsedDoorID++, playerTeleportLocation, isOnWE));
+        doors.Add(new Door(position, lastUsedDoorID++, playerTeleportLocation, orientation));
     }
 }
 #endregion
@@ -436,10 +436,19 @@ public class BetterRandom
     {
         return (Orientation)Random(0, 4);
     }
-    public Vector3 RandomPointOnWall(Vector3 start, Vector3 end)
+    public Vector3 RandomPointOnWall(Vector3 start, Vector3 end, float padding = 2)
     {
-        if(end.x < start.x) return new Vector3(Random(end.x, start.x),0,Random(end.z, start.z));        
-        return new Vector3(Random(start.x, end.x),0,Random(start.z, end.z));
+        float xElement = RandomElement(start.x, end.x, padding);
+        float yElement = RandomElement(start.y, end.y, padding);
+        float zElement = RandomElement(start.z, end.z, padding);
+
+        return new Vector3(xElement, yElement, zElement);
+    }
+    private float RandomElement(float a, float b, float padding)
+    {
+        if (b > a) return Random(a + padding, b - padding);
+        if (a > b) return Random(b + padding, a - padding);
+        return a;
     }
 }
 #endregion
