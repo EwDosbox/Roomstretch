@@ -55,12 +55,8 @@ public class DNDFileScriptCreator : MonoBehaviour
         save.Save.RoomsCountBounds.Value = save.Rooms.Count;
         save.Rooms[random.Random(0, save.Rooms.Count)].IsStartRoom = true;
 
-        foreach(RoomData room in save.Rooms)
-        {
-            Vector3 doorPosition = PlaceDoor(save.DoorMap, out bool isOnWE, out Vector3 playerTeleportLocation);
+        ConnectRoomsWithMST(save.DoorMap, save.Rooms, random);
 
-            save.DoorMap.AddDoor(doorPosition,playerTeleportLocation,isOnWE);
-        }
     }
 
     #endregion
@@ -90,12 +86,98 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         return room;
     }
+    #region MST
+    public static void ConnectRoomsWithMST(DoorMap doorMap, List<RoomData> rooms, BetterRandom random)
+    {
+        List<(RoomData a, RoomData b, float distance)> edges = new List<(RoomData, RoomData, float)>();
 
-    public static Vector3 PlaceDoor(DoorMap doorMap,out bool isOnWE, out Vector3 playerTeleportLocation)
+        // Generate all possible room pairs with distances
+        for (int i = 0; i < rooms.Count; i++)
+        {
+            for (int j = i + 1; j < rooms.Count; j++)
+            {
+                float dist = Vector3.Distance(rooms[i].Position, rooms[j].Position);
+                edges.Add((rooms[i], rooms[j], dist));
+            }
+        }
+
+        // Sort edges by distance
+        edges.Sort((a, b) => a.distance.CompareTo(b.distance));
+
+        UnionFind uf = new UnionFind(rooms.Count);
+
+        foreach (var edge in edges)
+        {
+            if (uf.Find(edge.a.ID) != uf.Find(edge.b.ID))
+            {
+                uf.Union(edge.a.ID, edge.b.ID);
+                CreateConnectedDoors(doorMap, edge.a, edge.b, random);
+            }
+        }
+    }
+    private static void CreateConnectedDoors(DoorMap doorMap, RoomData roomA, RoomData roomB, BetterRandom random)
+    {
+        // Determine optimal door positions
+        Vector3 doorAPos = GetDoorPositionOnWall(roomA, roomB, random);
+        Vector3 doorBPos = GetDoorPositionOnWall(roomB, roomA, random);
+
+        // Calculate teleport offsets
+        bool isHorizontal = Mathf.Abs(doorAPos.x - doorBPos.x) > Mathf.Abs(doorAPos.z - doorBPos.z);
+        Vector3 teleportOffset = isHorizontal ? new Vector3(2, 0, 0) : new Vector3(0, 0, 2);
+
+        // Create and register doors
+        Door doorA = new Door(
+            doorAPos,
+            doorMap.Doors.Count,
+            doorBPos + teleportOffset,
+            isHorizontal
+        );
+
+        Door doorB = new Door(
+            doorBPos,
+            doorMap.Doors.Count + 1,
+            doorAPos - teleportOffset,
+            isHorizontal
+        );
+
+        doorMap.AddDoor(doorA.Position, doorA.PlayerTeleportLocation, doorA.IsOnWE);
+        doorMap.AddDoor(doorB.Position, doorB.PlayerTeleportLocation, doorB.IsOnWE);
+        doorMap.AddConnection(doorA, doorB);
+    }
+
+    private static Vector3 GetDoorPositionOnWall(RoomData sourceRoom, RoomData targetRoom, BetterRandom random)
+    {
+        Vector3 dir = (targetRoom.Position - sourceRoom.Position).normalized;
+        Vector3 roomSize = sourceRoom.Size;
+
+        // Determine wall side based on direction
+        bool eastWestWall = Mathf.Abs(dir.x) > Mathf.Abs(dir.z);
+
+        if (eastWestWall)
+        {
+            float xPos = dir.x > 0 ?
+                sourceRoom.Position.x + roomSize.x / 2 :
+                sourceRoom.Position.x - roomSize.x / 2;
+
+            float zPos = sourceRoom.Position.z + random.Random(-roomSize.z / 2, roomSize.z / 2);
+            return new Vector3(xPos, 0, zPos);
+        }
+        else
+        {
+            float zPos = dir.z > 0 ?
+                sourceRoom.Position.z + roomSize.z / 2 :
+                sourceRoom.Position.z - roomSize.z / 2;
+
+            float xPos = sourceRoom.Position.x + random.Random(-roomSize.x / 2, roomSize.x / 2);
+            return new Vector3(xPos, 0, zPos);
+        }
+    }
+    #endregion
+    public static Vector3 PlaceDoor(DoorMap doorMap, List<RoomData> rooms, out bool isOnWE, out Vector3 playerTeleportLocation)
     {
         Vector3 doorPosition = Vector3.zero;
         isOnWE = false;
-        playerTeleportLocation = new(3,0,3);
+        playerTeleportLocation = new(3, 0, 3);
         return doorPosition;
         /*
         Vector3 doorPosition = Vector3.zero;
