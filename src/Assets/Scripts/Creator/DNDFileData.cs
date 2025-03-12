@@ -9,8 +9,9 @@ using UnityEngine;
 public class DNDFileData : ScriptableObject
 {
     [SerializeField] private int lastUsedID;
+    [SerializeField]private int lastUsedDoorID;
     [SerializeField] private List<RoomData> rooms;
-    [SerializeField] private DoorMap doorMap;
+    [SerializeField] private List<DoorConection> doors;
     [SerializeField] private List<Wall> walls;
     [SerializeField] private Settings settings;
     [SerializeField] private Save save;
@@ -20,16 +21,17 @@ public class DNDFileData : ScriptableObject
         get => rooms;
         set => rooms = value;
     }
-    public DoorMap DoorMap
-    {
-        get => doorMap;
-        set => doorMap = value;
-    }
     public List<Wall> Walls => walls;
+    public List<DoorConection> Doors => doors;
     public Settings Settings => settings;
-
     public Save Save => save;
 
+    public void AddConnection(Door door, Door teleportDoor)
+    {
+        door = new Door(door.Position, ++lastUsedDoorID, teleportDoor.Position, door.Orientation);
+        teleportDoor = new Door(teleportDoor.Position, ++lastUsedDoorID, door.Position, teleportDoor.Orientation);
+        doors.Add(new DoorConection(door, teleportDoor));
+    }
     public void AddRoom(Vector3 size, Vector3 position, List<ObjectData> listObjects)
     {
         lastUsedID++;
@@ -42,16 +44,12 @@ public class DNDFileData : ScriptableObject
 
         rooms.Add(room);
     }
-    public void AddDoor(Vector3 doorPosition, Vector3 playerTeleportLocation, Orientation orientation)
-    {
-        doorMap.AddDoor(doorPosition, playerTeleportLocation, orientation);
-    }
 
     public void Initialize()
     {
         lastUsedID = 0;
         rooms = new List<RoomData>();
-        doorMap = new DoorMap();
+        doors = new List<DoorConection>();
         walls = new List<Wall>();
         settings = new Settings();
         save = new Save();
@@ -239,70 +237,27 @@ public class RoomData : BaseEntityData
     }
 }
 #endregion
-#region UnionFind
-public class UnionFind
-{
-    private int[] parent;
-    private int[] rank;
-
-    public UnionFind(int size)
-    {
-        parent = new int[size];
-        rank = new int[size];
-        for (int i = 0; i < size; i++)
-            parent[i] = i;
-    }
-
-    public int Find(int x)
-    {
-        if (parent[x] != x)
-            parent[x] = Find(parent[x]);
-        return parent[x];
-    }
-
-    public void Union(int x, int y)
-    {
-        int rootX = Find(x);
-        int rootY = Find(y);
-        if (rootX == rootY) return;
-
-        if (rank[rootX] < rank[rootY])
-            parent[rootX] = rootY;
-        else
-        {
-            parent[rootY] = rootX;
-            if (rank[rootX] == rank[rootY])
-                rank[rootX]++;
-        }
-    }
-}
-#endregion
-#region DoorConnection
-[System.Serializable]
-public class DoorConnection
-{
-    private int id;
-    private Door door1;
-    private Door door2;
-
-    public int ID => id;
-    public Door Door1 => door1;
-    public Door Door2 => door2;
-
-    public DoorConnection(int id, Door door1, Door door2)
-    {
-        this.id = id;
-        this.door1 = door1;
-        this.door2 = door2;
-    }
-}
-#endregion
 #region Door
+[System.Serializable]
+public class DoorConection
+{
+    private Door door;
+    private Door teleportDoor;
+
+    public Door Door => door;
+    public Door TeleportDoor => teleportDoor;
+
+    public DoorConection(Door door, Door teleportDoor)
+    {
+        this.door = door;
+        this.teleportDoor = teleportDoor;
+    }
+}
 [System.Serializable]
 public class Door : BaseEntityData
 {
-    private Vector3 playerTeleportLocation;
     private Orientation orientation;
+    private Vector3 playerTeleportLocation;
 
     public Vector3 PlayerTeleportLocation
     {
@@ -320,35 +275,10 @@ public class Door : BaseEntityData
         this.playerTeleportLocation = playerTeleportLocation;
         this.orientation = orientation;
     }
-}
-#endregion
-#region DoorMap
-[System.Serializable]
-public class DoorMap
-{
-    private int lastUsedDoorID;
-    private int lastUsedConnectionID;
-    private List<DoorConnection> doorConnections;
-    private List<Door> doors;
-
-    public List<DoorConnection> DoorConnections => doorConnections;
-    public List<Door> Doors => doors;
-
-    public DoorMap()
+    public Door(): base(Vector3.zero, 0)
     {
-        doorConnections = new List<DoorConnection>();
-        doors = new List<Door>();
-        lastUsedDoorID = 0;
-        lastUsedConnectionID = 0;
-    }
-
-    public void AddConnection(Door door1, Door door2)
-    {
-        doorConnections.Add(new DoorConnection(lastUsedConnectionID++, door1, door2));
-    }
-    public void AddDoor(Vector3 position, Vector3 playerTeleportLocation, Orientation orientation)
-    {
-        doors.Add(new Door(position, lastUsedDoorID++, playerTeleportLocation, orientation));
+        playerTeleportLocation = Vector3.zero;
+        orientation = Orientation.N;
     }
 }
 #endregion
@@ -561,7 +491,11 @@ public abstract class BaseEntityData
     [SerializeField] protected Vector3 position;
 
     public int ID => id;
-    public Vector3 Position => position;
+    public Vector3 Position
+    {
+        get => position;
+        set => position = value;
+    }
 
     protected BaseEntityData(Vector3 position, int id)
     {

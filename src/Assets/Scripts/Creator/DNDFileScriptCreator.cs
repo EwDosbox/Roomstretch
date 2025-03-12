@@ -58,8 +58,8 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         foreach (RoomData room in save.Rooms)
         {
-            Vector3 doorPosition = PlaceDoor(room, save, random, out Orientation orientation, out Vector3 playerTeleportLocation);
-            save.DoorMap.AddDoor(doorPosition, playerTeleportLocation, orientation);
+            PlaceDoor(room, save, random, out Door door, out Door doorTeleport);
+            save.AddConnection(door, doorTeleport);
         }
     }
     #endregion
@@ -89,149 +89,54 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         return room;
     }
-    public static Vector3 PlaceDoor(RoomData room, DNDFileData save, BetterRandom random, out Orientation orientation, out Vector3 playerTeleportLocation)
+    public static void PlaceDoor(RoomData room, DNDFileData save, BetterRandom random, out Door door, out Door teleportDoor)
     {
-        List<RoomData> rooms = save.Rooms;
-        Vector3 doorPosition;
+        door = new Door();
+        teleportDoor = new Door();
 
-        orientation = random.RandomOrientation();
+        door.Orientation = random.RandomOrientation();
         PointOfWalls(room, out Vector3 upperLeft, out Vector3 upperRight, out Vector3 lowerLeft, out Vector3 lowerRight);
-        float offsetDoor = 0.75f;
-        switch (orientation)
+
+        switch (door.Orientation)
         {
             case Orientation.N:
-                doorPosition = random.RandomPointOnWall(upperLeft, upperRight);
-                doorPosition.z -= offsetDoor;
+                door.Position = random.RandomPointOnWall(upperLeft, upperRight);
                 break;
             case Orientation.S:
-                doorPosition = random.RandomPointOnWall(lowerLeft, lowerRight);
-                doorPosition.z += offsetDoor;
+                door.Position = random.RandomPointOnWall(lowerLeft, lowerRight);
                 break;
             case Orientation.E:
-                doorPosition = random.RandomPointOnWall(upperRight, lowerRight);
-                doorPosition.x -= offsetDoor;
+                door.Position = random.RandomPointOnWall(upperRight, lowerRight);
                 break;
             case Orientation.W:
-                doorPosition = random.RandomPointOnWall(upperLeft, lowerLeft);
-                doorPosition.x += offsetDoor;
+                door.Position = random.RandomPointOnWall(upperLeft, lowerLeft);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
 
-        int randomRoomIndex = random.Random(0, rooms.Count);
-        RoomData teleportRoom = rooms[randomRoomIndex];
-        Orientation orientationTeleport = random.RandomOrientation();
+        int randomRoomIndex = random.Random(0, save.Rooms.Count);
+        RoomData teleportRoom = save.Rooms[randomRoomIndex];
+        teleportDoor.Orientation = random.RandomOrientation();
         PointOfWalls(teleportRoom, out Vector3 upperLeftTeleport, out Vector3 upperRightTeleport, out Vector3 lowerLeftTeleport, out Vector3 lowerRightTeleport);
 
-        switch (orientationTeleport)
+        switch (teleportDoor.Orientation)
         {
             case Orientation.N:
-                playerTeleportLocation = random.RandomPointOnWall(upperLeftTeleport, upperRightTeleport);
-                playerTeleportLocation.z -= offsetDoor;
+                teleportDoor.Position = random.RandomPointOnWall(upperLeftTeleport, upperRightTeleport);
                 break;
             case Orientation.S:
-                playerTeleportLocation = random.RandomPointOnWall(lowerLeftTeleport, lowerRightTeleport);
-                doorPosition.z += offsetDoor;
+                teleportDoor.Position =  random.RandomPointOnWall(lowerLeftTeleport, lowerRightTeleport);
                 break;
             case Orientation.E:
-                playerTeleportLocation = random.RandomPointOnWall(upperRightTeleport, lowerRightTeleport);
-                doorPosition.x -= offsetDoor;
+                teleportDoor.Position = random.RandomPointOnWall(upperRightTeleport, lowerRightTeleport);
                 break;
             case Orientation.W:
-                playerTeleportLocation = random.RandomPointOnWall(upperLeftTeleport, lowerLeftTeleport);
-                doorPosition.x += offsetDoor;
+                teleportDoor.Position = random.RandomPointOnWall(upperLeftTeleport, lowerLeftTeleport);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
-
-        playerTeleportLocation.y = 0.5f;
-        return doorPosition;
-        /*
-        Vector3 doorPosition = Vector3.zero;
-
-        Vector3 upperLeft = new(room.Position.x, 0, room.Position.z + room.Size.z);
-        Vector3 upperRight = new(room.Position.x + room.Size.x, 0, room.Position.z + room.Size.z);
-        Vector3 lowerLeft = new(room.Position.x, 0, room.Position.z);
-        Vector3 lowerRight = new(room.Position.x + room.Size.x, 0, room.Position.z);
-
-        Wall wallN = new Wall(upperLeft, upperRight, Orientation.N);
-        Wall wallE = new Wall(lowerLeft, upperLeft, Orientation.E);
-        Wall wallS = new Wall(lowerRight, lowerLeft, Orientation.S);
-        Wall wallW = new Wall(lowerRight, upperRight, Orientation.W);
-
-        save.Walls.Add(wallN);
-        save.Walls.Add(wallE);
-        save.Walls.Add(wallS);
-        save.Walls.Add(wallW);
-
-        bool isDoorPlaced = false;
-        int attempts = 0, maxAttempts = 100;
-        Orientation orientation;
-        Bounds<float> hallBounds = new Bounds<float>(2f, 10f);
-        float hallWidth = 1f;
-        RectangleF possibleHall;
-
-        List<RectangleF> roomsWithoutThis = new List<RectangleF>(rooms);
-        roomsWithoutThis.RemoveAll(r => r.Position.x == room.Position.x && r.Position.y == room.Position.z);
-
-        do
-        {
-            orientation = random.RandomOrientation();
-
-            switch (orientation)
-            {
-                case Orientation.N:
-                    doorPosition = random.RandomPointOnWall(upperLeft, upperRight);
-                    possibleHall = new RectangleF(doorPosition, new Vector3(hallWidth, 0, hallBounds.Max)); // Hall extends north
-                    break;
-                case Orientation.S:
-                    doorPosition = random.RandomPointOnWall(lowerLeft, lowerRight);
-                    // Offset the hall so it extends south (subtract from z)
-                    possibleHall = new RectangleF(
-                        new Vector3(doorPosition.x, doorPosition.y, doorPosition.z - hallBounds.Max),
-                        new Vector3(hallWidth, 0, hallBounds.Max));
-                    break;
-                case Orientation.E:
-                    doorPosition = random.RandomPointOnWall(upperRight, lowerRight);
-                    possibleHall = new RectangleF(doorPosition, new Vector3(hallBounds.Max, 0, hallWidth)); // Hall extends east
-                    break;
-                case Orientation.W:
-                    doorPosition = random.RandomPointOnWall(upperLeft, lowerLeft);
-                    // Offset the hall so it extends west (subtract from x)
-                    possibleHall = new RectangleF(
-                        new Vector3(doorPosition.x - hallBounds.Max, doorPosition.y, doorPosition.z),
-                        new Vector3(hallBounds.Max, 0, hallWidth));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            isDoorPlaced = roomsWithoutThis.Any(r => r.Overlaps(possibleHall));
-            attempts++;
-
-        } while (!isDoorPlaced && attempts < maxAttempts);
-
-        if (isDoorPlaced)
-        {
-            isOnWE = orientation == Orientation.W || orientation == Orientation.E;
-
-            RectangleF targetRoom = roomsWithoutThis.First(r => r.Overlaps(possibleHall));
-            float requiredLength = Vector3.Distance(doorPosition, targetRoom.Position);
-            possibleHall = ResizeHall(possibleHall, requiredLength);
-
-            hall = possibleHall;
-            return doorPosition;
-        }
-        else
-        {
-            Debug.LogError("Failed to place door after " + attempts + " attempts");
-            isOnWE = false;
-            hall = new RectangleF(Vector3.zero, Vector3.zero);
-            return Vector3.zero;
-        }
-        */
     }
     #endregion
     #region Walls
@@ -312,15 +217,25 @@ public class DNDFileScriptCreator : MonoBehaviour
             }
             writer.WriteEndElement();
             writer.WriteStartElement("Doors");
-            foreach (Door door in fileData.DoorMap.Doors)
+            foreach (DoorConection door in fileData.Doors)
             {
+                writer.WriteStartElement("DoorConection");
                 writer.WriteStartElement("Door");
 
-                writer.WriteElementString("ID", door.ID.ToString());
-                WriteVector3(writer, door.Position, "Position");
-                WriteVector3(writer, door.PlayerTeleportLocation, "PlayerTeleportLocation");
-                writer.WriteElementString("Orientation", door.Orientation.ToString());
+                writer.WriteElementString("ID", door.Door.ID.ToString());
+                WriteVector3(writer, door.Door.Position, "Position");
+                WriteVector3(writer, door.Door.PlayerTeleportLocation, "PlayerTeleportLocation");
+                writer.WriteElementString("Orientation", door.Door.Orientation.ToString());
 
+                writer.WriteEndElement();
+                writer.WriteStartElement("TeleportDoor");
+
+                writer.WriteElementString("ID", door.TeleportDoor.ID.ToString());
+                WriteVector3(writer, door.TeleportDoor.Position, "Position");
+                WriteVector3(writer, door.TeleportDoor.PlayerTeleportLocation, "PlayerTeleportLocation");
+                writer.WriteElementString("Orientation", door.TeleportDoor.Orientation.ToString());
+
+                writer.WriteEndElement();
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();

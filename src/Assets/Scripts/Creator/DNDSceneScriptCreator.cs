@@ -14,6 +14,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
     [SerializeField] private DNDFileData fileData;
     [SerializeField] private GameObject Player;
     private Transform doorsTransform;
+    private Transform roomsTransform;
     private GameObject Map;
     private Dictionary<string, GameObject> Prefabs;
 
@@ -22,6 +23,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "LevelScene")
         {
             doorsTransform = GameObject.Find("Doors").transform;
+            roomsTransform = GameObject.Find("Rooms").transform;
             Map = GameObject.Find("Map");
             LoadPrefabs();
             MakeMap();
@@ -50,9 +52,10 @@ public class DNDSceneScriptCreator : MonoBehaviour
         {
             InstantiateRoom(room);
         }
-        foreach (Door door in fileData.DoorMap.Doors)
+        foreach (DoorConection door in fileData.Doors)
         {
-            InstantiateDoor(door);
+            InstantiateDoor(door.Door);
+            InstantiateDoor(door.TeleportDoor);
         }
 
         Debug.Log("Creator: " + fileData.ToString());
@@ -60,13 +63,14 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
     #endregion
     #region Instantiate Methods
+    #region Room
     private void InstantiateRoom(RoomData room)
     {
         Vector3 size = room.Size;
         Vector3 position = room.Position;
         position.y = 1;
 
-        GameObject roomObject = Instantiate(Prefabs["Room"], position, Quaternion.identity, Map.transform);
+        GameObject roomObject = Instantiate(Prefabs["Room"], position, Quaternion.identity, roomsTransform);
 
         // Find child walls
         Transform wallN = roomObject.transform.Find("WallN");
@@ -96,6 +100,8 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         Debug.Log($"Room created at {position} with size {size}");
     }
+    #endregion
+    #region Door
     private void InstantiateDoor(Door door)
     {
         Vector3 position = door.Position;
@@ -106,16 +112,20 @@ public class DNDSceneScriptCreator : MonoBehaviour
         switch (door.Orientation)
         {
             case Orientation.W:
-                doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 270f, 0));
+                doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 180f, 0));
+                doorObject.transform.position -= new Vector3(0.5f, 0, 0);
                 break;
             case Orientation.S:                      
                 doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 90f, 0));
+                doorObject.transform.position -= new Vector3(0, 0, 0.5f);
                 break;
             case Orientation.E:
                 doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+                doorObject.transform.position += new Vector3(0.5f, 0, 0);
                 break;
             case Orientation.N:
-                doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 180f, 0));
+                doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 270f, 0));
+                doorObject.transform.position += new Vector3(0, 0, 0.5f);
                 break;
         }
 
@@ -124,6 +134,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         Debug.Log($"Door created at {position}");
     }
+    #endregion
     #endregion
     #region ParseDNDFile
     private DNDFileData ParseDNDFile(string filePath)
@@ -184,22 +195,13 @@ public class DNDSceneScriptCreator : MonoBehaviour
         }
 
         XElement doorsElement = body.Element("Doors");
-        List<XElement> doors = doorsElement.Elements("Door").ToList();
+        List<XElement> doors = doorsElement.Elements("DoorConection").ToList();
         foreach (XElement door in doors)
         {
-            int doorID = int.Parse(door.Element("ID").Value.Trim());
-            Vector3 doorPosition = ParseVector3(door.Element("Position"));
-            Vector3 playerTeleportLocation = ParseVector3(door.Element("PlayerTeleportLocation"));
-            char orientationString = door.Element("Orientation").Value.Trim()[0];
+            Door doorData = ParseDoor(door.Element("Door"));
+            Door teleportDoorData = ParseDoor(door.Element("TeleportDoor"));
 
-            Orientation orientation = Orientation.N;
-            if (orientationString == 'N') orientation = Orientation.N;
-            else if (orientationString == 'S') orientation = Orientation.S;
-            else if (orientationString == 'E') orientation = Orientation.E;
-            else if (orientationString == 'W') orientation = Orientation.W;
-
-            file.AddDoor(doorPosition, playerTeleportLocation, orientation);
-            //file.DoorMap.Doors.Where(d => d.Position == doorPosition).First().IsOnWE = isOnWE;
+            file.AddConnection(doorData, teleportDoorData);
         }
 
         XElement wallsElement = body.Element("Walls");
@@ -253,6 +255,21 @@ public class DNDSceneScriptCreator : MonoBehaviour
         vector.z = float.Parse(element.Element("Z").Value.Trim());
 
         return vector;
+    }
+    private Door ParseDoor(XElement element)
+    {        
+            int doorID = int.Parse(element.Element("ID").Value.Trim());
+            Vector3 doorPosition = ParseVector3(element.Element("Position"));
+            Vector3 playerTeleportLocation = ParseVector3(element.Element("PlayerTeleportLocation"));
+            char orientationString = element.Element("Orientation").Value.Trim()[0];
+
+            Orientation orientation = Orientation.N;
+            if (orientationString == 'N') orientation = Orientation.N;
+            else if (orientationString == 'S') orientation = Orientation.S;
+            else if (orientationString == 'E') orientation = Orientation.E;
+            else if (orientationString == 'W') orientation = Orientation.W;
+
+            return new Door(doorPosition, doorID, playerTeleportLocation, orientation);
     }
     #endregion
 }
