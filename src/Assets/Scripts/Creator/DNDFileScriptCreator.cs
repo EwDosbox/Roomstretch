@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -55,10 +56,12 @@ public class DNDFileScriptCreator : MonoBehaviour
         save.Save.RoomsCountBounds.Value = save.Rooms.Count;
         save.Rooms[random.Random(0, save.Rooms.Count)].IsStartRoom = true;
 
-        ConnectRoomsWithMST(save.DoorMap, save.Rooms, random);
-
+        foreach (RoomData room in save.Rooms)
+        {
+            Vector3 doorPosition = PlaceDoor(room, save, random, out bool isOnWE, out Vector3 playerTeleportLocation);
+            save.DoorMap.AddDoor(doorPosition, playerTeleportLocation, isOnWE);
+        }
     }
-
     #endregion
     #region Helping Placement Methods
     private RectangleF PlaceRoom(List<RectangleF> rooms, DNDFileData save, BetterRandom random)
@@ -86,98 +89,55 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         return room;
     }
-    #region MST
-    public static void ConnectRoomsWithMST(DoorMap doorMap, List<RoomData> rooms, BetterRandom random)
+    public static Vector3 PlaceDoor(RoomData room, DNDFileData save, BetterRandom random, out bool isOnWE, out Vector3 playerTeleportLocation)
     {
-        List<(RoomData a, RoomData b, float distance)> edges = new List<(RoomData, RoomData, float)>();
+        List<RoomData> rooms = save.Rooms;
+        Vector3 doorPosition;
 
-        // Generate all possible room pairs with distances
-        for (int i = 0; i < rooms.Count; i++)
+        Orientation orientation = random.RandomOrientation();
+        PointOfWalls(room, out Vector3 upperLeft, out Vector3 upperRight, out Vector3 lowerLeft, out Vector3 lowerRight);
+        switch (orientation)
         {
-            for (int j = i + 1; j < rooms.Count; j++)
-            {
-                float dist = Vector3.Distance(rooms[i].Position, rooms[j].Position);
-                edges.Add((rooms[i], rooms[j], dist));
-            }
+            case Orientation.N:
+                doorPosition = random.RandomPointOnWall(upperLeft, upperRight);
+                break;
+            case Orientation.S:
+                doorPosition = random.RandomPointOnWall(lowerLeft, lowerRight);
+                break;
+            case Orientation.E:
+                doorPosition = random.RandomPointOnWall(upperRight, lowerRight);
+                break;
+            case Orientation.W:
+                doorPosition = random.RandomPointOnWall(upperLeft, lowerLeft);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
 
-        // Sort edges by distance
-        edges.Sort((a, b) => a.distance.CompareTo(b.distance));
+        int randomRoomIndex = random.Random(0, rooms.Count);
+        RoomData teleportRoom = rooms[randomRoomIndex];
+        Orientation orientationTeleport = random.RandomOrientation();
+        PointOfWalls(teleportRoom, out Vector3 upperLeftTeleport, out Vector3 upperRightTeleport, out Vector3 lowerLeftTeleport, out Vector3 lowerRightTeleport);
 
-        UnionFind uf = new UnionFind(rooms.Count);
-
-        foreach (var edge in edges)
+        switch (orientationTeleport)
         {
-            if (uf.Find(edge.a.ID) != uf.Find(edge.b.ID))
-            {
-                uf.Union(edge.a.ID, edge.b.ID);
-                CreateConnectedDoors(doorMap, edge.a, edge.b, random);
-            }
+            case Orientation.N:
+                playerTeleportLocation = random.RandomPointOnWall(upperLeftTeleport, upperRightTeleport);
+                break;
+            case Orientation.S:
+                playerTeleportLocation = random.RandomPointOnWall(lowerLeftTeleport, lowerRightTeleport);
+                break;
+            case Orientation.E:
+                playerTeleportLocation = random.RandomPointOnWall(upperRightTeleport, lowerRightTeleport);
+                break;
+            case Orientation.W:
+                playerTeleportLocation = random.RandomPointOnWall(upperLeftTeleport, lowerLeftTeleport);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
-    }
-    private static void CreateConnectedDoors(DoorMap doorMap, RoomData roomA, RoomData roomB, BetterRandom random)
-    {
-        // Determine optimal door positions
-        Vector3 doorAPos = GetDoorPositionOnWall(roomA, roomB, random);
-        Vector3 doorBPos = GetDoorPositionOnWall(roomB, roomA, random);
 
-        // Calculate teleport offsets
-        bool isHorizontal = Mathf.Abs(doorAPos.x - doorBPos.x) > Mathf.Abs(doorAPos.z - doorBPos.z);
-        Vector3 teleportOffset = isHorizontal ? new Vector3(2, 0, 0) : new Vector3(0, 0, 2);
-
-        // Create and register doors
-        Door doorA = new Door(
-            doorAPos,
-            doorMap.Doors.Count,
-            doorBPos + teleportOffset,
-            isHorizontal
-        );
-
-        Door doorB = new Door(
-            doorBPos,
-            doorMap.Doors.Count + 1,
-            doorAPos - teleportOffset,
-            isHorizontal
-        );
-
-        doorMap.AddDoor(doorA.Position, doorA.PlayerTeleportLocation, doorA.IsOnWE);
-        doorMap.AddDoor(doorB.Position, doorB.PlayerTeleportLocation, doorB.IsOnWE);
-        doorMap.AddConnection(doorA, doorB);
-    }
-
-    private static Vector3 GetDoorPositionOnWall(RoomData sourceRoom, RoomData targetRoom, BetterRandom random)
-    {
-        Vector3 dir = (targetRoom.Position - sourceRoom.Position).normalized;
-        Vector3 roomSize = sourceRoom.Size;
-
-        // Determine wall side based on direction
-        bool eastWestWall = Mathf.Abs(dir.x) > Mathf.Abs(dir.z);
-
-        if (eastWestWall)
-        {
-            float xPos = dir.x > 0 ?
-                sourceRoom.Position.x + roomSize.x / 2 :
-                sourceRoom.Position.x - roomSize.x / 2;
-
-            float zPos = sourceRoom.Position.z + random.Random(-roomSize.z / 2, roomSize.z / 2);
-            return new Vector3(xPos, 0, zPos);
-        }
-        else
-        {
-            float zPos = dir.z > 0 ?
-                sourceRoom.Position.z + roomSize.z / 2 :
-                sourceRoom.Position.z - roomSize.z / 2;
-
-            float xPos = sourceRoom.Position.x + random.Random(-roomSize.x / 2, roomSize.x / 2);
-            return new Vector3(xPos, 0, zPos);
-        }
-    }
-    #endregion
-    public static Vector3 PlaceDoor(DoorMap doorMap, List<RoomData> rooms, out bool isOnWE, out Vector3 playerTeleportLocation)
-    {
-        Vector3 doorPosition = Vector3.zero;
-        isOnWE = false;
-        playerTeleportLocation = new(3, 0, 3);
+        isOnWE = orientation == Orientation.W || orientation == Orientation.E;
         return doorPosition;
         /*
         Vector3 doorPosition = Vector3.zero;
@@ -263,6 +223,15 @@ public class DNDFileScriptCreator : MonoBehaviour
             return Vector3.zero;
         }
         */
+    }
+    #endregion
+    #region Walls
+    private static void PointOfWalls(RoomData room, out Vector3 upperLeft, out Vector3 upperRight, out Vector3 lowerLeft, out Vector3 lowerRight)
+    {
+        upperLeft = new(room.Position.x, 0, room.Position.z + room.Size.z);
+        upperRight = new(room.Position.x + room.Size.x, 0, room.Position.z + room.Size.z);
+        lowerLeft = new(room.Position.x, 0, room.Position.z);
+        lowerRight = new(room.Position.x + room.Size.x, 0, room.Position.z);
     }
     #endregion
     #region CreateFile

@@ -103,7 +103,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         GameObject doorObject = Instantiate(Prefabs["Door"], position, Quaternion.identity, doorsTransform);
 
-        if (door.IsOnWE)
+        if (!door.IsOnWE)
         {
             doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 90f, 0));
         }
