@@ -9,9 +9,11 @@ using UnityEngine;
 public class DNDFileData : ScriptableObject
 {
     [SerializeField] private int lastUsedID;
-    [SerializeField]private int lastUsedDoorID;
+    [SerializeField] private int lastUsedDoorID;
+    [SerializeField] private int lastUsedObjectID;
     [SerializeField] private List<RoomData> rooms;
     [SerializeField] private List<DoorConection> doors;
+    [SerializeField] private List<ObjectData> objects;
     [SerializeField] private List<Wall> walls;
     [SerializeField] private Settings settings;
     [SerializeField] private Save save;
@@ -23,6 +25,7 @@ public class DNDFileData : ScriptableObject
     }
     public List<Wall> Walls => walls;
     public List<DoorConection> Doors => doors;
+    public List<ObjectData> Objects => objects;
     public Settings Settings => settings;
     public Save Save => save;
 
@@ -32,24 +35,25 @@ public class DNDFileData : ScriptableObject
         teleportDoor = new Door(teleportDoor.Position, ++lastUsedDoorID, door.Position, teleportDoor.Orientation);
         doors.Add(new DoorConection(door, teleportDoor));
     }
-    public void AddRoom(Vector3 size, Vector3 position, List<ObjectData> listObjects)
+    public void AddRoom(Vector3 size, Vector3 position)
     {
-        lastUsedID++;
-        RoomData room = new RoomData(size, position, lastUsedID);
-
-        foreach (ObjectData obj in listObjects)
-        {
-            room.AddObject(obj.Position, obj.Object);
-        }
-
+        RoomData room = new RoomData(size, position, ++lastUsedID);
         rooms.Add(room);
+    }
+    public void AddObject(Vector3 position, string name)
+    {
+        ObjectData obj = new ObjectData(position, ++lastUsedObjectID, name);
+        objects.Add(obj);
     }
 
     public void Initialize()
     {
         lastUsedID = 0;
+        lastUsedDoorID = 0;
+        lastUsedObjectID = 0;
         rooms = new List<RoomData>();
         doors = new List<DoorConection>();
+        objects = new List<ObjectData>();
         walls = new List<Wall>();
         settings = new Settings();
         save = new Save();
@@ -105,6 +109,7 @@ public class Save
     [SerializeField] private string seed;
     [SerializeField] private string filepath;
     [SerializeField] private GenerationBounds<int> roomCountBounds;
+    [SerializeField] private GenerationBounds<int> objectCountBounds;
     [SerializeField] private Bounds<float> xRoomBounds;
     [SerializeField] private Bounds<float> zRoomBounds;
     [SerializeField] private Bounds<float> xMapBounds;
@@ -125,13 +130,16 @@ public class Save
         get => seed;
         set => seed = value;
     }
-
     public GenerationBounds<int> RoomsCountBounds
     {
         get => roomCountBounds;
         set => roomCountBounds = value;
     }
-
+    public GenerationBounds<int> ObjectCountBounds
+    {
+        get => objectCountBounds;
+        set => objectCountBounds = value;
+    }
     public Bounds<float> XRoomBounds
     {
         get => xRoomBounds;
@@ -180,6 +188,7 @@ public class Save
     {
         version = "1.0";
         roomCountBounds = new GenerationBounds<int>(5, new Bounds<int>(5, 10));
+        objectCountBounds = new GenerationBounds<int>(5, new Bounds<int>(5, 10));
         xRoomBounds = new Bounds<float>(5, 10);
         zRoomBounds = new Bounds<float>(5, 10);
         xMapBounds = new Bounds<float>(-10, +10);
@@ -197,14 +206,11 @@ public class Save
 [System.Serializable]
 public class RoomData : BaseEntityData
 {
-    private int lastUsedObjectID;
     private bool isStartRoom;
 
     [SerializeField] private Vector3 size;
-    [SerializeField] private List<ObjectData> listObjects;
 
     public Vector3 Size => size;
-    public List<ObjectData> Objects => listObjects;
 
     public bool IsStartRoom
     {
@@ -215,25 +221,11 @@ public class RoomData : BaseEntityData
     public RoomData(Vector3 size, Vector3 position, int id) : base(position, id)
     {
         this.size = size;
-        this.listObjects = new List<ObjectData>();
-        lastUsedObjectID = 0;
-    }
-
-    public void AddObject(Vector3 position, GameObject prefab)
-    {
-        ObjectData obj = new ObjectData(position, prefab, ++lastUsedObjectID);
-        listObjects.Add(obj);
     }
 
     public override string ToString()
     {
-        string s = $"\nRoom ID: {ID};\nSize: {Size};\nPosition: {Position};";
-        s += "Objects: ";
-        foreach (ObjectData obj in listObjects)
-        {
-            s += obj.ToString() + "\n";
-        }
-        return s;
+        return $"\nRoom ID: {ID};\nSize: {Size};\nPosition: {Position};";
     }
 }
 #endregion
@@ -286,17 +278,17 @@ public class Door : BaseEntityData
 [System.Serializable]
 public class ObjectData : BaseEntityData
 {
-    [SerializeField] private GameObject prefab;
-    public GameObject Object => prefab;
+    [SerializeField] private string name;
+    public string Name => name;
 
-    public ObjectData(Vector3 position, GameObject prefab, int id) : base(position, id)
+    public ObjectData(Vector3 position, int id, string name) : base(position, id)
     {
-        this.prefab = prefab;
+        this.name = name;
     }
 
     public override string ToString()
     {
-        return base.ToString() + $"Object: {prefab.name}";
+        return base.ToString() + $"Name: {name}";
     }
 }
 #endregion

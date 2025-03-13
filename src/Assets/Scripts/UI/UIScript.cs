@@ -19,6 +19,8 @@ public class UIScript : MonoBehaviour
 
     private Toggle toggleNoOfRooms;
     private GameObject GONoOfRoomsInput;
+    private Toggle toggleNoOfObjects;
+    private GameObject GONoOfObjectsInput;
 
     private Toggle roomBoundsToggle;
     private Toggle mapBoundsToggle;
@@ -43,6 +45,7 @@ public class UIScript : MonoBehaviour
                     creator = GameObject.Find("Creator");
                     toggles = GameObject.Find("Toggles");
                     GONoOfRoomsInput = GameObject.Find("NoOfRoomsInput");
+                    GONoOfObjectsInput = GameObject.Find("NoOfObjectsInput");
 
                     GameObject go = GameObject.Find("RoomBoundsToggle");
                     roomBoundsToggle = go.GetComponent<Toggle>();
@@ -62,6 +65,8 @@ public class UIScript : MonoBehaviour
 
                     go = GameObject.Find("NoOfRoomsToggle");
                     toggleNoOfRooms = go.GetComponent<Toggle>();
+                    go = GameObject.Find("NoOfObjectsToggle");
+                    toggleNoOfObjects = go.GetComponent<Toggle>();
 
                     dNDFileScriptCreator = creator.GetComponent<DNDFileScriptCreator>();
                     break;
@@ -96,6 +101,16 @@ public class UIScript : MonoBehaviour
                     {
                         GONoOfRoomsInput.SetActive(false);
                     }
+                    if(!toggleNoOfObjects.isOn)
+                    {
+                        GONoOfObjectsInput.SetActive(true);
+                    }
+                    else
+                    {
+                        GONoOfObjectsInput.SetActive(false);
+                    }
+
+
                     if (roomBoundsToggle.isOn)
                     {
                         foreach (GameObject go in GORoomsBoundsInput)
@@ -164,6 +179,13 @@ public class UIScript : MonoBehaviour
             fileData.Save.RoomsCountBounds.Value = int.Parse(GetInput("NoOfRooms").Trim());
         }
         fileData.Save.RoomsCountBounds.ShouldUseDefaultValue = shouldGenerate;
+
+        shouldGenerate = GetToggle("NoOfObjects").isOn;
+        if (!shouldGenerate)
+        {
+            fileData.Save.ObjectCountBounds.Value = int.Parse(GetInput("NoOfObjects").Trim());
+        }
+        fileData.Save.ObjectCountBounds.ShouldUseDefaultValue = shouldGenerate;
 
         shouldGenerate = GetToggle("RoomBounds").isOn;
         if (!shouldGenerate)

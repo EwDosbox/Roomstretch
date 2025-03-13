@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Unity.Burst.Intrinsics;
 using Unity.VisualScripting;
 using UnityEditor.Playables;
 using UnityEngine;
@@ -20,6 +21,7 @@ public class DNDFileScriptCreator : MonoBehaviour
         BetterRandom random = save.Save.Random;
 
         save.Save.RoomsCountBounds.Generate(random);
+        save.Save.ObjectCountBounds.Generate(random);
 
         rooms = new List<RectangleF>();
 
@@ -40,16 +42,6 @@ public class DNDFileScriptCreator : MonoBehaviour
             Vector3 roomSize = new Vector3(room.Size.x, 0, room.Size.y);
 
             RoomData roomData = new RoomData(roomSize, roomPosition, i);
-
-            for (int j = 0; j <= 1; j++)//jeden objekt zatim
-            {
-                Vector3 objectPosition = roomData.Position;
-                GameObject prefab = new GameObject("Vial_1");//TEMP
-                ObjectData objectData = new ObjectData(objectPosition, prefab, j);
-
-                roomData.Objects.Add(objectData);
-            }
-
             save.Rooms.Add(roomData);
         }
 
@@ -60,6 +52,13 @@ public class DNDFileScriptCreator : MonoBehaviour
         {
             PlaceDoor(room, save, random, out Door door, out Door doorTeleport);
             save.AddConnection(door, doorTeleport);
+        }
+
+        int NoOfObjectsInScene =save.Save.ObjectCountBounds.Value * save.Rooms.Count;
+        for (int i = 0; i < NoOfObjectsInScene; i++)
+        {
+            PlaceObject(save, random, out ObjectData objectData);
+            save.Objects.Add(objectData);
         }
     }
     #endregion
@@ -138,6 +137,11 @@ public class DNDFileScriptCreator : MonoBehaviour
                 throw new ArgumentOutOfRangeException();
         }
     }
+    public static void PlaceObject(DNDFileData save, BetterRandom random, out ObjectData objectData)
+    {
+        objectData = new ObjectData(Vector3.zero, 0, "Vial_1");
+        objectData.Position = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
+    }
     #endregion
     #region Walls
     private static void PointOfWalls(RoomData room, out Vector3 upperLeft, out Vector3 upperRight, out Vector3 lowerLeft, out Vector3 lowerRight)
@@ -171,6 +175,7 @@ public class DNDFileScriptCreator : MonoBehaviour
             writer.WriteElementString("Seed", fileData.Save.Seed);
             writer.WriteElementString("FilePath", fileData.Save.FilePath);
             WriteGenerationBounds(writer, fileData.Save.RoomsCountBounds, "RoomsCountBounds");
+            WriteGenerationBounds(writer, fileData.Save.ObjectCountBounds, "ObjectCountBounds");
 
             WriteBounds(writer, fileData.Save.XRoomBounds, "XRoomBounds");
             WriteBounds(writer, fileData.Save.ZRoomBounds, "ZRoomBounds");
@@ -201,17 +206,6 @@ public class DNDFileScriptCreator : MonoBehaviour
 
                 WriteVector3(writer, roomData.Position, "Position");
                 WriteVector3(writer, roomData.Size, "Size");
-
-                foreach (ObjectData objectData in roomData.Objects)
-                {
-                    writer.WriteStartElement("Object");
-
-                    writer.WriteElementString("ID", objectData.ID.ToString());
-                    WriteVector3(writer, objectData.Position, "Position");
-                    writer.WriteElementString("ObjectName", objectData.Object.name);
-
-                    writer.WriteEndElement();
-                }
 
                 writer.WriteEndElement();
             }
@@ -252,7 +246,18 @@ public class DNDFileScriptCreator : MonoBehaviour
                 writer.WriteEndElement();
             }
 
-            writer.WriteEndElement();
+            writer.WriteEndElement(); 
+            writer.WriteStartElement("Objects");
+            foreach (ObjectData objectData in fileData.Objects)
+                {
+                    writer.WriteStartElement("Object");
+
+                    writer.WriteElementString("ID", objectData.ID.ToString());
+                    WriteVector3(writer, objectData.Position, "Position");
+                    writer.WriteElementString("ObjectName", objectData.Name);
+
+                    writer.WriteEndElement();
+                }
             #endregion
 
             writer.WriteEndElement();
