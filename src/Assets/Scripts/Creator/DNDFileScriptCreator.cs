@@ -13,8 +13,7 @@ using UnityEngine;
 public class DNDFileScriptCreator : MonoBehaviour
 {
     private List<RectangleF> rooms;
-
-
+    private List<Cube> objects;
     #region PrepareSave
     public void PrepareSave(DNDFileData save)
     {
@@ -54,10 +53,10 @@ public class DNDFileScriptCreator : MonoBehaviour
             save.AddConnection(door, doorTeleport);
         }
 
-        int NoOfObjectsInScene =save.Save.ObjectCountBounds.Value * save.Rooms.Count;
+        int NoOfObjectsInScene = save.Save.ObjectCountBounds.Value * save.Rooms.Count;
         for (int i = 0; i < NoOfObjectsInScene; i++)
         {
-            PlaceObject(save, random, out ObjectData objectData);
+            ObjectData objectData = PlaceObject(save, random);
             save.Objects.Add(objectData);
         }
     }
@@ -88,7 +87,7 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         return room;
     }
-    public static void PlaceDoor(RoomData room, DNDFileData save, BetterRandom random, out Door door, out Door teleportDoor)
+    public void PlaceDoor(RoomData room, DNDFileData save, BetterRandom random, out Door door, out Door teleportDoor)
     {
         door = new Door();
         teleportDoor = new Door();
@@ -125,7 +124,7 @@ public class DNDFileScriptCreator : MonoBehaviour
                 teleportDoor.Position = random.RandomPointOnWall(upperLeftTeleport, upperRightTeleport);
                 break;
             case Orientation.S:
-                teleportDoor.Position =  random.RandomPointOnWall(lowerLeftTeleport, lowerRightTeleport);
+                teleportDoor.Position = random.RandomPointOnWall(lowerLeftTeleport, lowerRightTeleport);
                 break;
             case Orientation.E:
                 teleportDoor.Position = random.RandomPointOnWall(upperRightTeleport, lowerRightTeleport);
@@ -137,11 +136,89 @@ public class DNDFileScriptCreator : MonoBehaviour
                 throw new ArgumentOutOfRangeException();
         }
     }
-    public static void PlaceObject(DNDFileData save, BetterRandom random, out ObjectData objectData)
+    public ObjectData PlaceObject(DNDFileData save, BetterRandom random)
     {
-        objectData = new ObjectData(Vector3.zero, 0, "Vial_1");
-        objectData.Position = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
+        ObjectData objectData;
+        bool isPlaced;
+        int attempts = 0, maxAttempts = 100;
+        do
+        {
+            ObjectData.TypesOfObjects typesOfObject = random.RandomTypeOfObject();
+
+            switch (typesOfObject)
+            {
+                case ObjectData.TypesOfObjects.Light:
+                    objectData = PlaceLight(save, random);
+                    break;
+                case ObjectData.TypesOfObjects.Furniture:
+                    objectData = PlaceFurniture(save, random);
+                    break;
+                case ObjectData.TypesOfObjects.Rubble:
+                    objectData = PlaceRubble(save, random);
+                    break;
+                case ObjectData.TypesOfObjects.Wall:
+                    objectData = PlaceWall(save, random);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            attempts++;
+            isPlaced = IsValid(objectData, objects);
+        } while (!isPlaced && attempts < maxAttempts);
+
+        if (attempts >= maxAttempts) throw new Exception($"Failed to place object after {attempts} attempts");
+
+        if(isPlaced) objects.Add(GetSize(objectData));
+
+        return objectData;
     }
+    #region Helping PlaceObjectMethods
+
+    private bool IsValid(ObjectData objectData, List<Cube> cubes)
+    {
+        Cube cube = GetSize(objectData);
+        return !cubes.Any(c => c.Intersects(cube));
+    }
+    private Cube GetSize(ObjectData objectData)
+    {
+        switch (objectData.Name)
+        {
+            case "Vial":
+                return new Cube(new Vector3(0.5f, 0.5f, 0.5f), objectData.Position);
+            case "Chest":
+                return new Cube(new Vector3(1, 1, 1), objectData.Position);
+            case "Enemy":
+                return new Cube(new Vector3(1, 1, 1), objectData.Position);
+            case "Wall":
+                return new Cube(new Vector3(1, 1, 1), objectData.Position);
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+    #endregion
+    #region PlaceObjectTypes
+    private ObjectData PlaceLight(DNDFileData save, BetterRandom random)
+    {
+        Vector3 position = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
+        return new ObjectData(position, "Light", ObjectData.TypesOfObjects.Light);
+    }
+    private ObjectData PlaceFurniture(DNDFileData save, BetterRandom random)
+    {
+        Vector3 position = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
+        return new ObjectData(position, "Chest", ObjectData.TypesOfObjects.Furniture);
+    }
+    private ObjectData PlaceRubble(DNDFileData save, BetterRandom random)
+    {
+        Vector3 position = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
+        return new ObjectData(position, "Enemy", ObjectData.TypesOfObjects.Rubble);
+    }
+    private ObjectData PlaceWall(DNDFileData save, BetterRandom random)
+    {
+        Vector3 position = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
+        return new ObjectData(position, "Wall", ObjectData.TypesOfObjects.Wall);
+    }
+    #endregion
     #endregion
     #region Walls
     private static void PointOfWalls(RoomData room, out Vector3 upperLeft, out Vector3 upperRight, out Vector3 lowerLeft, out Vector3 lowerRight)
@@ -246,18 +323,18 @@ public class DNDFileScriptCreator : MonoBehaviour
                 writer.WriteEndElement();
             }
 
-            writer.WriteEndElement(); 
+            writer.WriteEndElement();
             writer.WriteStartElement("Objects");
             foreach (ObjectData objectData in fileData.Objects)
-                {
-                    writer.WriteStartElement("Object");
+            {
+                writer.WriteStartElement("Object");
 
-                    writer.WriteElementString("ID", objectData.ID.ToString());
-                    WriteVector3(writer, objectData.Position, "Position");
-                    writer.WriteElementString("ObjectName", objectData.Name);
+                writer.WriteElementString("ID", objectData.ID.ToString());
+                WriteVector3(writer, objectData.Position, "Position");
+                writer.WriteElementString("ObjectName", objectData.Name);
 
-                    writer.WriteEndElement();
-                }
+                writer.WriteEndElement();
+            }
             #endregion
 
             writer.WriteEndElement();

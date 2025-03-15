@@ -1,14 +1,23 @@
 # To-Do List
 
-## Tasks
+## To-Do
 
-- Close Button on Settings
-- UIScript generating noOfRooms
-- Anti-Aliasing to Setting
+- Procedural Generartion
+  - light
+    - fireplace
+    - torch
+  - furniture
+    - bookshelf
+    - table
+    - rug
+  - rubble
+  - wall
+    - painting
+- Documentation
+- Hosting
+- Movement 
 
 ## Completed
-
-- Check if fileName in DNDFileScriptCreator ends with .dnd
 
 ## Notes
 
@@ -17,10 +26,3 @@
   - nyni mam 7 258
 - Pozor na pomlcky, minusy a zavorky v dokumentaci
 
-## Post-PRocessing
-
-4. Settings Folder > UniversalRP-HighQuality > HDR > enable
-6. Volume > ToneMapping > Neutral
-7. DEPTH OF FIELD
-8. Lift Gamma Gain
-9. Motion Blur

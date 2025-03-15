@@ -267,7 +267,7 @@ public class Door : BaseEntityData
         this.playerTeleportLocation = playerTeleportLocation;
         this.orientation = orientation;
     }
-    public Door(): base(Vector3.zero, 0)
+    public Door() : base(Vector3.zero, 0)
     {
         playerTeleportLocation = Vector3.zero;
         orientation = Orientation.N;
@@ -280,6 +280,14 @@ public class ObjectData : BaseEntityData
 {
     [SerializeField] private string name;
     public string Name => name;
+    public enum TypesOfObjects
+    {
+        Light,
+        Furniture,
+        Rubble,
+        Wall
+    }
+
 
     public ObjectData(Vector3 position, int id, string name) : base(position, id)
     {
@@ -357,6 +365,10 @@ public class BetterRandom
     public Orientation RandomOrientation()
     {
         return (Orientation)Random(0, 4);
+    }
+    public ObjectData.TypesOfObjects RandomTypeOfObject()
+    {
+        return (ObjectData.TypesOfObjects)Random(0, ObjectData.TypesOfObjects.GetNames(typeof(ObjectData.TypesOfObjects)).Length);
     }
     public Vector3 RandomPointOnWall(Vector3 start, Vector3 end, float padding = 2)
     {
@@ -586,6 +598,47 @@ public class RectangleF
                (position.x + size.x + padding) > (other.position.x - padding) &&
                (position.y - padding) < (other.position.y + other.size.y + padding) &&
                (position.y + size.y + padding) > (other.position.y - padding);
+    }
+}
+#endregion
+#region Cube
+
+[System.Serializable]
+public class Cube
+{
+    private Vector3 position;
+    private Vector3 size;
+
+    public Vector3 Position
+    {
+        get => position;
+        set => position = value;
+    }
+    public Vector3 Size
+    {
+        get => size;
+        set => size = value;
+    }
+
+    public Cube(Vector3 position, Vector3 size)
+    {
+        this.position = position;
+        this.size = size;
+    }
+    public Cube(Vector3 position, float size)
+    {
+        this.position = position;
+        this.size = new Vector3(size, size, size);
+    }
+
+    public bool Intersects(Cube other)
+    {
+        return (position.x - size.x) < (other.position.x + other.size.x) &&
+               (position.x + size.x) > (other.position.x - other.size.x) &&
+               (position.y - size.y) < (other.position.y + other.size.y) &&
+               (position.y + size.y) > (other.position.y - other.size.y) &&
+               (position.z - size.z) < (other.position.z + other.size.z) &&
+               (position.z + size.z) > (other.position.z - other.size.z);
     }
 }
 #endregion
