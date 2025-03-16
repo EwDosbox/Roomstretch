@@ -59,7 +59,14 @@ public class DNDSceneScriptCreator : MonoBehaviour
         }
         foreach (ObjectData objectData in fileData.Objects)
         {
-            InstantiateObject(objectData);
+            try
+            {
+                InstantiateObject(objectData);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error while instantiating {objectData.Name} at {objectData.Position}: {e.Message}");
+            }
         }
 
         Debug.Log("Creator: " + fileData.ToString());
@@ -226,7 +233,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
             Wall wallData = new Wall(wallStart, wallEnd, wallOrientation);
             file.Walls.Add(wallData);
         }
-        
+
         XElement objectsElement = body.Element("Objects");
         List<XElement> objects = objectsElement.Elements("Object").ToList();
         foreach (XElement prefab in objects)

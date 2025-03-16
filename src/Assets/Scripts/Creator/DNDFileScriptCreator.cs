@@ -23,6 +23,7 @@ public class DNDFileScriptCreator : MonoBehaviour
         save.Save.ObjectCountBounds.Generate(random);
 
         rooms = new List<RectangleF>();
+        objects = new List<Cube>();
 
         for (int i = 0; i < save.Save.RoomsCountBounds.Value; i++)
         {
@@ -51,17 +52,12 @@ public class DNDFileScriptCreator : MonoBehaviour
         {
             PlaceDoor(room, save, random, out Door door, out Door doorTeleport);
             save.AddConnection(door, doorTeleport);
-        }
-
-        int NoOfObjectsInScene = save.Save.ObjectCountBounds.Value * save.Rooms.Count;
-        for (int i = 0; i < NoOfObjectsInScene; i++)
-        {
-            ObjectData objectData = PlaceObject(save, random);
-            save.Objects.Add(objectData);
+            PlaceObjects(save, random, room);
         }
     }
     #endregion
     #region Helping Placement Methods
+    #region Place Big
     private RectangleF PlaceRoom(List<RectangleF> rooms, DNDFileData save, BetterRandom random)
     {
         Vector3 roomPosition, roomSize;
@@ -136,29 +132,52 @@ public class DNDFileScriptCreator : MonoBehaviour
                 throw new ArgumentOutOfRangeException();
         }
     }
-    public ObjectData PlaceObject(DNDFileData save, BetterRandom random)
+    public void PlaceObjects(DNDFileData save, BetterRandom random, RoomData room)
+    {
+        for (int i = 0; i < save.Save.ObjectCountBounds.Value; i++)
+        {
+            ObjectData objectData;
+            try
+            {
+                objectData = PlaceObject(save, random, room);
+                save.AddObject(objectData.Position, objectData.Name);
+                objects.Add(GetCube(objectData));
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.Message);
+                continue;
+            }
+        }
+    }
+    #endregion
+    private ObjectData PlaceObject(DNDFileData save, BetterRandom random, RoomData room)
     {
         ObjectData objectData;
         bool isPlaced;
         int attempts = 0, maxAttempts = 100;
         do
         {
-            ObjectData.TypesOfObjects typesOfObject = random.RandomTypeOfObject();
+            ObjectData.TypesOfObjects typesOfObject = random.RandomEnum<ObjectData.TypesOfObjects>();
 
             switch (typesOfObject)
             {
                 case ObjectData.TypesOfObjects.Light:
-                    objectData = PlaceLight(save, random);
+                    objectData = PlaceLight(save, random, room);
                     break;
                 case ObjectData.TypesOfObjects.Furniture:
-                    objectData = PlaceFurniture(save, random);
+                    objectData = PlaceFurniture(save, random, room);
                     break;
                 case ObjectData.TypesOfObjects.Rubble:
-                    objectData = PlaceRubble(save, random);
+                    objectData = PlaceRubble(save, random, room);
                     break;
                 case ObjectData.TypesOfObjects.Wall:
-                    objectData = PlaceWall(save, random);
+                    objectData = PlaceWall(save, random, room);
                     break;
+                case ObjectData.TypesOfObjects.Decoration:
+                    objectData = PlaceDecoration(save, random, room);
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -169,54 +188,291 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         if (attempts >= maxAttempts) throw new Exception($"Failed to place object after {attempts} attempts");
 
-        if(isPlaced) objects.Add(GetSize(objectData));
-
         return objectData;
     }
     #region Helping PlaceObjectMethods
 
     private bool IsValid(ObjectData objectData, List<Cube> cubes)
     {
-        Cube cube = GetSize(objectData);
+        Cube cube = GetCube(objectData);
         return !cubes.Any(c => c.Intersects(cube));
     }
-    private Cube GetSize(ObjectData objectData)
+    private Cube GetCube(ObjectData objectData)
     {
-        switch (objectData.Name)
+        Cube size = GetSize(objectData.Name);
+        return new Cube(objectData.Position, size.Size);
+    }
+    private Cube GetSize(string name)
+    {
+        
+        Vector3 size;
+        switch (name)
         {
+            case "Torch":
+                size = new Vector3(0.15f, 0.7f, 0.11f);
+                break;
             case "Vial":
-                return new Cube(new Vector3(0.5f, 0.5f, 0.5f), objectData.Position);
+                size = new Vector3(0.5f, 0.5f, 0.5f);
+                break;
             case "Chest":
-                return new Cube(new Vector3(1, 1, 1), objectData.Position);
+                size = new Vector3(1, 1, 1);
+                break;
             case "Enemy":
-                return new Cube(new Vector3(1, 1, 1), objectData.Position);
+                size = new Vector3(1, 1, 1);
+                break;
             case "Wall":
-                return new Cube(new Vector3(1, 1, 1), objectData.Position);
+                size = new Vector3(1, 1, 1);
+                break;
             default:
-                throw new ArgumentOutOfRangeException();
+                size = new Vector3(1, 1, 1);
+                break;
         }
+
+        return new Cube(Vector3.zero, size);
     }
     #endregion
     #region PlaceObjectTypes
-    private ObjectData PlaceLight(DNDFileData save, BetterRandom random)
+    private ObjectData PlaceLight(DNDFileData save, BetterRandom random, RoomData room)
     {
-        Vector3 position = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
-        return new ObjectData(position, "Light", ObjectData.TypesOfObjects.Light);
+        ObjectData.LightTypes lightType = random.RandomEnum<ObjectData.LightTypes>();
+        Vector3 position;
+
+        switch (lightType)
+        {
+            case ObjectData.LightTypes.Candle1:
+                position = random.RandomPointInRoom(room, GetSize("Candle1"));
+                break;
+            case ObjectData.LightTypes.Candle2:
+                position = random.RandomPointInRoom(room, GetSize("Candle2"));
+                break;
+            case ObjectData.LightTypes.Candle3:
+                position = random.RandomPointInRoom(room, GetSize("Candle3"));
+                break;
+            case ObjectData.LightTypes.Torch:
+                position = random.RandomPointInRoom(room, GetSize("Torch"));
+                break;
+            case ObjectData.LightTypes.Lantern:
+                position = random.RandomPointInRoom(room, GetSize("Lantern"));
+                break;
+            case ObjectData.LightTypes.Fireplace:
+                position = random.RandomPointInRoom(room, GetSize("Fireplace"));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        string name = lightType.ToString();
+        return new ObjectData(position, -1, name);
     }
-    private ObjectData PlaceFurniture(DNDFileData save, BetterRandom random)
+    private ObjectData PlaceFurniture(DNDFileData save, BetterRandom random, RoomData room)
     {
-        Vector3 position = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
-        return new ObjectData(position, "Chest", ObjectData.TypesOfObjects.Furniture);
+        ObjectData.FurnitureTypes furnitureType = random.RandomEnum<ObjectData.FurnitureTypes>();
+        Vector3 position;
+
+        switch (furnitureType)
+        {
+            case ObjectData.FurnitureTypes.Bag:
+                position = random.RandomPointInRoom(room, GetSize("Bag"));
+                break;
+            case ObjectData.FurnitureTypes.Barrel:
+                position = random.RandomPointInRoom(room, GetSize("Barrel"));
+                break;
+            case ObjectData.FurnitureTypes.Box:
+                position = random.RandomPointInRoom(room, GetSize("Box"));
+                break;
+            case ObjectData.FurnitureTypes.Bucket:
+                position = random.RandomPointInRoom(room, GetSize("Bucket"));
+                break;
+            case ObjectData.FurnitureTypes.Carpet:
+                position = random.RandomPointInRoom(room, GetSize("Carpet"));
+                break;
+            case ObjectData.FurnitureTypes.Firewood:
+                position = random.RandomPointInRoom(room, GetSize("Firewood"));
+                break;
+            case ObjectData.FurnitureTypes.Stool:
+                position = random.RandomPointInRoom(room, GetSize("Stool"));
+                break;
+            case ObjectData.FurnitureTypes.Table1:
+                position = random.RandomPointInRoom(room, GetSize("Table1"));
+                break;
+            case ObjectData.FurnitureTypes.Table2:
+                position = random.RandomPointInRoom(room, GetSize("Table2"));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        string name = furnitureType.ToString();
+        return new ObjectData(position, -1, name);
     }
-    private ObjectData PlaceRubble(DNDFileData save, BetterRandom random)
+    private ObjectData PlaceRubble(DNDFileData save, BetterRandom random, RoomData room)
     {
-        Vector3 position = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
-        return new ObjectData(position, "Enemy", ObjectData.TypesOfObjects.Rubble);
+        ObjectData.RubbleTypes rubbleType = random.RandomEnum<ObjectData.RubbleTypes>();
+        Vector3 position;
+
+        switch (rubbleType)
+        {
+            case ObjectData.RubbleTypes.Big:
+                position = random.RandomPointInRoom(room, GetSize("Big"));
+                break;;
+            case ObjectData.RubbleTypes.Medium1:
+                position = random.RandomPointInRoom(room, GetSize("Medium1"));
+                break;
+            case ObjectData.RubbleTypes.Medium2:
+                position = random.RandomPointInRoom(room, GetSize("Medium2"));
+                break;
+            case ObjectData.RubbleTypes.Small1:
+                position = random.RandomPointInRoom(room, GetSize("Small1"));
+                break;
+            case ObjectData.RubbleTypes.Small2:
+                position = random.RandomPointInRoom(room, GetSize("Small2"));
+                break;
+            case ObjectData.RubbleTypes.Small3:
+                position = random.RandomPointInRoom(room, GetSize("Small3"));
+                break;
+            case ObjectData.RubbleTypes.Small4:
+                position = random.RandomPointInRoom(room, GetSize("Small4"));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        string name = rubbleType.ToString();
+        return new ObjectData(position, -1, name);
     }
-    private ObjectData PlaceWall(DNDFileData save, BetterRandom random)
+    private ObjectData PlaceWall(DNDFileData save, BetterRandom random, RoomData room)
     {
-        Vector3 position = random.RandomVector3(save.Save.XMapBounds, save.Save.ZMapBounds);
-        return new ObjectData(position, "Wall", ObjectData.TypesOfObjects.Wall);
+        ObjectData.WallTypes wallType = random.RandomEnum<ObjectData.WallTypes>();
+        Vector3 position;
+
+        switch (wallType)
+        {
+            case ObjectData.WallTypes.Axe:
+                position = random.RandomPointInRoom(room, GetSize("Axe"));
+                break;
+            case ObjectData.WallTypes.Painting:
+                position = random.RandomPointInRoom(room, GetSize("Painting"));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        string name = wallType.ToString();
+        return new ObjectData(position, -1, name);
+    }
+    private ObjectData PlaceDecoration(DNDFileData save, BetterRandom random, RoomData room)
+    {
+        ObjectData.DecorationTypes decorationType = random.RandomEnum<ObjectData.DecorationTypes>();
+        Vector3 position;
+
+        switch (decorationType)
+        {
+            case ObjectData.DecorationTypes.Book:
+                position = random.RandomPointInRoom(room, GetSize("Book"));
+                break;
+            case ObjectData.DecorationTypes.Bottle1:
+                position = random.RandomPointInRoom(room, GetSize("Bottle1"));
+                break;
+            case ObjectData.DecorationTypes.Bottle2:
+                position = random.RandomPointInRoom(room, GetSize("Bottle2"));
+                break;
+            case ObjectData.DecorationTypes.Bottle3:
+                position = random.RandomPointInRoom(room, GetSize("Bottle3"));
+                break;
+            case ObjectData.DecorationTypes.Coin1:
+                position = random.RandomPointInRoom(room, GetSize("Coin1"));
+                break;
+            case ObjectData.DecorationTypes.Coin2:
+                position = random.RandomPointInRoom(room, GetSize("Coin2"));
+                break;
+            case ObjectData.DecorationTypes.Coin3:
+                position = random.RandomPointInRoom(room, GetSize("Coin3"));
+                break;
+            case ObjectData.DecorationTypes.Cup1:
+                position = random.RandomPointInRoom(room, GetSize("Cup1"));
+                break;
+            case ObjectData.DecorationTypes.Cup2:
+                position = random.RandomPointInRoom(room, GetSize("Cup2"));
+                break;
+            case ObjectData.DecorationTypes.Flask1:
+                position = random.RandomPointInRoom(room, GetSize("Flask1"));
+                break;
+            case ObjectData.DecorationTypes.Flask2:
+                position = random.RandomPointInRoom(room, GetSize("Flask2"));
+                break;
+            case ObjectData.DecorationTypes.Flask3:
+                position = random.RandomPointInRoom(room, GetSize("Flask3"));
+                break;
+            case ObjectData.DecorationTypes.Food1:
+                position = random.RandomPointInRoom(room, GetSize("Food1"));
+                break;
+            case ObjectData.DecorationTypes.Food2:
+                position = random.RandomPointInRoom(room, GetSize("Food2"));
+                break;
+            case ObjectData.DecorationTypes.Food3:
+                position = random.RandomPointInRoom(room, GetSize("Food3"));
+                break;
+            case ObjectData.DecorationTypes.Food4:
+                position = random.RandomPointInRoom(room, GetSize("Food4"));
+                break;
+            case ObjectData.DecorationTypes.Food5:
+                position = random.RandomPointInRoom(room, GetSize("Food5"));
+                break;
+            case ObjectData.DecorationTypes.Food6:
+                position = random.RandomPointInRoom(room, GetSize("Food6"));
+                break;
+            case ObjectData.DecorationTypes.Gem1:
+                position = random.RandomPointInRoom(room, GetSize("Gem1"));
+                break;
+            case ObjectData.DecorationTypes.Gem2:
+                position = random.RandomPointInRoom(room, GetSize("Gem2"));
+                break;
+            case ObjectData.DecorationTypes.Jug1:
+                position = random.RandomPointInRoom(room, GetSize("Jug1"));
+                break;
+            case ObjectData.DecorationTypes.Jug2:
+                position = random.RandomPointInRoom(room, GetSize("Jug2"));
+                break;
+            case ObjectData.DecorationTypes.Plate1:
+                position = random.RandomPointInRoom(room, GetSize("Plate1"));
+                break;
+            case ObjectData.DecorationTypes.Plate2:
+                position = random.RandomPointInRoom(room, GetSize("Plate2"));
+                break;
+            case ObjectData.DecorationTypes.Plate3:
+                position = random.RandomPointInRoom(room, GetSize("Plate3"));
+                break;
+            case ObjectData.DecorationTypes.Plate4:
+                position = random.RandomPointInRoom(room, GetSize("Plate4"));
+                break;
+            case ObjectData.DecorationTypes.Plate5:
+                position = random.RandomPointInRoom(room, GetSize("Plate5"));
+                break;
+            case ObjectData.DecorationTypes.Urn:
+                position = random.RandomPointInRoom(room, GetSize("Urn"));
+                break;
+            case ObjectData.DecorationTypes.Vase1:
+                position = random.RandomPointInRoom(room, GetSize("Vase1"));
+                break;
+            case ObjectData.DecorationTypes.Vase2:
+                position = random.RandomPointInRoom(room, GetSize("Vase2"));
+                break;
+            case ObjectData.DecorationTypes.Vase3:
+                position = random.RandomPointInRoom(room, GetSize("Vase3"));
+                break;
+            case ObjectData.DecorationTypes.Vial1:
+                position = random.RandomPointInRoom(room, GetSize("Vial1"));
+                break;
+            case ObjectData.DecorationTypes.Vial2:
+                position = random.RandomPointInRoom(room, GetSize("Vial2"));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+
+        }
+
+        string name = decorationType.ToString();
+        return new ObjectData(position, -1, name);
     }
     #endregion
     #endregion

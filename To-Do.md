@@ -13,6 +13,9 @@
   - rubble
   - wall
     - painting
+- GetSize
+  - load Prefabs
+  - get it from there somhow
 - Documentation
 - Hosting
 - Movement 

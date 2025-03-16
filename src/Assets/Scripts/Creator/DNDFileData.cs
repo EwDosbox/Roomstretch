@@ -282,10 +282,29 @@ public class ObjectData : BaseEntityData
     public string Name => name;
     public enum TypesOfObjects
     {
-        Light,
-        Furniture,
-        Rubble,
-        Wall
+        Light, Furniture, Rubble, Wall, Decoration
+    }
+    public enum LightTypes
+    {
+        Torch, Candle1, Candle2, Candle3, Lantern, Fireplace
+    }
+    public enum FurnitureTypes
+    {
+        Bag, Barrel, Box, Bucket, Carpet, Firewood, Stool, Table1, Table2
+    }
+    public enum RubbleTypes
+    {
+        Big, Medium1, Medium2, Small1, Small2, Small3, Small4
+    }
+    public enum WallTypes
+    {
+        Painting, Axe
+    }
+    public enum DecorationTypes
+    {
+        Book, Bottle1, Bottle2, Bottle3, Coin1, Coin2, Coin3, Cup1, Cup2, Flask1, Flask2, Flask3,
+        Food1, Food2, Food3, Food4, Food5, Food6, Gem1, Gem2, Jug1, Jug2,
+        Plate1, Plate2, Plate3, Plate4, Plate5, Urn, Vase1, Vase2, Vase3, Vial1, Vial2
     }
 
 
@@ -321,7 +340,6 @@ public class BetterRandom
         else
             throw new ArgumentException("Type not supported");
     }
-
     public Vector3 RandomVector3<T>(Bounds<T> xBounds, Bounds<T> yBounds, Bounds<T> zBounds) where T : IComparable<T>
     {
         return new Vector3(
@@ -346,14 +364,6 @@ public class BetterRandom
             Random(zBounds.Min, zBounds.Max)
         );
     }
-    public Vector3 RandomPositiveVector3(Vector3 xBounds, Vector3 zBounds)
-    {
-        return new Vector3(
-            Random(xBounds.x, xBounds.y),
-            0f,
-            Random(zBounds.x, zBounds.y)
-        );
-    }
     public Vector3 RandomPositiveVector3(Bounds<float> xBounds, Bounds<float> zBounds)
     {
         return new Vector3(
@@ -362,13 +372,15 @@ public class BetterRandom
             MathF.Abs(Random(zBounds.Min, zBounds.Max))
         );
     }
+
+    public T RandomEnum<T>() where T : Enum
+    {
+        T[] values = (T[])Enum.GetValues(typeof(T));
+        return values[Random(0, values.Length)];
+    }
     public Orientation RandomOrientation()
     {
         return (Orientation)Random(0, 4);
-    }
-    public ObjectData.TypesOfObjects RandomTypeOfObject()
-    {
-        return (ObjectData.TypesOfObjects)Random(0, ObjectData.TypesOfObjects.GetNames(typeof(ObjectData.TypesOfObjects)).Length);
     }
     public Vector3 RandomPointOnWall(Vector3 start, Vector3 end, float padding = 2)
     {
@@ -378,6 +390,30 @@ public class BetterRandom
 
         return new Vector3(xElement, yElement, zElement);
     }
+    public Vector3 RandomPointInRoom(RoomData room, Cube cube)
+    {
+        // Override the room with a new one that has Y = 2
+        RoomData adjustedRoom = new RoomData(new Vector3(room.Size.x, 2, room.Size.z), room.Position, room.ID);
+        Vector3 cubeHalfSize = cube.Size / 2;
+
+        float minX = adjustedRoom.Position.x + cubeHalfSize.x;
+        float maxX = adjustedRoom.Position.x + adjustedRoom.Size.x - cubeHalfSize.x;
+        float minY = adjustedRoom.Position.y + cubeHalfSize.y;
+        float maxY = adjustedRoom.Position.y + adjustedRoom.Size.y - cubeHalfSize.y;
+        float minZ = adjustedRoom.Position.z + cubeHalfSize.z;
+        float maxZ = adjustedRoom.Position.z + adjustedRoom.Size.z - cubeHalfSize.z;
+
+        if (minX > maxX) throw new ArgumentException("Cube too wide for room X-axis");
+        if (minY > maxY) throw new ArgumentException("Cube too tall for room Y-axis");
+        if (minZ > maxZ) throw new ArgumentException("Cube too deep for room Z-axis");
+
+        return new Vector3(
+            Random(minX, maxX),
+            Random(minY, maxY),
+            Random(minZ, maxZ)
+        );
+    }
+
     private float RandomElement(float a, float b, float padding)
     {
         if (b > a) return Random(a + padding, b - padding);
@@ -639,6 +675,11 @@ public class Cube
                (position.y + size.y) > (other.position.y - other.size.y) &&
                (position.z - size.z) < (other.position.z + other.size.z) &&
                (position.z + size.z) > (other.position.z - other.size.z);
+    }
+
+    public override string ToString()
+    {
+        return $"Cube: Position = {position}, Size = {size}";
     }
 }
 #endregion
