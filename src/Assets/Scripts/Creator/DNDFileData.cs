@@ -302,7 +302,7 @@ public class ObjectData : BaseEntityData
     }
     public enum DecorationTypes
     {
-        Book, Bottle1, Bottle2, Bottle3, Coin1, Coin2, Coin3, Cup1, Cup2, Flask1, Flask2, Flask3,
+        Book1, Book2, Bottle1, Bottle2, Bottle3, Coin1, Coin2, Coin3, Cup1, Cup2, Flask1, Flask2, Flask3,
         Food1, Food2, Food3, Food4, Food5, Food6, Gem1, Gem2, Jug1, Jug2,
         Plate1, Plate2, Plate3, Plate4, Plate5, Urn, Vase1, Vase2, Vase3, Vial1, Vial2
     }
