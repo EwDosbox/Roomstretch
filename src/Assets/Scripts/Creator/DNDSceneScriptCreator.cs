@@ -109,6 +109,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
             Player.transform.position = room.Position + room.Size / 2 + new Vector3(0, 1, 0);
         }
 
+        roomObject.name = $"Room {room.ID}";
         Debug.Log($"Room created at {position} with size {size}");
     }
     #endregion
