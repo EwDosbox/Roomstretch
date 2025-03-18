@@ -368,19 +368,6 @@ public class DNDFileScriptCreator : MonoBehaviour
             }
             writer.WriteEndElement();
 
-            writer.WriteStartElement("Walls");
-            foreach (Wall wall in fileData.Walls)
-            {
-                writer.WriteStartElement("Wall");
-
-                WriteVector3(writer, wall.Start, "Start");
-                WriteVector3(writer, wall.End, "End");
-                writer.WriteElementString("Orientation", wall.Orientation.ToString());
-
-                writer.WriteEndElement();
-            }
-
-            writer.WriteEndElement();
             writer.WriteStartElement("Objects");
             foreach (ObjectData objectData in fileData.Objects)
             {
@@ -393,8 +380,8 @@ public class DNDFileScriptCreator : MonoBehaviour
                 writer.WriteEndElement();
             }
             #endregion
-
             writer.WriteEndElement();
+
             writer.WriteEndDocument();
         }
         Debug.Log("File: Temp.dnd created at: " + fileData.Save.FilePath);

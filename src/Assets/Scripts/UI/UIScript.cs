@@ -208,7 +208,6 @@ public class UIScript : MonoBehaviour
         dNDFileScriptCreator.CreateFile(fileData);
 
         NextScene();
-
     }
 
     public void NextScene()

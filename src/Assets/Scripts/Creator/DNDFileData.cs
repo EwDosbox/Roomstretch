@@ -14,7 +14,6 @@ public class DNDFileData : ScriptableObject
     [SerializeField] private List<RoomData> rooms;
     [SerializeField] private List<DoorConection> doors;
     [SerializeField] private List<ObjectData> objects;
-    [SerializeField] private List<Wall> walls;
     [SerializeField] private Settings settings;
     [SerializeField] private Save save;
 
@@ -22,9 +21,7 @@ public class DNDFileData : ScriptableObject
     {
         get => rooms;
         set => rooms = value;
-    }
-    public List<Wall> Walls => walls;
-    public List<DoorConection> Doors => doors;
+    }    public List<DoorConection> Doors => doors;
     public List<ObjectData> Objects => objects;
     public Settings Settings => settings;
     public Save Save => save;
@@ -54,7 +51,6 @@ public class DNDFileData : ScriptableObject
         rooms = new List<RoomData>();
         doors = new List<DoorConection>();
         objects = new List<ObjectData>();
-        walls = new List<Wall>();
         settings = new Settings();
         save = new Save();
     }
@@ -549,54 +545,10 @@ public abstract class BaseEntityData
     }
 }
 #endregion
-#region Wall
-public enum
-Orientation
+#region Orientation
+public enum Orientation
 {
     N, E, S, W
-}
-[System.Serializable]
-public class Wall
-{
-    [SerializeField]
-    private
-    Orientation orientation;
-    [SerializeField] private Vector3 start;
-    [SerializeField] private Vector3 end;
-
-    public
-    Orientation Orientation
-    {
-        get => orientation;
-        set => orientation = value;
-    }
-    public Vector3 Start
-    {
-        get => start;
-        set => start = value;
-    }
-
-    public Vector3 End
-    {
-        get => end;
-        set => end = value;
-    }
-
-    public Wall(Vector3 start, Vector3 end,
-    Orientation orientation)
-    {
-        this.start = start;
-        this.end = end;
-        this.orientation = orientation;
-    }
-
-    public Wall(float startX, float startZ, float endX, float endZ,
-    Orientation orientation)
-    {
-        start = new Vector3(startX, 0, startZ);
-        end = new Vector3(endX, 0, endZ);
-        this.orientation = orientation;
-    }
 }
 #endregion
 #region RectangleF

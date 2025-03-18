@@ -217,24 +217,6 @@ public class DNDSceneScriptCreator : MonoBehaviour
             file.AddConnection(doorData, teleportDoorData);
         }
 
-        XElement wallsElement = body.Element("Walls");
-        List<XElement> walls = wallsElement.Elements("Wall").ToList();
-        foreach (XElement wall in walls)
-        {
-            Vector3 wallStart = ParseVector3(wall.Element("Start"));
-            Vector3 wallEnd = ParseVector3(wall.Element("End"));
-            char wallOrientationValue = wall.Element("Orientation").Value.Trim()[0];
-
-            Orientation wallOrientation = Orientation.N;
-            if (wallOrientationValue == 'N') wallOrientation = Orientation.N;
-            else if (wallOrientationValue == 'S') wallOrientation = Orientation.S;
-            else if (wallOrientationValue == 'E') wallOrientation = Orientation.E;
-            else if (wallOrientationValue == 'W') wallOrientation = Orientation.W;
-
-            Wall wallData = new Wall(wallStart, wallEnd, wallOrientation);
-            file.Walls.Add(wallData);
-        }
-
         XElement objectsElement = body.Element("Objects");
         List<XElement> objects = objectsElement.Elements("Object").ToList();
         foreach (XElement prefab in objects)
