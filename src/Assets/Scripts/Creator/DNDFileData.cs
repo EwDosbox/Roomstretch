@@ -378,17 +378,40 @@ public class BetterRandom
     {
         return (Orientation)Random(0, 4);
     }
-    public Vector3 RandomPointOnWall(Vector3 start, Vector3 end, float padding = 2)
-    {
-        float xElement = RandomElement(start.x, end.x, padding);
-        float yElement = RandomElement(start.y, end.y, padding);
-        float zElement = RandomElement(start.z, end.z, padding);
+public Vector3 RandomPointOnWall(Vector3 start, Vector3 end, Orientation orientation, float padding = 2)
+{
+    // Ensure correct min/max ordering
+    float minX = Mathf.Min(start.x, end.x);
+    float maxX = Mathf.Max(start.x, end.x);
+    float minY = Mathf.Min(start.y, end.y);
+    float maxY = Mathf.Max(start.y, end.y);
+    float minZ = Mathf.Min(start.z, end.z);
+    float maxZ = Mathf.Max(start.z, end.z);
 
-        return new Vector3(xElement, yElement, zElement);
+    // Ensure valid range
+    if (maxX - minX < padding * 2) padding = (maxX - minX) / 2;
+    if (maxY - minY < padding * 2) padding = (maxY - minY) / 2;
+    if (maxZ - minZ < padding * 2) padding = (maxZ - minZ) / 2;
+
+    // Pick a random point
+    float xElement = RandomElement(minX, maxX, padding);
+    float yElement = RandomElement(minY, maxY, padding);
+    float zElement = RandomElement(minZ, maxZ, padding);
+
+    // Offset placement
+    float offset = 0.3f;
+    switch (orientation)
+    {
+        case Orientation.N: zElement = maxZ - offset; break;
+        case Orientation.E: xElement = maxX - offset; break;
+        case Orientation.S: zElement = minZ + offset; break;
+        case Orientation.W: xElement = minX + offset; break;
     }
+
+    return new Vector3(xElement, yElement, zElement);
+}
     public Vector3 RandomPointInRoom(RoomData room, Cube cube)
     {
-        // Override the room with a new one that has Y = 2
         RoomData adjustedRoom = new RoomData(new Vector3(room.Size.x, 2, room.Size.z), room.Position, room.ID);
         Vector3 cubeHalfSize = cube.Size / 2;
 

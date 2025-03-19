@@ -109,16 +109,16 @@ public class DNDFileScriptCreator : MonoBehaviour
         switch (door.Orientation)
         {
             case Orientation.N:
-                door.Position = random.RandomPointOnWall(upperLeft, upperRight);
+                door.Position = random.RandomPointOnWall(upperLeft, upperRight, door.Orientation);
                 break;
             case Orientation.S:
-                door.Position = random.RandomPointOnWall(lowerLeft, lowerRight);
+                door.Position = random.RandomPointOnWall(lowerLeft, lowerRight, door.Orientation);
                 break;
             case Orientation.E:
-                door.Position = random.RandomPointOnWall(upperRight, lowerRight);
+                door.Position = random.RandomPointOnWall(upperRight, lowerRight, door.Orientation);
                 break;
             case Orientation.W:
-                door.Position = random.RandomPointOnWall(upperLeft, lowerLeft);
+                door.Position = random.RandomPointOnWall(upperLeft, lowerLeft, door.Orientation);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -132,16 +132,16 @@ public class DNDFileScriptCreator : MonoBehaviour
         switch (teleportDoor.Orientation)
         {
             case Orientation.N:
-                teleportDoor.Position = random.RandomPointOnWall(upperLeftTeleport, upperRightTeleport);
+                teleportDoor.Position = random.RandomPointOnWall(upperLeftTeleport, upperRightTeleport, teleportDoor.Orientation);
                 break;
             case Orientation.S:
-                teleportDoor.Position = random.RandomPointOnWall(lowerLeftTeleport, lowerRightTeleport);
+                teleportDoor.Position = random.RandomPointOnWall(lowerLeftTeleport, lowerRightTeleport, teleportDoor.Orientation);
                 break;
             case Orientation.E:
-                teleportDoor.Position = random.RandomPointOnWall(upperRightTeleport, lowerRightTeleport);
+                teleportDoor.Position = random.RandomPointOnWall(upperRightTeleport, lowerRightTeleport, teleportDoor.Orientation);
                 break;
             case Orientation.W:
-                teleportDoor.Position = random.RandomPointOnWall(upperLeftTeleport, lowerLeftTeleport);
+                teleportDoor.Position = random.RandomPointOnWall(upperLeftTeleport, lowerLeftTeleport, teleportDoor.Orientation);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

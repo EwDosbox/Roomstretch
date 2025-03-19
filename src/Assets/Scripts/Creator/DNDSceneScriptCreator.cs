@@ -125,19 +125,15 @@ public class DNDSceneScriptCreator : MonoBehaviour
         {
             case Orientation.W:
                 doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 180f, 0));
-                doorObject.transform.position -= new Vector3(0.5f, 0, 0);
                 break;
             case Orientation.S:
                 doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 90f, 0));
-                doorObject.transform.position -= new Vector3(0, 0, 0.5f);
                 break;
             case Orientation.E:
                 doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
-                doorObject.transform.position += new Vector3(0.5f, 0, 0);
                 break;
             case Orientation.N:
                 doorObject.transform.rotation = Quaternion.Euler(new Vector3(0, 270f, 0));
-                doorObject.transform.position += new Vector3(0, 0, 0.5f);
                 break;
         }
 
