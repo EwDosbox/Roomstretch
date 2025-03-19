@@ -27,7 +27,11 @@ public class PlayerInputScript : MonoBehaviour
             return walkingVector.normalized; // Normalize to ensure consistent speed in diagonal movement
         }
     }
-    public bool ShouldBeInMenu => shouldBeInMenu;
+    public bool ShouldBeInMenu
+    {
+        get => shouldBeInMenu;
+        set => shouldBeInMenu = value;
+    }
     public bool ShouldTeleport => shouldTeleport;
 
     private void Awake()

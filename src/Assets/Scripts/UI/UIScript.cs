@@ -9,8 +9,7 @@ using System.Linq;
 
 public class UIScript : MonoBehaviour
 {
-    [SerializeField]
-    private DNDFileData fileData;
+    [SerializeField]    private DNDFileData fileData;
 
     private DNDFileScriptCreator dNDFileScriptCreator;
     private PlayerInputScript playerInputScript;
@@ -101,7 +100,7 @@ public class UIScript : MonoBehaviour
                     {
                         GONoOfRoomsInput.SetActive(false);
                     }
-                    if(!toggleNoOfObjects.isOn)
+                    if (!toggleNoOfObjects.isOn)
                     {
                         GONoOfObjectsInput.SetActive(true);
                     }
@@ -226,6 +225,14 @@ public class UIScript : MonoBehaviour
     {
         fileData.Settings.FOV = value;
     }
+    public void UpdateSensitivity(float value)
+    {
+        fileData.Settings.Sensitivity = value;
+    }
+    public void UpdateMenu(bool value)
+    {
+        playerInputScript.ShouldBeInMenu = value;
+    }
     #endregion
 
     private string GetInput(string toFind)
@@ -237,15 +244,8 @@ public class UIScript : MonoBehaviour
     private Toggle GetToggle(string ToFind)
     {
         Transform ToFindT = toggles.transform.Find(ToFind + "Toggle");
-        GameObject toFindGO = ToFindT.gameObject;
         Toggle toFindTOggle = ToFindT.GetComponent<Toggle>();
         return toFindTOggle;
-    }
-
-    private string EndsWithDND(string file)
-    {
-        if (file.EndsWith(".dnd") || file.EndsWith(".DND")) return file;
-        return file + ".dnd";
     }
 
     public void LockCursor(bool shouldBeLocked)
