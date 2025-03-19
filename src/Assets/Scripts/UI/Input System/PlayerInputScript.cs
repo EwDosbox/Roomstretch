@@ -38,7 +38,6 @@ public class PlayerInputScript : MonoBehaviour
     {
         PlayerInput playerInput = GetComponent<PlayerInput>();
 
-        // Enable both "Movement" and "UI" action maps
         playerInput.actions.FindActionMap("Movement").Enable();
         playerInput.actions.FindActionMap("UI").Enable();
     }

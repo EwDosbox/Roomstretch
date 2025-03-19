@@ -230,12 +230,20 @@ public class DNDSceneScriptCreator : MonoBehaviour
     #region Helping Parse Methods
     private GenerationBounds<T> ParseGenerationBounds<T>(XElement element) where T : IComparable<T>
     {
-        bool ShouldUseDefaultValue = element.Element("ShouldUseDefaultValue").Value.Trim() == "True";
-        T value = (T)Convert.ChangeType(element.Element("Value").Value.Trim(), typeof(T));
-        T defaultValue = (T)Convert.ChangeType(element.Element("DefaultValue").Value.Trim(), typeof(T));
-        Bounds<T> extremesBounds = ParseBounds<T>(element.Element("ExtremesBounds"));
+        bool ShouldUseDefaultValue =
+            element.Element("ShouldUseDefaultValue").Value.Trim() == "True";
+        T value =
+            (T)Convert.ChangeType(element.Element("Value").Value.Trim(),
+                                  typeof(T));
+        T defaultValue =
+            (T)Convert.ChangeType(element.Element("DefaultValue").Value.Trim(),
+                                  typeof(T));
+        Bounds<T> extremesBounds =
+            ParseBounds<T>(element.Element("ExtremesBounds"));
 
-        GenerationBounds<T> generationBounds = new GenerationBounds<T>(defaultValue, extremesBounds);
+        GenerationBounds<T> generationBounds =
+            new GenerationBounds<T>(defaultValue,
+                                    extremesBounds);
         generationBounds.ShouldUseDefaultValue = ShouldUseDefaultValue;
         generationBounds.Value = value;
 
