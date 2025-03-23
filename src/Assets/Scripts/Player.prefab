@@ -203,6 +203,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraTransform: {fileID: 0}
+  moveSpeed: 10
+  acceleration: 20
+  deceleration: 30
 --- !u!54 &1092050152028681896
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -229,7 +232,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!136 &3071324930289823799
 CapsuleCollider:
   m_ObjectHideFlags: 0

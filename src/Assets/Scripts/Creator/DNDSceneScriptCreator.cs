@@ -147,10 +147,25 @@ public class DNDSceneScriptCreator : MonoBehaviour
     private void InstantiateObject(ObjectData objectData)
     {
         Vector3 position = objectData.Position;
-        position.y = Prefabs[objectData.Name].transform.position.y;
 
         GameObject objectInstance = Instantiate(Prefabs[objectData.Name], position, Quaternion.identity, objectsTransform);
         objectInstance.name = objectData.Name + " " + objectData.ID;
+
+        switch(objectData.Orientation)
+        {
+            case Orientation.W:
+                objectInstance.transform.rotation = Quaternion.Euler(new Vector3(0, 270f, 0));
+                break;
+            case Orientation.S:
+                objectInstance.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 0));
+                break;
+            case Orientation.E:
+                objectInstance.transform.rotation = Quaternion.Euler(new Vector3(0, 90f, 0));
+                break;
+            case Orientation.N:
+                objectInstance.transform.rotation = Quaternion.Euler(new Vector3(0, 180f, 0));
+                break;
+        }
 
         Debug.Log($"Object {objectData.Name} created at {position}");
     }
@@ -220,8 +235,10 @@ public class DNDSceneScriptCreator : MonoBehaviour
             int objectId = int.Parse(prefab.Element("ID").Value.Trim());
             Vector3 objectPosition = ParseVector3(prefab.Element("Position"));
             string objectName = prefab.Element("ObjectName").Value.Trim();
+            ObjectData.TypesOfObjects objectType = (ObjectData.TypesOfObjects)Enum.Parse(typeof(ObjectData.TypesOfObjects), prefab.Element("Type").Value.Trim());
+            Orientation orientation = (Orientation)Enum.Parse(typeof(Orientation), prefab.Element("Orientation").Value.Trim());
 
-            file.AddObject(objectPosition, objectName);
+            file.AddObject(objectPosition,objectName, objectType, orientation);
         }
 
         return file;

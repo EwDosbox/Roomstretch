@@ -67,6 +67,7 @@ public class DNDFileScriptCreator : MonoBehaviour
         {
             PlaceDoor(room, save, random, out Door door, out Door doorTeleport);
             save.AddConnection(door, doorTeleport);
+            LoadDoorIntoObjects(door, doorTeleport);
             PlaceObjects(save, random, room);
         }
     }
@@ -103,49 +104,91 @@ public class DNDFileScriptCreator : MonoBehaviour
         door = new Door();
         teleportDoor = new Door();
 
-        door.Orientation = random.RandomOrientation();
-        PointOfWalls(room, out Vector3 upperLeft, out Vector3 upperRight, out Vector3 lowerLeft, out Vector3 lowerRight);
+        int attempts = 0, maxAttempts = 100;
+        bool isPlaced = false;
 
-        switch (door.Orientation)
+        do
         {
-            case Orientation.N:
-                door.Position = random.RandomPointOnWall(upperLeft, upperRight, door.Orientation);
-                break;
-            case Orientation.S:
-                door.Position = random.RandomPointOnWall(lowerLeft, lowerRight, door.Orientation);
-                break;
-            case Orientation.E:
-                door.Position = random.RandomPointOnWall(upperRight, lowerRight, door.Orientation);
-                break;
-            case Orientation.W:
-                door.Position = random.RandomPointOnWall(upperLeft, lowerLeft, door.Orientation);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            door.Orientation = random.RandomOrientation();
+            PointOfWalls(room, out Vector3 upperLeft, out Vector3 upperRight, out Vector3 lowerLeft, out Vector3 lowerRight);
 
-        int randomRoomIndex = random.Random(0, save.Rooms.Count);
-        RoomData teleportRoom = save.Rooms[randomRoomIndex];
-        teleportDoor.Orientation = random.RandomOrientation();
-        PointOfWalls(teleportRoom, out Vector3 upperLeftTeleport, out Vector3 upperRightTeleport, out Vector3 lowerLeftTeleport, out Vector3 lowerRightTeleport);
+            switch (door.Orientation)
+            {
+                case Orientation.N:
+                    door.Position = random.RandomPointOnWall(upperLeft, upperRight, door.Orientation);
+                    break;
+                case Orientation.S:
+                    door.Position = random.RandomPointOnWall(lowerLeft, lowerRight, door.Orientation);
+                    break;
+                case Orientation.E:
+                    door.Position = random.RandomPointOnWall(upperRight, lowerRight, door.Orientation);
+                    break;
+                case Orientation.W:
+                    door.Position = random.RandomPointOnWall(upperLeft, lowerLeft, door.Orientation);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
-        switch (teleportDoor.Orientation)
+            isPlaced = IsValidDoor(door, save.Doors);
+            attempts++;
+        } while (!isPlaced && attempts < maxAttempts);
+
+        if (attempts >= maxAttempts) throw new Exception($"Failed to place door after {attempts} attempts");
+
+        attempts = 0;
+        isPlaced = false;
+        do
         {
-            case Orientation.N:
-                teleportDoor.Position = random.RandomPointOnWall(upperLeftTeleport, upperRightTeleport, teleportDoor.Orientation);
-                break;
-            case Orientation.S:
-                teleportDoor.Position = random.RandomPointOnWall(lowerLeftTeleport, lowerRightTeleport, teleportDoor.Orientation);
-                break;
-            case Orientation.E:
-                teleportDoor.Position = random.RandomPointOnWall(upperRightTeleport, lowerRightTeleport, teleportDoor.Orientation);
-                break;
-            case Orientation.W:
-                teleportDoor.Position = random.RandomPointOnWall(upperLeftTeleport, lowerLeftTeleport, teleportDoor.Orientation);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+            int randomRoomIndex;
+            do
+            {
+                randomRoomIndex = random.Random(0, save.Rooms.Count);
+            } while (randomRoomIndex == room.ID);
+
+            RoomData teleportRoom = save.Rooms[randomRoomIndex];
+            teleportDoor.Orientation = random.RandomOrientation();
+            PointOfWalls(teleportRoom, out Vector3 upperLeftTeleport, out Vector3 upperRightTeleport, out Vector3 lowerLeftTeleport, out Vector3 lowerRightTeleport);
+
+            switch (teleportDoor.Orientation)
+            {
+                case Orientation.N:
+                    teleportDoor.Position = random.RandomPointOnWall(upperLeftTeleport, upperRightTeleport, teleportDoor.Orientation);
+                    break;
+                case Orientation.S:
+                    teleportDoor.Position = random.RandomPointOnWall(lowerLeftTeleport, lowerRightTeleport, teleportDoor.Orientation);
+                    break;
+                case Orientation.E:
+                    teleportDoor.Position = random.RandomPointOnWall(upperRightTeleport, lowerRightTeleport, teleportDoor.Orientation);
+                    break;
+                case Orientation.W:
+                    teleportDoor.Position = random.RandomPointOnWall(upperLeftTeleport, lowerLeftTeleport, teleportDoor.Orientation);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            isPlaced = IsValidDoor(teleportDoor, save.Doors);
+            attempts++;
+        } while (!isPlaced && attempts < maxAttempts);
+
+        if (attempts >= maxAttempts) throw new Exception($"Failed to place teleport door after {attempts} attempts");
+    }
+
+    private bool IsValidDoor(Door newDoor, List<DoorConection> existingDoors)
+    {
+        foreach (DoorConection doorConection in existingDoors)
+        {
+            foreach (Door door in new Door[] { doorConection.Door, doorConection.TeleportDoor })
+            {
+
+                if (Vector3.Distance(newDoor.Position, door.Position) < 2.0f) // Adjust distance threshold as needed
+                {
+                    return false;
+                }
+            }
         }
+        return true;
     }
     public void PlaceObjects(DNDFileData save, BetterRandom random, RoomData room)
     {
@@ -155,7 +198,7 @@ public class DNDFileScriptCreator : MonoBehaviour
             try
             {
                 objectData = PlaceObject(save, random, room);
-                save.AddObject(objectData.Position, objectData.Name);
+                save.AddObject(objectData.Position, objectData.Name, objectData.Type, objectData.Orientation);
                 objects.Add(GetCube(objectData));
             }
             catch (Exception ex)
@@ -164,6 +207,14 @@ public class DNDFileScriptCreator : MonoBehaviour
                 continue;
             }
         }
+    }
+    #endregion
+    #region LoadDoorsIntoObjects
+    private void LoadDoorIntoObjects(Door door, Door teleportDoor)
+    {
+        Cube doorCube = GetSize("Door");
+        objects.Add(new Cube(door.Position, doorCube.Size));
+        objects.Add(new Cube(teleportDoor.Position, doorCube.Size));
     }
     #endregion
     private ObjectData PlaceObject(DNDFileData save, BetterRandom random, RoomData room)
@@ -237,42 +288,51 @@ public class DNDFileScriptCreator : MonoBehaviour
     private ObjectData PlaceLight(DNDFileData save, BetterRandom random, RoomData room)
     {
         ObjectData.LightTypes lightType = random.RandomEnum<ObjectData.LightTypes>();
-        Vector3 position = random.RandomPointInRoom(room, GetSize(lightType.ToString()));
 
+        Vector3 position = random.RandomPointInRoom(room, GetSize(lightType.ToString()));
         string name = lightType.ToString();
-        return new ObjectData(position, -1, name);
+        Orientation orientation = random.RandomOrientation();
+
+        return new ObjectData(position, ObjectData.TypesOfObjects.Light, orientation, -1, name);
     }
     private ObjectData PlaceFurniture(DNDFileData save, BetterRandom random, RoomData room)
     {
         ObjectData.FurnitureTypes furnitureType = random.RandomEnum<ObjectData.FurnitureTypes>();
-        Vector3 position = random.RandomPointInRoom(room, GetSize(furnitureType.ToString()));
 
+        Vector3 position = random.RandomPointInRoom(room, GetSize(furnitureType.ToString()));
         string name = furnitureType.ToString();
-        return new ObjectData(position, -1, name);
+        Orientation orientation = random.RandomOrientation();
+
+        return new ObjectData(position, ObjectData.TypesOfObjects.Furniture, orientation, -1, name);
     }
     private ObjectData PlaceRubble(DNDFileData save, BetterRandom random, RoomData room)
     {
         ObjectData.RubbleTypes rubbleType = random.RandomEnum<ObjectData.RubbleTypes>();
-        Vector3 position = random.RandomPointInRoom(room, GetSize(rubbleType.ToString()));
 
+        Vector3 position = random.RandomPointInRoom(room, GetSize(rubbleType.ToString()));
         string name = rubbleType.ToString();
-        return new ObjectData(position, -1, name);
+        Orientation orientation = random.RandomOrientation();
+
+        return new ObjectData(position, ObjectData.TypesOfObjects.Rubble, orientation, -1, name);
     }
     private ObjectData PlaceWall(DNDFileData save, BetterRandom random, RoomData room)
     {
         ObjectData.WallTypes wallType = random.RandomEnum<ObjectData.WallTypes>();
-        Vector3 position = random.RandomPointInRoom(room, GetSize(wallType.ToString()));
 
+        Vector3 position = random.RandomPointOnWall(room, GetSize(wallType.ToString()), out Orientation orientation);
         string name = wallType.ToString();
-        return new ObjectData(position, -1, name);
+
+        return new ObjectData(position, ObjectData.TypesOfObjects.Wall, orientation, -1, name);
     }
     private ObjectData PlaceDecoration(DNDFileData save, BetterRandom random, RoomData room)
     {
         ObjectData.DecorationTypes decorationType = random.RandomEnum<ObjectData.DecorationTypes>();
-        Vector3 position = random.RandomPointInRoom(room, GetSize(decorationType.ToString()));
 
+        Vector3 position = random.RandomPointInRoom(room, GetSize(decorationType.ToString()));
         string name = decorationType.ToString();
-        return new ObjectData(position, -1, name);
+        Orientation orientation = random.RandomOrientation();
+
+        return new ObjectData(position, ObjectData.TypesOfObjects.Decoration, orientation, -1, name);
     }
     #endregion
     #endregion
@@ -375,6 +435,8 @@ public class DNDFileScriptCreator : MonoBehaviour
                 writer.WriteElementString("ID", objectData.ID.ToString());
                 WriteVector3(writer, objectData.Position, "Position");
                 writer.WriteElementString("ObjectName", objectData.Name);
+                writer.WriteElementString("Type", objectData.Type.ToString());
+                writer.WriteElementString("Orientation", objectData.Orientation.ToString());
 
                 writer.WriteEndElement();
             }

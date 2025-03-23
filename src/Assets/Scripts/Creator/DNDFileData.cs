@@ -21,7 +21,8 @@ public class DNDFileData : ScriptableObject
     {
         get => rooms;
         set => rooms = value;
-    }    public List<DoorConection> Doors => doors;
+    }
+    public List<DoorConection> Doors => doors;
     public List<ObjectData> Objects => objects;
     public Settings Settings => settings;
     public Save Save => save;
@@ -37,9 +38,9 @@ public class DNDFileData : ScriptableObject
         RoomData room = new RoomData(size, position, ++lastUsedID);
         rooms.Add(room);
     }
-    public void AddObject(Vector3 position, string name)
+    public void AddObject(Vector3 position, string name, ObjectData.TypesOfObjects type, Orientation orientation)
     {
-        ObjectData obj = new ObjectData(position, ++lastUsedObjectID, name);
+        ObjectData obj = new ObjectData(position, type, orientation, ++lastUsedObjectID, name);
         objects.Add(obj);
     }
 
@@ -275,7 +276,11 @@ public class Door : BaseEntityData
 public class ObjectData : BaseEntityData
 {
     [SerializeField] private string name;
+    [SerializeField] private TypesOfObjects type;
+    [SerializeField] private Orientation orientation;
     public string Name => name;
+    public TypesOfObjects Type => type;
+    public Orientation Orientation => orientation;
     public enum TypesOfObjects
     {
         Light, Furniture, Rubble, Wall, Decoration
@@ -303,10 +308,11 @@ public class ObjectData : BaseEntityData
         Plate1, Plate2, Plate3, Plate4, Plate5, Urn, Vase1, Vase2, Vase3, Vial1, Vial2
     }
 
-
-    public ObjectData(Vector3 position, int id, string name) : base(position, id)
+    public ObjectData(Vector3 position,TypesOfObjects typeOfObjects, Orientation orientation, int id, string name) : base(position, id)
     {
         this.name = name;
+        this.type = typeOfObjects;
+        this.orientation = orientation;
     }
 
     public override string ToString()
@@ -378,38 +384,57 @@ public class BetterRandom
     {
         return (Orientation)Random(0, 4);
     }
-public Vector3 RandomPointOnWall(Vector3 start, Vector3 end, Orientation orientation, float padding = 2)
-{
-    // Ensure correct min/max ordering
-    float minX = Mathf.Min(start.x, end.x);
-    float maxX = Mathf.Max(start.x, end.x);
-    float minY = Mathf.Min(start.y, end.y);
-    float maxY = Mathf.Max(start.y, end.y);
-    float minZ = Mathf.Min(start.z, end.z);
-    float maxZ = Mathf.Max(start.z, end.z);
-
-    // Ensure valid range
-    if (maxX - minX < padding * 2) padding = (maxX - minX) / 2;
-    if (maxY - minY < padding * 2) padding = (maxY - minY) / 2;
-    if (maxZ - minZ < padding * 2) padding = (maxZ - minZ) / 2;
-
-    // Pick a random point
-    float xElement = RandomElement(minX, maxX, padding);
-    float yElement = RandomElement(minY, maxY, padding);
-    float zElement = RandomElement(minZ, maxZ, padding);
-
-    // Offset placement
-    float offset = 0.3f;
-    switch (orientation)
+    public Vector3 RandomPointOnWall(Vector3 start, Vector3 end, Orientation orientation, float padding = 2)
     {
-        case Orientation.N: zElement = maxZ - offset; break;
-        case Orientation.E: xElement = maxX - offset; break;
-        case Orientation.S: zElement = minZ + offset; break;
-        case Orientation.W: xElement = minX + offset; break;
-    }
+        // Ensure correct min/max ordering
+        float minX = Mathf.Min(start.x, end.x);
+        float maxX = Mathf.Max(start.x, end.x);
+        float minY = Mathf.Min(start.y, end.y);
+        float maxY = Mathf.Max(start.y, end.y);
+        float minZ = Mathf.Min(start.z, end.z);
+        float maxZ = Mathf.Max(start.z, end.z);
 
-    return new Vector3(xElement, yElement, zElement);
-}
+        // Ensure valid range
+        if (maxX - minX < padding * 2) padding = (maxX - minX) / 2;
+        if (maxY - minY < padding * 2) padding = (maxY - minY) / 2;
+        if (maxZ - minZ < padding * 2) padding = (maxZ - minZ) / 2;
+
+        // Pick a random point
+        float xElement = RandomElement(minX, maxX, padding);
+        float yElement = RandomElement(minY, maxY, padding);
+        float zElement = RandomElement(minZ, maxZ, padding);
+
+        // Offset placement
+        float offset = 0.3f;
+        switch (orientation)
+        {
+            case Orientation.N: zElement = maxZ - offset; break;
+            case Orientation.E: xElement = maxX - offset; break;
+            case Orientation.S: zElement = minZ + offset; break;
+            case Orientation.W: xElement = minX + offset; break;
+        }
+
+        return new Vector3(xElement, yElement, zElement);
+    }
+    public Vector3 RandomPointOnWall(RoomData room, Cube cube, out Orientation orientation, float padding = 2)
+    {
+        RoomData adjustedRoom = new RoomData(new Vector3(room.Size.x, 2, room.Size.z), room.Position, room.ID);
+        Vector3 cubeHalfSize = cube.Size / 2;
+
+        float minX = adjustedRoom.Position.x + cubeHalfSize.x;
+        float maxX = adjustedRoom.Position.x + adjustedRoom.Size.x - cubeHalfSize.x;
+        float minY = adjustedRoom.Position.y + cubeHalfSize.y;
+        float maxY = adjustedRoom.Position.y + adjustedRoom.Size.y - cubeHalfSize.y;
+        float minZ = adjustedRoom.Position.z + cubeHalfSize.z;
+        float maxZ = adjustedRoom.Position.z + adjustedRoom.Size.z - cubeHalfSize.z;
+
+        if (minX > maxX) throw new ArgumentException("Cube too wide for room X-axis");
+        if (minY > maxY) throw new ArgumentException("Cube too tall for room Y-axis");
+        if (minZ > maxZ) throw new ArgumentException("Cube too deep for room Z-axis");
+
+        orientation = RandomOrientation();
+        return RandomPointOnWall(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ), orientation, padding);
+    }
     public Vector3 RandomPointInRoom(RoomData room, Cube cube)
     {
         RoomData adjustedRoom = new RoomData(new Vector3(room.Size.x, 2, room.Size.z), room.Position, room.ID);

@@ -27,10 +27,10 @@ public class DoorTeleportScript : MonoBehaviour
 
     private IEnumerator FadeAndTeleport()
     {
-        yield return StartCoroutine(Fade(canvasGroup, 2f, FadeEnum.In));
+        yield return StartCoroutine(Fade(canvasGroup, 1f, FadeEnum.In));
         Player.transform.position = Destination;
         yield return null;
-        yield return StartCoroutine(Fade(canvasGroup, 2f, FadeEnum.Out));
+        yield return StartCoroutine(Fade(canvasGroup, 1f, FadeEnum.Out));
         isTeleporting = false;
     }
 
