@@ -28,4 +28,4 @@
   - KB je 6 750 znaku s mezerami
   - nyni mam 7 258
 - Pozor na pomlcky, minusy a zavorky v dokumentaci
-
+- Pridat autory :3 Online všude dat. Pridat linky(vždy na o co cituju) a fakulty na bakalářky, spravnej nazev stranky
