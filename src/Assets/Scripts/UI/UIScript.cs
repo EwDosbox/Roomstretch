@@ -1,15 +1,19 @@
 using UnityEngine;
-using System.IO;
 using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine.InputSystem;
+using System.IO;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 public class UIScript : MonoBehaviour
 {
-    [SerializeField]    private DNDFileData fileData;
+    [DllImport("__Internal")] private static extern void DownloadFile(string data, string filename);
+    [DllImport("__Internal")] public static extern string BrowserTextUpload(string extFilter, string gameObjName, string dataSinkFn);
+
+    [SerializeField] private DNDFileData fileData;
 
     private DNDFileScriptCreator dNDFileScriptCreator;
     private PlayerInputScript playerInputScript;
@@ -41,6 +45,7 @@ public class UIScript : MonoBehaviour
                 }
             case 1:
                 {//Generating Scene
+
                     creator = GameObject.Find("Creator");
                     toggles = GameObject.Find("Toggles");
                     GONoOfRoomsInput = GameObject.Find("NoOfRoomsInput");
@@ -205,6 +210,37 @@ public class UIScript : MonoBehaviour
         Debug.Log(fileData.Save.ToString());
 
         dNDFileScriptCreator.CreateFile(fileData);
+
+        NextScene();
+    }
+
+    public void DownloadButton_Click()
+    {
+        string dataToSave = File.ReadAllText(fileData.Save.FilePath);
+
+        Debug.Log(dataToSave);
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        DownloadFile(dataToSave, "Save.dnd");
+#else
+        Debug.Log("Download not supported in this platform");
+#endif
+
+    }
+
+    public void UploadButton_Click()
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        BrowserTextUpload(".dnd", gameObject.name, "OnFileUploaded");
+#else
+        Debug.Log("Upload not supported in this platform");
+#endif
+    }
+    public void OnFileUploaded(string str)
+    {
+        Debug.Log(str);
+
+        File.WriteAllText(fileData.Save.FilePath, str);
 
         NextScene();
     }
