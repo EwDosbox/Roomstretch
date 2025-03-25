@@ -57,6 +57,9 @@ public class DNDSceneScriptCreator : MonoBehaviour
             InstantiateDoor(door.Door);
             InstantiateDoor(door.TeleportDoor);
         }
+        GameObject textGO = GameObject.Find("TeleportText");
+        textGO.SetActive(false);
+
         foreach (ObjectData objectData in fileData.Objects)
         {
             try

@@ -4,31 +4,49 @@ using UnityEngine;
 public class DoorTeleportScript : MonoBehaviour
 {
     [SerializeField] public Vector3 Destination;
-    private CanvasGroup canvasGroup;
-    [SerializeField] private GameObject Player;
+    [SerializeField] private CanvasGroup canvasGroup;
+    [SerializeField] private GameObject player;
+    [SerializeField] private GameObject textGO;
     private PlayerInputScript playerInputScript;
     private bool isTeleporting = false;
 
     private void Awake()
     {
-        Player = GameObject.Find("Player");
         canvasGroup = GameObject.Find("BlackBackground").GetComponent<CanvasGroup>();
-        playerInputScript = Player.GetComponent<PlayerInputScript>();
+        player = GameObject.Find("Player");
+        textGO = GameObject.Find("TeleportText");
+        playerInputScript = player.GetComponent<PlayerInputScript>();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject == player)
+        {
+            textGO.SetActive(true);
+        }
     }
 
     private void OnTriggerStay(Collider other)
     {
-        if (!isTeleporting && other.gameObject == Player && playerInputScript.ShouldTeleport)
+        if (!isTeleporting && other.gameObject == player && playerInputScript.ShouldTeleport)
         {
             isTeleporting = true;
             StartCoroutine(FadeAndTeleport());
         }
     }
 
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject == player)
+        {
+            textGO.SetActive(false);
+        }
+    }
+
     private IEnumerator FadeAndTeleport()
     {
         yield return StartCoroutine(Fade(canvasGroup, 1f, FadeEnum.In));
-        Player.transform.position = Destination;
+        player.transform.position = Destination;
         yield return null;
         yield return StartCoroutine(Fade(canvasGroup, 1f, FadeEnum.Out));
         isTeleporting = false;
@@ -57,10 +75,9 @@ public class DoorTeleportScript : MonoBehaviour
             canvasGroup.alpha = 0;
         }
     }
-}
-
-public enum FadeEnum
-{
-    In,
-    Out
+    public enum FadeEnum
+    {
+        In,
+        Out
+    }
 }
