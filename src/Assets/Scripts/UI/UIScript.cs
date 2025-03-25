@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System;
 
 public class UIScript : MonoBehaviour
 {
@@ -33,6 +34,7 @@ public class UIScript : MonoBehaviour
     private GameObject canvasGO;
     private GameObject toggles;
     private GameObject creator;
+    private GameObject errorGO;
 
     private void Awake()
     {
@@ -73,6 +75,7 @@ public class UIScript : MonoBehaviour
                     toggleNoOfObjects = go.GetComponent<Toggle>();
 
                     dNDFileScriptCreator = creator.GetComponent<DNDFileScriptCreator>();
+                    errorGO = GameObject.Find("ErrorText");
                     break;
                 }
             case 2:
@@ -105,6 +108,7 @@ public class UIScript : MonoBehaviour
                     {
                         GONoOfRoomsInput.SetActive(false);
                     }
+
                     if (!toggleNoOfObjects.isOn)
                     {
                         GONoOfObjectsInput.SetActive(true);
@@ -176,33 +180,21 @@ public class UIScript : MonoBehaviour
 
         fileData.Save.Seed = GetInput("Seed");
 
-
-        bool shouldGenerate = GetToggle("NoOfRooms").isOn;
-        if (!shouldGenerate)
+        try
         {
-            fileData.Save.RoomsCountBounds.Value = int.Parse(GetInput("NoOfRooms").Trim());
+            AssignGenerationBounds(fileData.Save.RoomsCountBounds, "NoOfRooms");
+            AssignGenerationBounds(fileData.Save.ObjectCountBounds, "NoOfObjects");
+
+            AssignBounds(fileData.Save.XRoomBounds, "RoomBounds", "MinRoomX", "MaxRoomX");
+            AssignBounds(fileData.Save.ZRoomBounds, "RoomBounds", "MinRoomZ", "MaxRoomZ");
+            AssignBounds(fileData.Save.XMapBounds, "MapBounds", "MinMapX", "MaxMapX");
+            AssignBounds(fileData.Save.ZMapBounds, "MapBounds", "MinMapZ", "MaxMapZ");
         }
-        fileData.Save.RoomsCountBounds.ShouldUseDefaultValue = shouldGenerate;
-
-        shouldGenerate = GetToggle("NoOfObjects").isOn;
-        if (!shouldGenerate)
+        catch (FormatException e)
         {
-            fileData.Save.ObjectCountBounds.Value = int.Parse(GetInput("NoOfObjects").Trim());
-        }
-        fileData.Save.ObjectCountBounds.ShouldUseDefaultValue = shouldGenerate;
-
-        shouldGenerate = GetToggle("RoomBounds").isOn;
-        if (!shouldGenerate)
-        {
-            fileData.Save.XRoomBounds = new Bounds<float>(float.Parse(GetInput("MinRoomX")), float.Parse(GetInput("MaxRoomX")));
-            fileData.Save.ZRoomBounds = new Bounds<float>(float.Parse(GetInput("MinRoomZ")), float.Parse(GetInput("MaxRoomZ")));
-        }
-
-        shouldGenerate = GetToggle("MapBounds").isOn;
-        if (!shouldGenerate)
-        {
-            fileData.Save.XMapBounds = new Bounds<float>(float.Parse(GetInput("MinMapX")), float.Parse(GetInput("MaxMapX")));
-            fileData.Save.ZMapBounds = new Bounds<float>(float.Parse(GetInput("MinMapZ")), float.Parse(GetInput("MaxMapZ")));
+            errorGO.SetActive(true);
+            errorGO.GetComponent<TextMeshProUGUI>().text = e.Message.ToString();
+            return;
         }
 
         dNDFileScriptCreator.PrepareSave(fileData);
@@ -236,14 +228,6 @@ public class UIScript : MonoBehaviour
         Debug.Log("Upload not supported in this platform");
 #endif
     }
-    public void OnFileUploaded(string str)
-    {
-        Debug.Log(str);
-
-        File.WriteAllText(fileData.Save.FilePath, str);
-
-        NextScene();
-    }
 
     public void NextScene()
     {
@@ -270,7 +254,47 @@ public class UIScript : MonoBehaviour
         playerInputScript.ShouldBeInMenu = value;
     }
     #endregion
+    #region Helper Methods
+    public void OnFileUploaded(string str)
+    {
+        Debug.Log(str);
 
+        File.WriteAllText(fileData.Save.FilePath, str);
+
+        NextScene();
+    }
+
+    private void AssignGenerationBounds(GenerationBounds<int> bounds, string name)
+    {
+        try
+        {
+            bool shouldGenerate = GetToggle(name).isOn;
+            if (!shouldGenerate)
+            {
+                bounds.Value = int.Parse(GetInput("NoOfRooms").Trim());
+            }
+            bounds.ShouldUseDefaultValue = shouldGenerate;
+        }
+        catch (FormatException)
+        {
+            throw new FormatException($"{name} is not valid");
+        }
+    }
+    private void AssignBounds(Bounds<float> bounds, string name, string min, string max)
+    {
+        try
+        {
+            bool shouldGenerate = GetToggle(name).isOn;
+            if (!shouldGenerate)
+            {
+                bounds = new Bounds<float>(float.Parse(GetInput(min)), float.Parse(GetInput(max)));
+            }
+        }
+        catch (FormatException)
+        {
+            throw new FormatException($"{name} is not valid");
+        }
+    }
     private string GetInput(string toFind)
     {
         var inputField = GameObject.Find(toFind + "Input").transform.GetChild(0).GetComponent<TMP_InputField>();
@@ -297,4 +321,5 @@ public class UIScript : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
         }
     }
+    #endregion
 }
