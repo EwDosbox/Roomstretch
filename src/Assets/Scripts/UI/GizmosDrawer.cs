@@ -16,13 +16,18 @@ public class GizmosDrawer : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawSphere(door.TeleportDoor.Position, 0.5f);
         }
-        /*
+        
         foreach (RoomData room in fileData.Rooms)
         {
             Gizmos.color = Color.blue;
             Vector3 roomCenter = new Vector3(room.Position.x + room.Size.x / 2, 0, room.Position.z + room.Size.z / 2);
-            Gizmos.DrawCube(roomCenter, room.Size);
+            Gizmos.DrawWireCube(roomCenter, room.Size);
         }        
-        */
+        
+        foreach (ObjectData obj in fileData.Objects)
+        {
+            Gizmos.color = Color.black;
+            Gizmos.DrawSphere(obj.Position, 0.5f);   
+        }
     }
 }

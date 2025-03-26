@@ -3,11 +3,11 @@ using UnityEngine;
 [RequireComponent(typeof(Renderer))]
 public class MaterialTilingUpdater : MonoBehaviour
 {
-    private Renderer rend;
     [SerializeField] private Vector2 tilingMultiplier = new Vector2(1, 1);
     [SerializeField] private bool xx = true;
 
     private Vector3 lastScale;
+    private Renderer rend;
 
     private void Awake()
     {

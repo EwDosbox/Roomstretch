@@ -271,11 +271,11 @@ public class UIScript : MonoBehaviour
             bool shouldGenerate = GetToggle(name).isOn;
             if (!shouldGenerate)
             {
-                bounds.Value = int.Parse(GetInput("NoOfRooms").Trim());
+                bounds.Value = int.Parse(GetInput(name).Trim());
             }
             bounds.ShouldUseDefaultValue = shouldGenerate;
         }
-        catch (FormatException)
+        catch (Exception)
         {
             throw new FormatException($"{name} is not valid");
         }

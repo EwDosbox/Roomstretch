@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-#region  DNDFileData
+#region DNDFileData
 [CreateAssetMenu(fileName = "FileData", menuName = "ScriptableObjects/FileData", order = 1)]
 public class DNDFileData : ScriptableObject
 {
-    [SerializeField] private int lastUsedID;
+    [SerializeField] private int lastUsedRoomID;
     [SerializeField] private int lastUsedDoorID;
     [SerializeField] private int lastUsedObjectID;
     [SerializeField] private List<RoomData> rooms;
@@ -35,7 +35,7 @@ public class DNDFileData : ScriptableObject
     }
     public void AddRoom(Vector3 size, Vector3 position)
     {
-        RoomData room = new RoomData(size, position, ++lastUsedID);
+        RoomData room = new RoomData(size, position, ++lastUsedRoomID);
         rooms.Add(room);
     }
     public void AddObject(Vector3 position, string name, ObjectData.TypesOfObjects type, Orientation orientation)
@@ -46,7 +46,7 @@ public class DNDFileData : ScriptableObject
 
     public void Initialize()
     {
-        lastUsedID = 0;
+        lastUsedRoomID = 0;
         lastUsedDoorID = 0;
         lastUsedObjectID = 0;
         rooms = new List<RoomData>();
@@ -59,10 +59,11 @@ public class DNDFileData : ScriptableObject
     public override string ToString()
     {
         string s = $"Version: {Save.Version}, Seed: {Save.Seed},\n Rooms : ";
-        foreach (RoomData room in rooms)
-        {
-            s += room.ToString() + "\n";
-        }
+        foreach (RoomData room in rooms) s += room.ToString() + "\n";
+        s+= "Doors: ";
+        foreach(DoorConection door in doors) s+= door.ToString() + "\n";
+        s+= "Objects: ";
+        foreach(ObjectData obj in objects) s+= obj.ToString() + "\n";
         return s;
     }
 }
@@ -94,7 +95,7 @@ public class Settings
 
     public override string ToString()
     {
-        return $"Settings: FOV = {fov}";
+        return $"Settings: FOV = {fov}; Sensitivity: {sensitivity}";
     }
 }
 #endregion
@@ -194,18 +195,17 @@ public class Save
 
     public override string ToString()
     {
-        return $"Save: Version = {version}, Seed = {seed}, FilePath = {filepath}, " +
-               $"RoomCountBounds = {roomCountBounds.ToString()}, WidthBounds = {xRoomBounds.ToString()}";
+        return $"Save: Version = {version}, Seed = {seed}, FilePath = {filepath}, RoomCountBounds = {roomCountBounds.ToString()}, WidthBounds = {xRoomBounds.ToString()}";
     }
 }
 #endregion
+#region SomethingData
 #region RoomData
 [System.Serializable]
 public class RoomData : BaseEntityData
 {
     private bool isStartRoom;
-
-    [SerializeField] private Vector3 size;
+    private Vector3 size;
 
     public Vector3 Size => size;
 
@@ -278,9 +278,11 @@ public class ObjectData : BaseEntityData
     [SerializeField] private string name;
     [SerializeField] private TypesOfObjects type;
     [SerializeField] private Orientation orientation;
+
     public string Name => name;
     public TypesOfObjects Type => type;
     public Orientation Orientation => orientation;
+    #region Enums
     public enum TypesOfObjects
     {
         Light, Furniture, Rubble, Wall, Decoration
@@ -307,6 +309,7 @@ public class ObjectData : BaseEntityData
         Food1, Food2, Food3, Food4, Food5, Food6, Gem1, Gem2, Jug1, Jug2,
         Plate1, Plate2, Plate3, Plate4, Plate5, Urn, Vase1, Vase2, Vase3, Vial1, Vial2
     }
+    #endregion
 
     public ObjectData(Vector3 position,TypesOfObjects typeOfObjects, Orientation orientation, int id, string name) : base(position, id)
     {
@@ -320,6 +323,7 @@ public class ObjectData : BaseEntityData
         return base.ToString() + $"Name: {name}";
     }
 }
+#endregion
 #endregion
 #region BetterRandom
 public class BetterRandom
@@ -386,7 +390,6 @@ public class BetterRandom
     }
     public Vector3 RandomPointOnWall(Vector3 start, Vector3 end, Orientation orientation, float padding = 2)
     {
-        // Ensure correct min/max ordering
         float minX = Mathf.Min(start.x, end.x);
         float maxX = Mathf.Max(start.x, end.x);
         float minY = Mathf.Min(start.y, end.y);
@@ -394,17 +397,14 @@ public class BetterRandom
         float minZ = Mathf.Min(start.z, end.z);
         float maxZ = Mathf.Max(start.z, end.z);
 
-        // Ensure valid range
         if (maxX - minX < padding * 2) padding = (maxX - minX) / 2;
         if (maxY - minY < padding * 2) padding = (maxY - minY) / 2;
         if (maxZ - minZ < padding * 2) padding = (maxZ - minZ) / 2;
 
-        // Pick a random point
         float xElement = RandomElement(minX, maxX, padding);
         float yElement = RandomElement(minY, maxY, padding);
         float zElement = RandomElement(minZ, maxZ, padding);
 
-        // Offset placement
         float offset = 0.3f;
         switch (orientation)
         {
@@ -624,7 +624,7 @@ public class RectangleF
     }
     public RectangleF(Vector3 position3D, Vector3 size3D)
     {
-        position = new Vector2(position3D.x, position3D.z); // Use X/Z
+        position = new Vector2(position3D.x, position3D.z);
         size = new Vector2(Mathf.Abs(size3D.x), Mathf.Abs(size3D.z));
     }
 
@@ -638,7 +638,6 @@ public class RectangleF
 }
 #endregion
 #region Cube
-
 [System.Serializable]
 public class Cube
 {

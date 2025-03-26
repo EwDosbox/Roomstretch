@@ -183,7 +183,7 @@ public class DNDFileScriptCreator : MonoBehaviour
             foreach (Door door in new Door[] { doorConection.Door, doorConection.TeleportDoor })
             {
 
-                if (Vector3.Distance(newDoor.Position, door.Position) < 2.0f) // Adjust distance threshold as needed
+                if (Vector3.Distance(newDoor.Position, door.Position) < 2.0f)
                 {
                     return false;
                 }
@@ -210,7 +210,7 @@ public class DNDFileScriptCreator : MonoBehaviour
         }
     }
     #endregion
-    #region LoadDoorsIntoObjects
+    #region LoadDoorIntoObjects
     private void LoadDoorIntoObjects(Door door, Door teleportDoor)
     {
         Cube doorCube = GetSize("Door");
@@ -271,17 +271,14 @@ public class DNDFileScriptCreator : MonoBehaviour
     }
     private Cube GetSize(string name)
     {
-        if (Prefabs == null)
-        {
-            LoadPrefabs();
-        }
+        if (Prefabs == null) LoadPrefabs();
 
         if (Prefabs.TryGetValue(name, out GameObject prefab) && prefab.TryGetComponent(out BoxCollider collider))
         {
             return new Cube(Vector3.zero, collider.size);
         }
 
-        Debug.LogError($"Prefab '{name}' not found or missing BoxCollider.");
+        Debug.LogWarning($"Prefab '{name}' not found or missing BoxCollider.");
         return new Cube(Vector3.zero, Vector3.one);
     }
     #endregion
@@ -358,7 +355,6 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         using (XmlWriter writer = XmlWriter.Create(fileData.Save.FilePath, settings))
         {
-            writer.WriteStartDocument();
             writer.WriteStartElement("RoomStretch");
             #region Head
             writer.WriteStartElement("Head");
