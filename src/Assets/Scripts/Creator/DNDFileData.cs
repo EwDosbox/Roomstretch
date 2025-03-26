@@ -184,7 +184,6 @@ public class Save
 
     public Save()
     {
-        version = "1.0";
         roomCountBounds = new GenerationBounds<int>(5, new Bounds<int>(5, 10));
         objectCountBounds = new GenerationBounds<int>(5, new Bounds<int>(5, 10));
         xRoomBounds = new Bounds<float>(5, 10);
