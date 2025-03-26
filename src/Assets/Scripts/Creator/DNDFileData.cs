@@ -60,10 +60,10 @@ public class DNDFileData : ScriptableObject
     {
         string s = $"Version: {Save.Version}, Seed: {Save.Seed},\n Rooms : ";
         foreach (RoomData room in rooms) s += room.ToString() + "\n";
-        s+= "Doors: ";
-        foreach(DoorConection door in doors) s+= door.ToString() + "\n";
-        s+= "Objects: ";
-        foreach(ObjectData obj in objects) s+= obj.ToString() + "\n";
+        s += "Doors: ";
+        foreach (DoorConection door in doors) s += door.ToString() + "\n";
+        s += "Objects: ";
+        foreach (ObjectData obj in objects) s += obj.ToString() + "\n";
         return s;
     }
 }
@@ -284,15 +284,11 @@ public class ObjectData : BaseEntityData
     #region Enums
     public enum TypesOfObjects
     {
-        Light, Furniture, Rubble, Wall, Decoration
-    }
-    public enum LightTypes
-    {
-        Torch, Candle1, Candle2, Candle3, Lantern, Fireplace
+        Furniture, Rubble, Wall, Decoration
     }
     public enum FurnitureTypes
     {
-        Bag, Barrel, Box, Bucket, Carpet, Firewood, Stool, Table1, Table2
+        Bag, Barrel, Box, Bucket, Carpet, Firewood, Stool, Table1, Table2, Fireplace
     }
     public enum RubbleTypes
     {
@@ -300,17 +296,18 @@ public class ObjectData : BaseEntityData
     }
     public enum WallTypes
     {
-        Painting, Axe
+        Axe, Torch
     }
     public enum DecorationTypes
     {
         Book1, Book2, Bottle1, Bottle2, Bottle3, Coin1, Coin2, Coin3, Cup1, Cup2, Flask1, Flask2, Flask3,
         Food1, Food2, Food3, Food4, Food5, Food6, Gem1, Gem2, Jug1, Jug2,
-        Plate1, Plate2, Plate3, Plate4, Plate5, Urn, Vase1, Vase2, Vase3, Vial1, Vial2
+        Plate1, Plate2, Plate3, Plate4, Plate5, Urn, Vase1, Vase2, Vase3, Vial1, Vial2,
+        Candle1, Candle2, Candle3
     }
     #endregion
 
-    public ObjectData(Vector3 position,TypesOfObjects typeOfObjects, Orientation orientation, int id, string name) : base(position, id)
+    public ObjectData(Vector3 position, TypesOfObjects typeOfObjects, Orientation orientation, int id, string name) : base(position, id)
     {
         this.name = name;
         this.type = typeOfObjects;
@@ -387,7 +384,7 @@ public class BetterRandom
     {
         return (Orientation)Random(0, 4);
     }
-    public Vector3 RandomPointOnWall(Vector3 start, Vector3 end, Orientation orientation, float padding = 2)
+    public Vector3 RandomPointOnWall(Vector3 start, Vector3 end, Orientation orientation, float padding = 4f)
     {
         float minX = Mathf.Min(start.x, end.x);
         float maxX = Mathf.Max(start.x, end.x);
@@ -404,7 +401,7 @@ public class BetterRandom
         float yElement = RandomElement(minY, maxY, padding);
         float zElement = RandomElement(minZ, maxZ, padding);
 
-        float offset = 0.3f;
+        float offset = 0.2f;
         switch (orientation)
         {
             case Orientation.N: zElement = maxZ - offset; break;

@@ -95,7 +95,6 @@ GameObject:
   - component: {fileID: 3215854483600775741}
   - component: {fileID: 7614143720778179002}
   - component: {fileID: 5108715074951353161}
-  - component: {fileID: 6574274963914827304}
   m_Layer: 0
   m_Name: Vial_2_Glass
   m_TagString: Untagged
@@ -146,7 +145,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6eb6a96d5c7bd6f48a520f6cafd164a6, type: 2}
+  - {fileID: 2100000, guid: a5f3265eb027f0e41af7b62f064343df, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -182,28 +181,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilingMultiplier: {x: 1, y: 1}
   xx: 1
---- !u!64 &6574274963914827304
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4718966173301983147}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 3130848853361547441, guid: 6b309adbe52a99041aa1d084852963f5, type: 3}
 --- !u!1 &6158365479096785192
 GameObject:
   m_ObjectHideFlags: 0
@@ -216,7 +193,6 @@ GameObject:
   - component: {fileID: 4475439422378304579}
   - component: {fileID: 3766898230678581922}
   - component: {fileID: 4914848919073425271}
-  - component: {fileID: 882159879115391809}
   m_Layer: 0
   m_Name: Vial_2_Cork
   m_TagString: Untagged
@@ -267,7 +243,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6eb6a96d5c7bd6f48a520f6cafd164a6, type: 2}
+  - {fileID: 2100000, guid: 06d2d82c741d6b34692010a75df9b1fc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -303,25 +279,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilingMultiplier: {x: 1, y: 1}
   xx: 1
---- !u!64 &882159879115391809
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6158365479096785192}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 2104465589784839661, guid: 6b309adbe52a99041aa1d084852963f5, type: 3}

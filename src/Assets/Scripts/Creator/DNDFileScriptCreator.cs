@@ -229,9 +229,6 @@ public class DNDFileScriptCreator : MonoBehaviour
 
             switch (typesOfObject)
             {
-                case ObjectData.TypesOfObjects.Light:
-                    objectData = PlaceLight(save, random, room);
-                    break;
                 case ObjectData.TypesOfObjects.Furniture:
                     objectData = PlaceFurniture(save, random, room);
                     break;
@@ -283,16 +280,6 @@ public class DNDFileScriptCreator : MonoBehaviour
     }
     #endregion
     #region PlaceObjectTypes
-    private ObjectData PlaceLight(DNDFileData save, BetterRandom random, RoomData room)
-    {
-        ObjectData.LightTypes lightType = random.RandomEnum<ObjectData.LightTypes>();
-
-        Vector3 position = random.RandomPointInRoom(room, GetSize(lightType.ToString()));
-        string name = lightType.ToString();
-        Orientation orientation = random.RandomOrientation();
-
-        return new ObjectData(position, ObjectData.TypesOfObjects.Light, orientation, -1, name);
-    }
     private ObjectData PlaceFurniture(DNDFileData save, BetterRandom random, RoomData room)
     {
         ObjectData.FurnitureTypes furnitureType = random.RandomEnum<ObjectData.FurnitureTypes>();
