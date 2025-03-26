@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8041822292640364067}
   - component: {fileID: -5340183727616185455}
   - component: {fileID: 6824378782235073741}
+  - component: {fileID: 4105685744645583062}
   m_Layer: 0
   m_Name: Flask2
   m_TagString: Untagged
@@ -126,3 +127,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 122
   m_CollisionDetection: 1
+--- !u!65 &4105685744645583062
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1744068085801348642}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.23257379, y: 0.23388168, z: 0.5000001}
+  m_Center: {x: -0.000000007450581, y: -0.000000011175874, z: 0.2250863}
