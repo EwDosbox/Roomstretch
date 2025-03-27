@@ -342,6 +342,7 @@ public class DNDFileScriptCreator : MonoBehaviour
 
         using (XmlWriter writer = XmlWriter.Create(fileData.Save.FilePath, settings))
         {
+            writer.WriteStartDocument();
             writer.WriteStartElement("RoomStretch");
             #region Head
             writer.WriteStartElement("Head");

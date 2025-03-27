@@ -169,7 +169,7 @@ public partial class @Input: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""742db324-31b3-40f6-8c72-b19c65281b46"",
-                    ""path"": ""<Keyboard>/escape"",
+                    ""path"": ""<Keyboard>/tab"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

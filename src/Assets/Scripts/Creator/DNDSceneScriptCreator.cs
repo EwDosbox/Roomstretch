@@ -52,11 +52,14 @@ public class DNDSceneScriptCreator : MonoBehaviour
         {
             InstantiateRoom(room);
         }
+        Debug.Log("Creator: Rooms: " + fileData.Rooms.ToSeparatedString("; "));
         foreach (DoorConection door in fileData.Doors)
         {
             InstantiateDoor(door.Door);
             InstantiateDoor(door.TeleportDoor);
         }
+        Debug.Log("Creator: Doors: " + fileData.Doors.ToSeparatedString("; "));
+
         GameObject textGO = GameObject.Find("TeleportText");
         textGO.SetActive(false);
 
@@ -71,6 +74,7 @@ public class DNDSceneScriptCreator : MonoBehaviour
                 Debug.LogError($"Error while instantiating {objectData.Name} at {objectData.Position}: {e.Message}");
             }
         }
+        Debug.Log("Creator: Objects: " + fileData.Objects.ToSeparatedString("; "));
 
         Debug.Log("Creator: " + fileData.ToString());
     }
@@ -113,7 +117,6 @@ public class DNDSceneScriptCreator : MonoBehaviour
         }
 
         roomObject.name = $"Room {room.ID}";
-        Debug.Log($"Room created at {position} with size {size}");
     }
     #endregion
     #region Door
@@ -142,8 +145,6 @@ public class DNDSceneScriptCreator : MonoBehaviour
 
         doorObject.name = $"Door {door.ID}";
         doorObject.GetComponent<DoorTeleportScript>().Destination = door.PlayerTeleportLocation + new Vector3(0, 1, 0);
-
-        Debug.Log($"Door created at {position}");
     }
     #endregion
     #region Object
@@ -169,8 +170,6 @@ public class DNDSceneScriptCreator : MonoBehaviour
                 objectInstance.transform.rotation = Quaternion.Euler(new Vector3(0, 180f, 0));
                 break;
         }
-
-        Debug.Log($"Object {objectData.Name} created at {position}");
     }
     #endregion
     #endregion
@@ -188,9 +187,9 @@ public class DNDSceneScriptCreator : MonoBehaviour
         XElement head = roomstretch.Element("Head");
         XElement save = head.Element("Save");
 
-        file.Save.Version = save.Element("Version").Value.Trim();
+        save.Element("Version").Value.Trim();//arent used
         file.Save.Seed = save.Element("Seed").Value.Trim();
-        file.Save.FilePath = save.Element("FilePath").Value.Trim();
+        save.Element("FilePath").Value.Trim();//arent used
 
         file.Save.RoomsCountBounds = ParseGenerationBounds<int>(save.Element("RoomsCountBounds"));
         file.Save.ObjectCountBounds = ParseGenerationBounds<int>(save.Element("ObjectCountBounds"));

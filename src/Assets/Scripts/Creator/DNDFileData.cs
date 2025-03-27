@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 
 #region DNDFileData
@@ -103,7 +104,6 @@ public class Settings
 [System.Serializable]
 public class Save
 {
-    [SerializeField] private string version = "1.0";
     [SerializeField] private string seed;
     [SerializeField] private string filepath;
     [SerializeField] private GenerationBounds<int> roomCountBounds;
@@ -115,13 +115,26 @@ public class Save
 
     public string FilePath
     {
-        get => Application.persistentDataPath + "/TestDNDFile.dnd";
-        set => filepath = value;
+        get
+        {
+            string path = Application.persistentDataPath;
+            string host;
+            string url = Application.absoluteURL;
+            if (!string.IsNullOrEmpty(url))
+            {
+                Uri uri = new Uri(url);
+                host = uri.Host;
+            }
+            else
+                host = "unknown";
+
+            return path + "/" + host + ".dnd";
+        }
     }
+
     public string Version
     {
-        get => version;
-        set => version = value;
+        get => Application.version;
     }
     public string Seed
     {
@@ -194,7 +207,7 @@ public class Save
 
     public override string ToString()
     {
-        return $"Save: Version = {version}, Seed = {seed}, FilePath = {filepath}, RoomCountBounds = {roomCountBounds.ToString()}, WidthBounds = {xRoomBounds.ToString()}";
+        return $"Save: Version = {Version}, Seed = {seed}, FilePath = {filepath}, RoomCountBounds = {roomCountBounds.ToString()}, WidthBounds = {xRoomBounds.ToString()}";
     }
 }
 #endregion
