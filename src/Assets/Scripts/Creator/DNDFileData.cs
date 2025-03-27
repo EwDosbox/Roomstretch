@@ -401,7 +401,7 @@ public class BetterRandom
         float yElement = RandomElement(minY, maxY, padding);
         float zElement = RandomElement(minZ, maxZ, padding);
 
-        float offset = 0.2f;
+        float offset = 0.3f;
         switch (orientation)
         {
             case Orientation.N: zElement = maxZ - offset; break;
